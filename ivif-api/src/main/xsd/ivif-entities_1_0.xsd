@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns="http://www.iorga.com/xml/ns/ivif-entities"
+        targetNamespace="http://www.iorga.com/xml/ns/ivif-entities"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified">
+
+    <xs:include schemaLocation="ivif-attributeType_1_0.xsd"/>
+    <xs:include schemaLocation="ivif-attributes_1_0.xsd"/>
+
+
+    <xs:element name="entities">
+        <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="unbounded">
+                <xs:element ref="entity"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="entity">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="entityAttribute"/>
+            </xs:choice>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="table" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

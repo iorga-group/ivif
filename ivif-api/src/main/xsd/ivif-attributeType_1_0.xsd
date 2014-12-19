@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns="http://www.iorga.com/xml/ns/ivif-entities"
+        targetNamespace="http://www.iorga.com/xml/ns/ivif-entities"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified">
+
+    <xs:element name="entityAttribute" type="attributeType" abstract="true"/>
+
+    <xs:complexType name="attributeType">
+        <xs:sequence minOccurs="0" maxOccurs="1">
+            <xs:element ref="default-editor"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="column" type="xs:string"/>
+        <xs:attribute name="required" type="xs:boolean" default="false"/>
+        <xs:attribute name="name-column" type="xs:boolean" default="false"/>
+        <xs:attribute name="id" type="xs:boolean" default="false"/>
+    </xs:complexType>
+
+    <xs:element name="default-editor">
+        <xs:complexType>
+            <xs:attribute name="editor" type="xs:string" default="field"/>
+            <xs:attribute name="show" type="xs:boolean" default="true"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
