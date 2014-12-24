@@ -27,7 +27,7 @@
     <xs:element name="date" type="attributeType" substitutionGroup="entityAttribute"/>
     <xs:element name="integer" type="attributeType" substitutionGroup="entityAttribute"/>
     
-    <xs:element name="many-to-one" type="attributeType" substitutionGroup="entityAttribute">
-
-    </xs:element>
+    <xs:element name="many-to-one" type="attributeType" substitutionGroup="entityAttribute"></xs:element>
+    
+    
 </xs:schema>
