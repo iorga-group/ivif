@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configurations xmlns="http://www.iorga.com/xml/ns/ivif-configurations"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-configurations">
+    <base-package value="com.iorga.ivif.test"/>
+</configurations>
