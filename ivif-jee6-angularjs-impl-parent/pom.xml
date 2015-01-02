@@ -13,6 +13,7 @@
 
     <modules>
         <module>../ivif-api</module>
+        <module>../ivif-jee6-angularjs-impl</module>
     </modules>
 
     <dependencyManagement>
@@ -27,6 +28,7 @@
                 <artifactId>freemarker</artifactId>
                 <version>2.3.21</version>
             </dependency>
+            <!-- scope test -->
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>

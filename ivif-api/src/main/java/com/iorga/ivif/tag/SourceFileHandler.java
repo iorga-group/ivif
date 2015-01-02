@@ -5,5 +5,5 @@ public interface SourceFileHandler<GC extends GeneratorContext, SF extends Sourc
 
     void init(SF sourceFile, GC context) throws Exception;
 
-    void prepare(SF sourceFile, GC context) throws Exception;
+    void prepareTargetFiles(SF sourceFile, GC context) throws Exception;
 }

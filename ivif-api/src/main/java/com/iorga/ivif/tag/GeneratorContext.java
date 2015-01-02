@@ -9,47 +9,28 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static java.util.Map.*;
-
 public abstract class GeneratorContext<C extends GeneratorContext<C>> {
 
     protected String basePackage = ""; // TODO parse from config
-    protected Path basePath = Paths.get("");
     protected Deque<DocumentToProcess> documentsToProcess = new LinkedList<>();
-
-    protected Set<Dependency> rootDependencies = Sets.newHashSet();
-    protected Multimap<TargetFile<C, ?>, Dependency> unresolvedDependencies = LinkedListMultimap.create();
-    protected Map<TargetFile<C, ?>, Dependency> dependenciesByCreatedTargetFile = Maps.newHashMap();
-    protected Map<SourceFileHandler<C, ?>, Dependency> dependenciesBySourceFileHandler = Maps.newHashMap();
 
     protected Map<SourceFileHandler<C, ?>, SourceFile> sourceFilesByHandler = Maps.newHashMap();
 
     protected Map<Class<?>, Map<Object, TargetFile>> targetFiles = Maps.newHashMap();
+    private Path sourcePath = Paths.get("");
+    private Path targetPath;
 
-    protected class Dependency {
-        protected SourceFileHandler<C, ?> sourceFileHandler;
-        protected Set<TargetFile<C, ?>> requiredTargetFiles = Sets.newHashSet();
-        protected Set<TargetFile<C, ?>> createdTargetFiles = Sets.newHashSet();
-        protected Set<Dependency> resolvedParentDependencies = Sets.newHashSet();
-        protected Set<Dependency> resolvedChildrenDependencies = Sets.newHashSet();
+
+    public void registerSourceFile(SourceFile sourceFile, SourceFileHandler<C, ?> sourceFileHandler) {
+        sourceFilesByHandler.put(sourceFileHandler, sourceFile);
     }
 
-    public class SourceFileAndHandler {
-        protected final SourceFile sourceFile;
-        protected final SourceFileHandler sourceFileHandler;
+    public Collection<SourceFileHandler<C, ?>> getSourceFileHandlers() {
+        return sourceFilesByHandler.keySet();
+    }
 
-        public SourceFileAndHandler(SourceFile sourceFile, SourceFileHandler sourceFileHandler) {
-            this.sourceFile = sourceFile;
-            this.sourceFileHandler = sourceFileHandler;
-        }
-
-        public SourceFile getSourceFile() {
-            return sourceFile;
-        }
-
-        public SourceFileHandler getSourceFileHandler() {
-            return sourceFileHandler;
-        }
+    public SourceFile getSourceFileForHandler(SourceFileHandler<C, ?> sourceFileHandler) {
+        return sourceFilesByHandler.get(sourceFileHandler);
     }
 
     public <SF extends SourceFile> void declareCreatedSourceFile(SF sourceFile, SourceFileHandler<C, SF> sourceFileCreator) {
@@ -113,80 +94,6 @@ public abstract class GeneratorContext<C extends GeneratorContext<C>> {
         };
     }
 
-    public <T extends TargetFile<C, ?>> void declareRequiredTargetFile(SourceFileHandler<C, ?> sourceFileHandler, T targetFile) {
-        Dependency dependency = getOrCreateDependency(sourceFileHandler);
-        dependency.requiredTargetFiles.add(targetFile);
-        // Try to resolve dependency searching its parent dependencies
-        Dependency parentDependency = dependenciesByCreatedTargetFile.get(targetFile);
-        if (parentDependency != null) {
-            markAsResolved(dependency, parentDependency);
-        } else {
-            unresolvedDependencies.put(targetFile, dependency);
-        }
-    }
-
-    private void markAsResolved(Dependency dependency, Dependency parent) {
-        // link parent & child
-        dependency.resolvedParentDependencies.add(parent);
-        parent.resolvedChildrenDependencies.add(dependency);
-        // this is no more a root dependency
-        rootDependencies.remove(dependency);
-    }
-
-    public <T extends TargetFile<C, ?>> void declareCreatedTargetFile(SourceFileHandler<C, ?> sourceFileHandler, T targetFile) {
-        Dependency dependency = getOrCreateDependency(sourceFileHandler);
-        dependency.createdTargetFiles.add(targetFile);
-        dependenciesByCreatedTargetFile.put(targetFile, dependency);
-        // Try to resolve dependency searching its children dependencies
-        Collection<Dependency> children = unresolvedDependencies.get(targetFile);
-        if (children != null) {
-            for (Dependency child : children) {
-                // link parent & child
-                markAsResolved(child, dependency);
-            }
-        }
-    }
-
-    private Dependency getOrCreateDependency(SourceFileHandler<C, ?> sourceFileHandler) {
-        Dependency dependency = dependenciesBySourceFileHandler.get(sourceFileHandler);
-        if (dependency == null) {
-            // create dependency
-            dependency = new Dependency();
-            dependency.sourceFileHandler = sourceFileHandler;
-            rootDependencies.add(dependency);
-            dependenciesBySourceFileHandler.put(sourceFileHandler, dependency);
-        }
-        return dependency;
-    }
-
-    /**
-     * Iterate on SourceFileHandler and its SourceFile taking into account
-     * the dependency tree between handlers
-     */
-    public Iterable<SourceFileAndHandler> iterateOnSourceFileHandlers() {
-        return new Iterable<SourceFileAndHandler>() {
-            @Override
-            public Iterator<SourceFileAndHandler> iterator() {
-                // Compute resolved Dependency list
-                Set<Dependency> alreadyIteratedOnDependency = Sets.newHashSet();
-                List<SourceFileAndHandler> flattenedDependencies = Lists.newLinkedList();
-                visit(rootDependencies, alreadyIteratedOnDependency, flattenedDependencies);
-                return flattenedDependencies.iterator();
-            }
-
-            private void visit(Collection<Dependency> dependencies, Set<Dependency> alreadyIteratedOnDependency, List<SourceFileAndHandler> flattenedDependencies) {
-                for (Dependency dependency : dependencies) {
-                    if (!alreadyIteratedOnDependency.contains(dependency)) {
-                        flattenedDependencies.add(new SourceFileAndHandler(sourceFilesByHandler.get(dependency.sourceFileHandler), dependency.sourceFileHandler));
-                        alreadyIteratedOnDependency.add(dependency);
-                        // now handle children
-                        visit(dependency.resolvedChildrenDependencies, alreadyIteratedOnDependency, flattenedDependencies);
-                    }
-                }
-            }
-        };
-    }
-
     public Collection<TargetFile<C, ?>> getTargetFiles() {
         List<TargetFile<C, ?>> finalList = new ArrayList<>();
         for (Map<Object, TargetFile> targetFileMap : targetFiles.values()) {
@@ -207,11 +114,19 @@ public abstract class GeneratorContext<C extends GeneratorContext<C>> {
         return basePackage;
     }
 
-    public Path getBasePath() {
-        return basePath;
+    public void setSourcePath(Path sourcePath) {
+        this.sourcePath = sourcePath;
     }
 
-    public void setBasePath(Path basePath) {
-        this.basePath = basePath;
+    public Path getSourcePath() {
+        return sourcePath;
+    }
+
+    public void setTargetPath(Path targetPath) {
+        this.targetPath = targetPath;
+    }
+
+    public Path getTargetPath() {
+        return targetPath;
     }
 }

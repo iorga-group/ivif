@@ -7,16 +7,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public abstract class JavaTargetFile extends TargetFile<JAGeneratorContext, String> {
-    protected String classSimpleName;
+    protected String simpleClassName;
     protected String packageName;
     protected String packageNameRelativeToBase;
 
 
-    public JavaTargetFile(String classSimpleName, String packageName, boolean packageRelativeToBase, JAGeneratorContext context) {
-        super(getPackageName(packageName, packageRelativeToBase, context)+classSimpleName, context);
-        this.classSimpleName = classSimpleName;
+    public JavaTargetFile(String simpleClassName, String packageName, boolean packageRelativeToBase, JAGeneratorContext context) {
+        super(getClassName(simpleClassName, packageName, packageRelativeToBase, context), context);
+        this.simpleClassName = simpleClassName;
         this.packageName = getPackageName(packageName, packageRelativeToBase, context);
         this.packageNameRelativeToBase = packageRelativeToBase ? packageName : StringUtils.removeStart(this.packageName, context.getBasePackage());
+    }
+
+    protected static String getClassName(String simpleClassName, String packageName, boolean packageRelativeToBase, JAGeneratorContext context) {
+        String fullPackageName = getPackageName(packageName, packageRelativeToBase, context);
+        return fullPackageName + (StringUtils.isNotBlank(fullPackageName) ? "." : "") + simpleClassName;
     }
 
     protected static String getPackageName(String packageName, boolean packageRelativeToBase, JAGeneratorContext context) {
@@ -25,8 +30,8 @@ public abstract class JavaTargetFile extends TargetFile<JAGeneratorContext, Stri
     }
 
     @Override
-    public Path getPathRelativeToBasePath(JAGeneratorContext context) {
-        return context.getJavaBaseGenerationPathRelativeToProject().resolve(getPackageNamePath()).resolve(getClassSimpleName()+".java");
+    public Path getPathRelativeToTargetPath(JAGeneratorContext context) {
+        return context.getJavaBaseGenerationPathRelativeToTargetPath().resolve(getPackageNamePath()).resolve(getSimpleClassName()+".java");
     }
 
     public String getPackageName() {
@@ -45,7 +50,7 @@ public abstract class JavaTargetFile extends TargetFile<JAGeneratorContext, Stri
         return getId();
     }
 
-    public String getClassSimpleName() {
-        return classSimpleName;
+    public String getSimpleClassName() {
+        return simpleClassName;
     }
 }

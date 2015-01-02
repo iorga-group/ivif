@@ -33,21 +33,24 @@ public abstract class Generator<C extends GeneratorContext<C>> {
 
     public abstract SourceFileHandler<C, ?> getSourceFileHandler(Document document);
 
-    public void parseAndGenerate(Path sourceDirectory) throws Exception {
+    public void parseAndGenerate(Path sourceDirectory, Path targetDirectory) throws Exception {
         final C context = createGeneratorContext();
 
-        parseAndGenerate(sourceDirectory, context);
+        context.setSourcePath(sourceDirectory);
+        context.setTargetPath(targetDirectory);
+
+        parseAndGenerate(context);
     }
 
-    public void parseAndGenerate(Path sourceDirectory, C context) throws Exception {
+    public void parseAndGenerate(C context) throws Exception {
         // First, we will parse XML files to DOM and find their associated FileHandlers
-        addDocumentToProcess(sourceDirectory, context);
+        addDocumentToProcess(context);
 
         // For each sources files, create a new file handler and init it
         createSourceFileHandlersThenParseAndInit(context);
 
-        // Now, we "prepare", that is to say, every fileHandler will create target files in the generator context using getOrCreateTargetFile method, and add modifications to it using addFileModification method
-        prepareSourceFileHandlers(context);
+        // Now, we "prepareTargetFiles", that is to say, every fileHandler will create target files in the generator context using getOrCreateTargetFile method, and add modifications to it using addFileModification method
+        makeSourceFileHandlersPrepareTargetFiles(context);
 
         prepareTargetFiles(context);
 
@@ -67,9 +70,9 @@ public abstract class Generator<C extends GeneratorContext<C>> {
         }
     }
 
-    public void prepareSourceFileHandlers(C context) throws Exception {
-        for (GeneratorContext<C>.SourceFileAndHandler sourceFileAndHandler : context.iterateOnSourceFileHandlers()) {
-            sourceFileAndHandler.getSourceFileHandler().prepare(sourceFileAndHandler.getSourceFile(), context);
+    public void makeSourceFileHandlersPrepareTargetFiles(C context) throws Exception {
+        for (SourceFileHandler sourceFileHandler : context.getSourceFileHandlers()) {
+            sourceFileHandler.prepareTargetFiles(context.getSourceFileForHandler(sourceFileHandler), context);
         }
     }
 
@@ -78,34 +81,28 @@ public abstract class Generator<C extends GeneratorContext<C>> {
             Document document = documentToProcess.getDocument();
             SourceFileHandler sourceFileHandler = getSourceFileHandler(document);
             if (sourceFileHandler != null) {
-                parseDocumentToProcessThenInitSourceFileHandler(context, documentToProcess, sourceFileHandler);
+                parseDocumentToProcess(context, documentToProcess, sourceFileHandler);
             } else {
                 LOG.warn("Ignoring {} as we couldn't found a FileHandler for it", documentToProcess.getPath());
             }
         }
+        for (SourceFileHandler sourceFileHandler : context.getSourceFileHandlers()) {
+            sourceFileHandler.init(context.getSourceFileForHandler(sourceFileHandler), context);
+        }
     }
 
-    public void parseDocumentToProcessThenInitSourceFileHandler(C context, DocumentToProcess documentToProcess, SourceFileHandler sourceFileHandler) throws Exception {
+    public void parseDocumentToProcess(C context, DocumentToProcess documentToProcess, SourceFileHandler sourceFileHandler) throws Exception {
         SourceFile sourceFile = sourceFileHandler.parse(documentToProcess, context);
-        sourceFileHandler.init(sourceFile, context);
+        context.registerSourceFile(sourceFile, sourceFileHandler);
     }
 
-    public void addDocumentToProcess(Path sourceDirectory, final C context) throws IOException {
-        Files.walkFileTree(sourceDirectory, new SimpleFileVisitor<Path>() {
+    public void addDocumentToProcess(final C context) throws IOException {
+        Files.walkFileTree(context.getSourcePath(), new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 try {
                     Document document = documentBuilder.parse(file.toFile());
                     context.addDocumentToProcess(file, document);
-                    /*
-                    SourceFileHandler<C, ?> sourceFileHandler = getOrCreateSourceFileHandler(document);
-                    if (sourceFileHandler != null) {
-                        SourceFile sourceFile = sourceFileHandler.parse(document, context);
-                        fileHandlerToSourceFiles.put(sourceFileHandler, sourceFile);
-                    } else {
-                        LOG.warn("Ignoring {} as we couldn't found a FileHandler for it", file);
-                    }
-                    */
                 } catch (Exception e) {
                     LOG.warn("Ignoring {} as it must not be a parseable source file (Problem: [{}] {})", file, e.getClass().getName(), e.getMessage());
                 }

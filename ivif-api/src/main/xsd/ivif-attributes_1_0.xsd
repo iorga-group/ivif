@@ -27,7 +27,15 @@
     <xs:element name="date" type="attributeType" substitutionGroup="entityAttribute"/>
     <xs:element name="integer" type="attributeType" substitutionGroup="entityAttribute"/>
     
-    <xs:element name="many-to-one" type="attributeType" substitutionGroup="entityAttribute"></xs:element>
+    <xs:element name="many-to-one" substitutionGroup="entityAttribute">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="attributeType">
+                    <xs:attribute name="ref" type="xs:string"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
     
     
 </xs:schema>

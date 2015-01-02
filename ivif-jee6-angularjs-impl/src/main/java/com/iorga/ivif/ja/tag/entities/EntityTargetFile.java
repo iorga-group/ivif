@@ -4,22 +4,34 @@ import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.JavaTargetFile;
 import com.iorga.ivif.tag.bean.AttributeType;
 import com.iorga.ivif.tag.bean.Entity;
+import com.iorga.ivif.tag.bean.ManyToOne;
 import com.iorga.ivif.util.JavaClassGeneratorUtil;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBElement;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class EntityTargetFile extends JavaTargetFile {
-    private List<AttributeType> idAttributes;
+    private List<EntityAttribute> idAttributes;
     private Entity entity;
-    private String idClassname;
+    private String idClassName;
+    private String idSimpleClassName;
+    private Map<String, EntityAttribute> attributes = new LinkedHashMap<>();
+    // Declare attribute tag names to Class mapping
+    private final static Map<String, Class<?>> attributeTypesToClass = new HashMap<>();
+    static {
+        attributeTypesToClass.put("string", String.class);
+        attributeTypesToClass.put("long", Long.class);
+        attributeTypesToClass.put("boolean", Boolean.class);
+        attributeTypesToClass.put("date", Date.class);
+        attributeTypesToClass.put("integer", Integer.class);
+    }
 
     public EntityTargetFile(String classSimpleName, JAGeneratorContext context) {
         super(classSimpleName, "entity", true, context);
@@ -29,47 +41,47 @@ public class EntityTargetFile extends JavaTargetFile {
     public void prepare(JAGeneratorContext context) throws Exception {
         super.prepare(context);
 
-        // Now computes values for the rendering
+        // Prepare the attributes
         idAttributes = new ArrayList<>();
         for (JAXBElement<? extends AttributeType> attributeElement : entity.getEntityAttribute()) {
-            AttributeType attribute = attributeElement.getValue();
-            // group id attributes
-            if (attribute.isId()) {
-                idAttributes.add(attribute);
-            }
-        }
-        // And full id class name if necessary
-        if (hasMultipleIds()) {
-            idClassname = getClassName() + "." + entity.getName() + "Id";
-        } else {
-            idClassname = null;
-        }
-    }
+            EntityAttribute entityAttribute = new EntityAttribute(attributeElement);
 
-    /*
-    @Override
-    public void applyModifications(JAGeneratorContext context) {
-        super.applyModifications(context);
-        // Now computes values for the rendering
-        idAttributes = Lists.newArrayList();
-        for (JAXBElement<? extends AttributeType> attributeElement : entity.getEntityAttribute()) {
             AttributeType attribute = attributeElement.getValue();
+            String attributeName = attribute.getName();
+
+            if (attribute instanceof ManyToOne) {
+                // Handle many to one
+                // Try to solve reference
+                String ref = ((ManyToOne) attribute).getRef();
+                if (ref.contains(".")) {
+                    // This is an absolute reference, we can use it as it
+                    entityAttribute.setType(ref);
+                } else {
+                    // This is a "relative to this package" class name
+                    String packageName = getPackageName();
+                    entityAttribute.setType(StringUtils.isNotBlank(packageName) ? packageName + "." + ref : ref);
+                }
+            } else {
+                // This is a simple attribute, let's set its type and declare as resolved
+                String attributeType = attributeElement.getName().getLocalPart();
+                entityAttribute.setType(attributeTypesToClass.get(attributeType).getName());
+            }
+            attributes.put(attributeName, entityAttribute);
+            declarePartPrepared(entityAttribute, attributeName);
             // group id attributes
             if (attribute.isId()) {
-                idAttributes.add(attribute);
+                idAttributes.add(entityAttribute);
             }
         }
-        // Computing full class name
-        String entityName = entity.getName();
-        fullClassName = getPackageName() + entityName;
         // And full id class name if necessary
         if (hasMultipleIds()) {
-            fullIdClassname = fullClassName + "." + entityName + "Id";
+            idClassName = getClassName() + "." + entity.getName() + "Id";
+            idSimpleClassName = entity.getName() + "Id";
         } else {
-            fullIdClassname = null;
+            idClassName = null;
+            idSimpleClassName = null;
         }
     }
-    */
 
     @Override
     public void render(JAGeneratorContext context) throws Exception {
@@ -100,6 +112,10 @@ public class EntityTargetFile extends JavaTargetFile {
         return idAttributes.size() > 1;
     }
 
+    public Collection<EntityAttribute> getAttributes() {
+        return attributes.values();
+    }
+
     /// Getters & setters
     public void setEntity(Entity entity) {
         this.entity = entity;
@@ -109,11 +125,15 @@ public class EntityTargetFile extends JavaTargetFile {
         return entity;
     }
 
-    public List<AttributeType> getIdAttributes() {
+    public List<EntityAttribute> getIdAttributes() {
         return idAttributes;
     }
 
-    public String getIdClassname() {
-        return idClassname;
+    public String getIdClassName() {
+        return idClassName;
+    }
+
+    public String getIdSimpleClassName() {
+        return idSimpleClassName;
     }
 }

@@ -30,7 +30,7 @@ public abstract class JAXBSourceFileHandler<T, C extends GeneratorContext<C>, S 
     }
 
     @Override
-    public void prepare(S sourceFile, C context) throws Exception {
+    public void prepareTargetFiles(S sourceFile, C context) throws Exception {
         // Do nothing
     }
 }
