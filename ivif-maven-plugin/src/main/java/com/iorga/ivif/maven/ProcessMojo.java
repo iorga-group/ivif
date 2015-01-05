@@ -55,8 +55,9 @@ public class ProcessMojo extends AbstractMojo {
             Class<? extends Generator> generatorClass = (Class<? extends Generator>) Class.forName(this.generatorClass, true, contextClassLoader);
             Generator generator = generatorClass.newInstance();
             Build build = project.getBuild();
-            Path sourcePath = Paths.get(build.getSourceDirectory()).getParent().resolve("ivif");
-            Path targetPath = Paths.get(build.getOutputDirectory()).getParent();
+            Path mainSrc = Paths.get(build.getSourceDirectory()).getParent();
+            Path sourcePath = mainSrc.resolve("ivif");
+            Path targetPath = mainSrc;
             getLog().info("Reading ivif sources from '" + sourcePath+"' and generating into '"+targetPath+"'");
             generator.parseAndGenerate(sourcePath, targetPath);
         } catch (ClassNotFoundException e) {

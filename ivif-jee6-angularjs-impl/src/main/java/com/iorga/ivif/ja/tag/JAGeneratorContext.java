@@ -17,7 +17,7 @@ public class JAGeneratorContext extends GeneratorContext<JAGeneratorContext> {
     }
 
     public Path getJavaBaseGenerationPathRelativeToTargetPath() {
-        return Paths.get("generated-sources", "java");
+        return Paths.get("ivif-generated-sources", "java");
     }
 
     public Template getTemplate(String name) throws IOException {
