@@ -24,7 +24,7 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="date" type="attributeType" substitutionGroup="entityAttribute"/>
+    <xs:element name="datetime" type="attributeType" substitutionGroup="entityAttribute"/>
     <xs:element name="integer" type="attributeType" substitutionGroup="entityAttribute"/>
     
     <xs:element name="many-to-one" substitutionGroup="entityAttribute">
