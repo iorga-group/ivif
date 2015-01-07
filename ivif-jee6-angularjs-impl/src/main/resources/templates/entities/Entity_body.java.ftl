@@ -1,3 +1,4 @@
+<#assign entity=model.entity>
 @${util.useClass("javax.persistence.Entity")}
 <#if model.hasMultipleIds()>
 @${util.useClass("javax.persistence.IdClass")}(${util.useClass(model.idClassName)}.class)

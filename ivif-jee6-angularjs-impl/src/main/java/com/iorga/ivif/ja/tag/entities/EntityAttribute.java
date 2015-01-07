@@ -10,11 +10,21 @@ public class EntityAttribute {
     private String type;
     private final String capitalizedName;
     private final boolean manyToOne;
+    private final String title;
 
     public EntityAttribute(JAXBElement<? extends AttributeType> element) {
         this.element = element;
-        capitalizedName = StringUtils.capitalize(element.getValue().getName());
+        AttributeType elementValue = element.getValue();
+        capitalizedName = StringUtils.capitalize(elementValue.getName());
         manyToOne = "many-to-one".equals(element.getName().getLocalPart());
+        String elementTitle = elementValue.getTitle();
+        if (StringUtils.isNotBlank(elementTitle)) {
+            title = elementTitle;
+        } else {
+            String[] tempTitleCrumbs = StringUtils.splitByCharacterTypeCamelCase(elementValue.getName());
+            tempTitleCrumbs[0] = StringUtils.capitalize(tempTitleCrumbs[0]);
+            title = StringUtils.join(tempTitleCrumbs, ' ');
+        }
     }
 
     /// Getters & Setters
@@ -37,5 +47,9 @@ public class EntityAttribute {
 
     public boolean isManyToOne() {
         return manyToOne;
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

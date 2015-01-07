@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<views xmlns="http://www.iorga.com/xml/ns/ivif-views"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-views">
+
+    <grid name="UserGrid" title="Users" entity="User">
+        <column ref="name"/>
+    </grid>
+
+    <form name="UserForm" title="User" entity="User">
+        <field ref="name"/>
+    </form>
+</views>

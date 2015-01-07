@@ -20,6 +20,10 @@
             <artifactId>ivif-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.iorga</groupId>
+            <artifactId>ivif-jee6-angularjs-re</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
         </dependency>

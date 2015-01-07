@@ -1,4 +1,4 @@
-package com.iorga.ivif.util;
+package com.iorga.ivif.ja;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;

@@ -1,16 +1,15 @@
 package com.iorga.ivif.tag;
 
-import org.w3c.dom.Document;
-
+import javax.xml.stream.XMLStreamReader;
 import java.nio.file.Path;
 
 public class DocumentToProcess {
     private Path path;
-    private Document document;
+    private XMLStreamReader xmlStreamReader;
 
-    public DocumentToProcess(Path path, Document document) {
+    public DocumentToProcess(Path path, XMLStreamReader xmlStreamReader) {
         this.path = path;
-        this.document = document;
+        this.xmlStreamReader = xmlStreamReader;
     }
 
     public Path getPath() {
@@ -21,11 +20,11 @@ public class DocumentToProcess {
         this.path = path;
     }
 
-    public Document getDocument() {
-        return document;
+    public XMLStreamReader getXmlStreamReader() {
+        return xmlStreamReader;
     }
 
-    public void setDocument(Document document) {
-        this.document = document;
+    public void setXmlStreamReader(XMLStreamReader xmlStreamReader) {
+        this.xmlStreamReader = xmlStreamReader;
     }
 }

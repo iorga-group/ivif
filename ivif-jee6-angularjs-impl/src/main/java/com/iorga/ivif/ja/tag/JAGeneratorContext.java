@@ -20,6 +20,10 @@ public class JAGeneratorContext extends GeneratorContext<JAGeneratorContext> {
         return Paths.get("ivif-generated-sources", "java");
     }
 
+    public Path getWebappBaseGenerationPathRelativeToTargetPath() {
+        return Paths.get("ivif-generated-sources", "webapp");
+    }
+
     public Template getTemplate(String name) throws IOException {
         return configuration.getTemplate(name);
     }

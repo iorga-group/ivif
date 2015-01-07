@@ -1,4 +1,4 @@
-package com.iorga.ivif.util;
+package com.iorga.ivif.ja;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Retention;

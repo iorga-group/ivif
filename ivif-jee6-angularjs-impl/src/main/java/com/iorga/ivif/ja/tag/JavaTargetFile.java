@@ -1,56 +1,133 @@
 package com.iorga.ivif.ja.tag;
 
+import com.iorga.ivif.ja.tag.util.TargetFileUtils;
 import com.iorga.ivif.tag.TargetFile;
+import com.iorga.ivif.util.JavaClassGeneratorUtil;
+import freemarker.template.SimpleHash;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
 
-public abstract class JavaTargetFile extends TargetFile<JAGeneratorContext, String> {
-    protected String simpleClassName;
-    protected String packageName;
-    protected String packageNameRelativeToBase;
+public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetFile<JAGeneratorContext, I> {
 
+    protected final String variableName;
+    protected JavaClassGeneratorUtil util;
 
-    public JavaTargetFile(String simpleClassName, String packageName, boolean packageRelativeToBase, JAGeneratorContext context) {
-        super(getClassName(simpleClassName, packageName, packageRelativeToBase, context), context);
-        this.simpleClassName = simpleClassName;
-        this.packageName = getPackageName(packageName, packageRelativeToBase, context);
-        this.packageNameRelativeToBase = packageRelativeToBase ? packageName : StringUtils.removeStart(this.packageName, context.getBasePackage());
+    public static class JavaTargetFileId {
+        protected String simpleClassName;
+        protected String packageName;
+        protected String className;
+
+        public JavaTargetFileId(String simpleOrFullClassName, String packageNameOrNull, String packageNameRelativeToBase, JAGeneratorContext context) {
+            if (simpleOrFullClassName.contains(".")) {
+                // this is a full class name, let's split it
+                simpleClassName = StringUtils.substringAfterLast(simpleOrFullClassName, ".");
+                packageName = StringUtils.substringBeforeLast(simpleOrFullClassName, ".");
+            } else {
+                // this is a partial class name, let's complete it
+                simpleClassName = simpleOrFullClassName;
+                if (StringUtils.isBlank(packageNameOrNull)) {
+                    // package name has not been given, let's determine it
+                    packageName = context.getBasePackage();
+                    if (StringUtils.isNotBlank(packageNameRelativeToBase)) {
+                        packageName = (StringUtils.isNotBlank(packageName) ? packageName + "." : "") + packageNameRelativeToBase;
+                    }
+                } else {
+                    // package name has been given, let's use it
+                    packageName = packageNameOrNull;
+                }
+            }
+            className = (StringUtils.isNotBlank(packageName) ? packageName + "." : "") + simpleClassName;
+        }
+
+        @Override
+        public String toString() {
+            return className;
+        }
+
+        @Override
+        public int hashCode() {
+            return className.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof JavaTargetFileId ? className.equals(((JavaTargetFileId) obj).className) : false;
+        }
     }
 
-    protected static String getClassName(String simpleClassName, String packageName, boolean packageRelativeToBase, JAGeneratorContext context) {
-        String fullPackageName = getPackageName(packageName, packageRelativeToBase, context);
-        return fullPackageName + (StringUtils.isNotBlank(fullPackageName) ? "." : "") + simpleClassName;
+    public JavaTargetFile(I id, JAGeneratorContext context) {
+        super(id, context);
+
+        this.variableName = TargetFileUtils.getVariableNameFromName(id.simpleClassName);
     }
 
-    protected static String getPackageName(String packageName, boolean packageRelativeToBase, JAGeneratorContext context) {
-        String basePackage = context.getBasePackage();
-        return packageRelativeToBase ? (StringUtils.isNotBlank(basePackage) ? (basePackage + ".") : "") + packageName : packageName;
+
+    @Override
+    public void render(JAGeneratorContext context) throws Exception {
+        util = new JavaClassGeneratorUtil();
+        ByteArrayOutputStream bodyStream = renderBody(context);
+        // Now add the header
+        SimpleHash freemarkerContext = context.createSimpleHash();
+        freemarkerContext.put("model", this);
+        freemarkerContext.put("util", util);
+        Template template = context.getTemplate("JavaHeader.ftl");
+        File file = getPath(context).toFile();
+        // create file structure
+        file.getParentFile().mkdirs();
+        // before writing to it
+        FileOutputStream outputStream = new FileOutputStream(file);
+        template.process(freemarkerContext, new OutputStreamWriter(outputStream));
+        // And append the body
+        bodyStream.writeTo(outputStream);
+    }
+
+    protected ByteArrayOutputStream renderBody(JAGeneratorContext context) throws IOException, TemplateException {
+        SimpleHash freemarkerContext = context.createSimpleHash();
+        freemarkerContext.put("model", getFreemarkerModel());
+        freemarkerContext.put("util", util);
+        // First process body
+        Template template = context.getTemplate(getFreemarkerBodyTemplateName());
+        ByteArrayOutputStream bodyStream = new ByteArrayOutputStream();
+        template.process(freemarkerContext, new OutputStreamWriter(bodyStream));
+        return bodyStream;
+    }
+
+    protected Object getFreemarkerModel() {
+        return this;
+    }
+
+    protected String getFreemarkerBodyTemplateName() {
+        return null;
     }
 
     @Override
     public Path getPathRelativeToTargetPath(JAGeneratorContext context) {
-        return context.getJavaBaseGenerationPathRelativeToTargetPath().resolve(getPackageNamePath()).resolve(getSimpleClassName()+".java");
+        return context.getJavaBaseGenerationPathRelativeToTargetPath().resolve(getPackageNamePath()).resolve(getSimpleClassName() + ".java");
     }
 
     public String getPackageName() {
-        return packageName;
+        return getId().packageName;
     }
 
     public Path getPackageNamePath() {
         return Paths.get(getPackageName().replaceAll("\\.", "/"));
     }
 
-    public String getPackageNameRelativeToBase() {
-        return packageNameRelativeToBase;
-    }
-
     public String getClassName() {
-        return getId();
+        return getId().className;
     }
 
     public String getSimpleClassName() {
-        return simpleClassName;
+        return getId().simpleClassName;
+    }
+
+    public String getVariableName() {
+        return variableName;
     }
 }

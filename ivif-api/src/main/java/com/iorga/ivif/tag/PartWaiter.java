@@ -9,7 +9,7 @@ public abstract class PartWaiter<T, I, C extends GeneratorContext<C>> {
         this.partId = partId;
     }
 
-    public abstract void onPrepared(T part);
+    public abstract void onPrepared(T part) throws Exception;
 
     public TargetFile<C, ?> getTargetFileWaiter() {
         return targetFileWaiter;

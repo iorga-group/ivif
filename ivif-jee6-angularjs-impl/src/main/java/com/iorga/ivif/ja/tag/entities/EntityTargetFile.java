@@ -2,6 +2,7 @@ package com.iorga.ivif.ja.tag.entities;
 
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.JavaTargetFile;
+import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 import com.iorga.ivif.tag.bean.AttributeType;
 import com.iorga.ivif.tag.bean.Entity;
 import com.iorga.ivif.tag.bean.ManyToOne;
@@ -16,8 +17,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.*;
+import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
 
-public class EntityTargetFile extends JavaTargetFile {
+public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
     private List<EntityAttribute> idAttributes;
     private Entity entity;
     private String idClassName;
@@ -33,8 +35,18 @@ public class EntityTargetFile extends JavaTargetFile {
         attributeTypesToClass.put("integer", Integer.class);
     }
 
-    public EntityTargetFile(String classSimpleName, JAGeneratorContext context) {
-        super(classSimpleName, "entity", true, context);
+    public static class EntityTargetFileId extends JavaTargetFileId {
+        public EntityTargetFileId(String simpleOrFullClassName, String packageNameOrNull, JAGeneratorContext context) {
+            super(simpleOrFullClassName, packageNameOrNull, "entity", context);
+        }
+
+        public EntityTargetFileId(String simpleOrFullClassName, JAGeneratorContext context) {
+            this(simpleOrFullClassName, null, context);
+        }
+    }
+
+    public EntityTargetFile(EntityTargetFileId id, JAGeneratorContext context) {
+        super(id, context);
     }
 
     @Override
@@ -84,28 +96,9 @@ public class EntityTargetFile extends JavaTargetFile {
     }
 
     @Override
-    public void render(JAGeneratorContext context) throws Exception {
-        JavaClassGeneratorUtil util = new JavaClassGeneratorUtil();
-        SimpleHash freemarkerContext = context.createSimpleHash();
-        freemarkerContext.put("model", this);
-        freemarkerContext.put("util", util);
-        freemarkerContext.put("entity", entity);
-        // First process body
-        Template template = context.getTemplate("EntityClass.ftl");
-        ByteArrayOutputStream bodyStream = new ByteArrayOutputStream();
-        template.process(freemarkerContext, new OutputStreamWriter(bodyStream));
-        // Now add the header
-        template = context.getTemplate("JavaHeader.ftl");
-        File file = getPath(context).toFile();
-        // create file structure
-        file.getParentFile().mkdirs();
-        // before writing to it
-        FileOutputStream outputStream = new FileOutputStream(file);
-        template.process(freemarkerContext, new OutputStreamWriter(outputStream));
-        // And append the body
-        bodyStream.writeTo(outputStream);
+    protected String getFreemarkerBodyTemplateName() {
+        return "entities/Entity_body.java.ftl";
     }
-
 
     /// Methods used for rendering
     public boolean hasMultipleIds() {

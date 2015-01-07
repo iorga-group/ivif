@@ -2,12 +2,14 @@ package com.iorga.ivif.tag;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,21 +19,15 @@ import java.nio.file.attribute.BasicFileAttributes;
 public abstract class Generator<C extends GeneratorContext<C>> {
     private final static Logger LOG = LoggerFactory.getLogger(Generator.class);
 
-    protected DocumentBuilder documentBuilder;
+    protected XMLInputFactory xmlInputFactory;
 
     {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        try {
-            documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Couldn't initialize "+getClass(), e);
-        }
+        xmlInputFactory = XMLInputFactory.newInstance();
     }
 
     public abstract C createGeneratorContext();
 
-    public abstract SourceFileHandler<C, ?> getSourceFileHandler(Document document);
+    protected abstract SourceTagHandler<C> createSourceTagHandler(QName name, C context) throws JAXBException, NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException;
 
     public void parseAndGenerate(Path sourceDirectory, Path targetDirectory) throws Exception {
         final C context = createGeneratorContext();
@@ -44,15 +40,17 @@ public abstract class Generator<C extends GeneratorContext<C>> {
 
     public void parseAndGenerate(C context) throws Exception {
         // First, we will parse XML files to DOM and find their associated FileHandlers
-        addDocumentToProcess(context);
+        addDocumentsToProcess(context);
 
         // For each sources files, create a new file handler and init it
-        createSourceFileHandlersThenParseAndInit(context);
+        createSourceTagHandlersThenParseAndInit(context);
 
         // Now, we "prepareTargetFiles", that is to say, every fileHandler will create target files in the generator context using getOrCreateTargetFile method, and add modifications to it using addFileModification method
-        makeSourceFileHandlersPrepareTargetFiles(context);
+        makeSourceTagHandlersPrepareTargetFiles(context);
 
         prepareTargetFiles(context);
+
+        //FIXME check if there are no target files waiting for others to be prepared
 
         // End finally render the target files
         renderTargetFiles(context);
@@ -70,39 +68,49 @@ public abstract class Generator<C extends GeneratorContext<C>> {
         }
     }
 
-    public void makeSourceFileHandlersPrepareTargetFiles(C context) throws Exception {
-        for (SourceFileHandler sourceFileHandler : context.getSourceFileHandlers()) {
-            sourceFileHandler.prepareTargetFiles(context.getSourceFileForHandler(sourceFileHandler), context);
+    public void makeSourceTagHandlersPrepareTargetFiles(C context) throws Exception {
+        for (SourceTagHandler<C> sourceTagHandler : context.getSourceTagHandlers()) {
+            sourceTagHandler.prepareTargetFiles(context);
         }
     }
 
-    public void createSourceFileHandlersThenParseAndInit(C context) throws Exception {
+    public void createSourceTagHandlersThenParseAndInit(C context) throws Exception {
         for (DocumentToProcess documentToProcess : context.processDocument()) {
-            Document document = documentToProcess.getDocument();
-            SourceFileHandler sourceFileHandler = getSourceFileHandler(document);
-            if (sourceFileHandler != null) {
-                parseDocumentToProcess(context, documentToProcess, sourceFileHandler);
-            } else {
-                LOG.warn("Ignoring {} as we couldn't found a FileHandler for it", documentToProcess.getPath());
+            XMLStreamReader reader = documentToProcess.getXmlStreamReader();
+            // Inspect file until a tag handler is found
+            int eventType;
+            int nbSourceTagHandlers = 0;
+            while (reader.hasNext()) {
+                eventType = reader.next();
+                if (eventType == XMLStreamReader.START_ELEMENT) {
+                    // check if we have a tag handler for this
+                    SourceTagHandler<C> sourceTagHandler = createSourceTagHandler(reader.getName(), context);
+                    if (sourceTagHandler != null) {
+                        boolean parsed = sourceTagHandler.parse(documentToProcess, context);
+                        if (parsed) {
+                            nbSourceTagHandlers++;
+                            context.registerSourceTagHandler(sourceTagHandler, documentToProcess);
+                        }
+                    }
+                }
+            }
+            if (nbSourceTagHandlers == 0) {
+                LOG.warn("Found no tag handlers for file {}", documentToProcess.getPath());
             }
         }
-        for (SourceFileHandler sourceFileHandler : context.getSourceFileHandlers()) {
-            sourceFileHandler.init(context.getSourceFileForHandler(sourceFileHandler), context);
+        for (SourceTagHandler sourceTagHandler : context.getSourceTagHandlers()) {
+            sourceTagHandler.init(context);
         }
     }
 
-    public void parseDocumentToProcess(C context, DocumentToProcess documentToProcess, SourceFileHandler sourceFileHandler) throws Exception {
-        SourceFile sourceFile = sourceFileHandler.parse(documentToProcess, context);
-        context.registerSourceFile(sourceFile, sourceFileHandler);
-    }
-
-    public void addDocumentToProcess(final C context) throws IOException {
+    public void addDocumentsToProcess(final C context) throws IOException {
         Files.walkFileTree(context.getSourcePath(), new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 try {
-                    Document document = documentBuilder.parse(file.toFile());
-                    context.addDocumentToProcess(file, document);
+                    //TODO change to xml stream here & cut SourceFileHandlers to SourceTagHandlers and make JAXB the default impl
+                    XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(file.toString(), new FileInputStream(file.toFile()));
+                    context.addDocumentToProcess(file, xmlStreamReader);
                 } catch (Exception e) {
                     LOG.warn("Ignoring {} as it must not be a parseable source file (Problem: [{}] {})", file, e.getClass().getName(), e.getMessage());
                 }

@@ -1,12 +1,11 @@
 package com.iorga.ivif.maven;
 
 import com.iorga.ivif.tag.Generator;
+import net.peachjean.slf4j.mojo.AbstractLoggingMojo;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.model.Build;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
 
@@ -26,7 +25,7 @@ import java.util.Set;
         requiresDependencyResolution = ResolutionScope.COMPILE,
         threadSafe = true
 )
-public class ProcessMojo extends AbstractMojo {
+public class ProcessMojo extends AbstractLoggingMojo {
 
     @Parameter(name = "generatorClass", required = true)
     protected String generatorClass;
@@ -39,7 +38,7 @@ public class ProcessMojo extends AbstractMojo {
     protected MavenProject project;
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void executeWithLogging() throws MojoExecutionException, MojoFailureException {
         try {
             // create new class loader thanks to http://stackoverflow.com/a/16263482/535203
             Set<URL> urls = new HashSet<>();

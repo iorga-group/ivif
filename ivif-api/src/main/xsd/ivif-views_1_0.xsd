@@ -1,85 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema
         xmlns:xs="http://www.w3.org/2001/XMLSchema"
-        xmlns="http://www.iorga.com/xml/ns/ivif-entities"
-        targetNamespace="http://www.iorga.com/xml/ns/ivif-entities"
+        xmlns="http://www.iorga.com/xml/ns/ivif-views"
+        targetNamespace="http://www.iorga.com/xml/ns/ivif-views"
         elementFormDefault="qualified"
         attributeFormDefault="unqualified">
 
-
     <xs:element name="views">
         <xs:complexType>
-            <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:choice minOccurs="1" maxOccurs="unbounded">
                 <xs:element ref="grid"/>
-                <xs:element ref="form"/> 
-                <xs:element ref="action-view"/>  
-            </xs:sequence>
+                <xs:element ref="form"/>
+                <xs:element ref="action-view"/>
+            </xs:choice>
         </xs:complexType>
     </xs:element>
 
-  <xs:element name="grid">
-        <xs:complexType>            
-	        <xs:choice minOccurs="0" maxOccurs="unbounded">
-	            <xs:element ref="g-field"/>
-		    </xs:choice>
-	        <xs:attribute name="on-double-click" type="xs:string"/>	        
-	        <xs:attribute name="editable" type="xs:boolean" default="false"/>
-	        <xs:attribute name="name" type="xs:string" use="required"/>
-	        <xs:attribute name="title" type="xs:string"/>
-            <xs:attribute name="entity" type="xs:string"/>
-	  	  </xs:complexType>
-	  	  
-    </xs:element>
-    
-    <xs:element name="form">
-    	 <xs:complexType>            
-	        <xs:choice minOccurs="0" maxOccurs="unbounded">
-	            <xs:element ref="field"/>
-	        </xs:choice>
-	        <xs:attribute name="save" type="xs:string"/>
-	        <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:element name="grid">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="column"/>
+            </xs:choice>
+            <xs:attribute name="on-double-click" type="xs:string"/>
+            <xs:attribute name="editable" type="xs:boolean" default="false"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="entity" type="xs:string"/>
-	  	  </xs:complexType>
-	</xs:element>
-
-  	<xs:element name="action-view">
-  		 <xs:complexType>            
-	        <xs:choice minOccurs="0" maxOccurs="unbounded">
-	            <xs:element ref="query"/>
-	        </xs:choice>
-	        <xs:attribute name="name" type="xs:string" use="required"/>
-	        <xs:attribute name="grid" type="xs:string"/>
-	  	  </xs:complexType>
-	</xs:element>
-
-
-    <xs:element name="g-field">
-    	 <xs:complexType>
-             <xs:attribute name="name" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
-    
+
+    <xs:element name="form">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="field"/>
+            </xs:choice>
+            <xs:attribute name="save" type="xs:string"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="title" type="xs:string"/>
+            <xs:attribute name="entity" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="action-view">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="1">
+                <xs:element ref="query"/>
+            </xs:choice>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="grid" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="column">
+        <xs:complexType>
+            <xs:attribute name="ref" type="xs:string" use="required"/>
+            <xs:attribute name="title" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="field">
-     	<xs:complexType>
-             <xs:attribute name="name" type="xs:string" use="required"/>
-             <xs:attribute name="col-span" type="xs:integer"/>
+        <xs:complexType>
+            <xs:attribute name="ref" type="xs:string" use="required"/>
+            <xs:attribute name="col-span" type="xs:integer"/>
         </xs:complexType>
     </xs:element>
-    
-     <xs:element name="query">
-	     <xs:complexType>
-	     		  <xs:choice minOccurs="0" maxOccurs="unbounded">
-		            <xs:element ref="field"/>
-		          </xs:choice>
-	             <xs:attribute name="name" type="xs:string" use="required"/>
-	             <xs:attribute name="col-span" type="xs:integer"/>
-	        </xs:complexType>
-    </xs:element>
-    
-          
 
- </xs:schema>  
+    <xs:element name="query">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="where" maxOccurs="1"/>
+                <xs:element ref="parameter"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="where" type="xs:string"/>
+
+    <xs:element name="parameter">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
 
               
     
