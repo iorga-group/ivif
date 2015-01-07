@@ -31,7 +31,7 @@ public class GridCtrlJsTargetFile extends TargetFile<JAGeneratorContext, String>
 
     @Override
     public Path getPathRelativeToTargetPath(JAGeneratorContext context) {
-        return context.getWebappBaseGenerationPathRelativeToTargetPath().resolve(Paths.get("scripts", "controllers")).resolve(getId()+"Ctlr.js");
+        return context.getWebappBaseGenerationPathRelativeToTargetPath().resolve(Paths.get("scripts", "controllers")).resolve(getId()+"Ctrl.js");
     }
 
     public void setGrid(Grid grid) {

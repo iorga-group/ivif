@@ -6,10 +6,10 @@ angular.module('sara')
             $routeProvider.
                 when('/${model.variableName}', {
                     templateUrl: 'templates/views/${grid.name}.html',
-                    controller: '${grid.name}Ctlr'
+                    controller: '${grid.name}Ctrl'
                 });
         }])
-    .controller('${grid.name}Ctlr', ['$scope', 'ngTableParams', '$timeout', '$http', function($scope, ngTableParams, $timeout, $http) {
+    .controller('${grid.name}Ctrl', ['$scope', 'ngTableParams', '$timeout', '$http', function($scope, ngTableParams, $timeout, $http) {
         $scope.${model.variableName}TableParams = new ngTableParams({
             page: 1,
             count: 10

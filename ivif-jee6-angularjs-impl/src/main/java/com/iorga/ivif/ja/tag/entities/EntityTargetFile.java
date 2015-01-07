@@ -32,6 +32,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
         attributeTypesToClass.put("long", Long.class);
         attributeTypesToClass.put("boolean", Boolean.class);
         attributeTypesToClass.put("date", Date.class);
+        attributeTypesToClass.put("datetime", Date.class);
         attributeTypesToClass.put("integer", Integer.class);
     }
 

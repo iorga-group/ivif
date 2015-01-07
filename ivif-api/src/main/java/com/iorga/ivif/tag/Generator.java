@@ -50,7 +50,7 @@ public abstract class Generator<C extends GeneratorContext<C>> {
 
         prepareTargetFiles(context);
 
-        //FIXME check if there are no target files waiting for others to be prepared
+        //TODO FIXME check if there are no target files waiting for others to be prepared
 
         // End finally render the target files
         renderTargetFiles(context);
