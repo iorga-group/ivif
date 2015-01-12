@@ -6,7 +6,7 @@
                 <table ng-table="${model.variableName}TableParams" class="table table-bordered table-condensed table-hover table-striped">
                     <tr ng-repeat="line in $data">
 <#list model.columns as column>
-                        <td data-title="'${column.title}'">
+                        <td data-title="'${column.title}'" sortable="'${column.refVariableName}'">
                             {{line.${column.refVariableName}}}
                         </td>
 </#list>

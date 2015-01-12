@@ -1,6 +1,7 @@
 <#assign grid=model.grid>
 @${util.useClass("javax.ws.rs.Path")}("/${model.variableName}")
 @${util.useClass("com.iorga.ivif.ja.Generated")}
+@${util.useClass("javax.ejb.Stateless")}
 public class ${grid.name}BaseWS {
     @${util.useClass("javax.inject.Inject")} @${util.useClass("com.iorga.ivif.ja.Generated")}
     private ${util.useClass(model.baseService.className)} ${model.baseService.variableName};
@@ -9,6 +10,14 @@ public class ${grid.name}BaseWS {
 <#list model.columns as column>
         public ${util.useClass(column.entityAttribute.type)} ${column.refVariableName};
 </#list>
+
+        public ${model.searchResultSimpleClassName}() {}
+        public ${model.searchResultSimpleClassName}(<#list model.columns as column>${util.useClass(column.entityAttribute.type)} ${column.refVariableName}<#if column_has_next>, </#if></#list>) {
+<#list model.columns as column>
+    <#assign element=column.entityAttribute.element.value>
+            this.${column.refVariableName} = ${column.refVariableName};
+</#list>
+        }
     }
     public static class ${model.searchFilterSimpleClassName} extends ${util.useClass(model.searchResultClassName)} {
 <#-- TODO add target entity id attribute -->

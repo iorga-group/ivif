@@ -28,7 +28,7 @@ angular.module('sara')
                 $http.post('api/${model.variableName}/search', {
                     limit: params.count(),
                     offset: (params.page() - 1) * params.count(),
-                    sorting: params.sorting(),
+                    sorting: sorting,
                     filter: params.filter()
                 }).success(function(data) {
                     $defer.resolve(data.results);
