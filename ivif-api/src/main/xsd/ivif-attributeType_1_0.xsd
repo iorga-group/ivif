@@ -19,6 +19,8 @@
         <xs:attribute name="id" type="xs:boolean" default="false"/>
         <xs:attribute name="title" type="xs:string"/>
         <xs:attribute name="formula" type="xs:string"/>
+        <xs:attribute name="insertable" type="xs:boolean" default="true"/>
+        <xs:attribute name="updatable" type="xs:boolean" default="true"/>
     </xs:complexType>
 
     <xs:element name="default-editor">

@@ -9,17 +9,21 @@
 public class ${entity.name} {
 <#list model.attributes as attribute>
     <#assign element=attribute.element.value>
+    <#if attribute.manyToOne>
+    @${util.useClass("javax.persistence.ManyToOne")}(fetch = ${util.useClass("javax.persistence.FetchType")}.LAZY, cascade = {${util.useClass("javax.persistence.CascadeType")}.PERSIST, ${util.useClass("javax.persistence.CascadeType")}.MERGE})
+    </#if>
     <#if element.id>
     @${util.useClass("javax.persistence.Id")}
     </#if>
     <#if element.column?has_content>
-    @${util.useClass("javax.persistence.Column")}(name = "${element.column}")
+        <#if attribute.manyToOne>
+    @${util.useClass("javax.persistence.JoinColumn")}(name = "${element.column}"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
+        <#else>
+    @${util.useClass("javax.persistence.Column")}(name = "${element.column}"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
+        </#if>
     </#if>
     <#if element.required || element.id>
     @${util.useClass("javax.validation.constraints.NotNull")}
-    </#if>
-    <#if attribute.manyToOne>
-    @${util.useClass("javax.persistence.ManyToOne")}(fetch = ${util.useClass("javax.persistence.FetchType")}.LAZY, cascade = {${util.useClass("javax.persistence.CascadeType")}.PERSIST, ${util.useClass("javax.persistence.CascadeType")}.MERGE})
     </#if>
     private ${util.useClass(attribute.type)} ${element.name};
 
