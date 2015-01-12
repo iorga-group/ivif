@@ -11,11 +11,14 @@
 </#list>
         // Applying sorting
         ${util.useClass("com.iorga.ivif.ja.Sorting")} sorting = searchParam.sorting;
+        ${util.useClass("com.mysema.query.types.expr.ComparableExpressionBase")} sortingExpression = null;
 <#list model.columns as column>
         <#if column_index != 0>} else </#if>if ("${column.refVariableName}".equals(sorting.ref)) {
-            ${util.useClass("com.mysema.query.types.expr.ComparableExpressionBase")} expressionBase = qEntity.${column.element.ref};
-            jpaQuery.orderBy(${util.useClass("com.iorga.ivif.ja.SortingType")}.ASCENDING.equals(sorting.type) ? expressionBase.asc() : expressionBase.desc());
+            sortingExpression = qEntity.${column.element.ref};
         <#if !column_has_next>
+        }
+        if (sortingExpression != null) {
+            jpaQuery.orderBy(${util.useClass("com.iorga.ivif.ja.SortingType")}.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
         </#if>
 </#list>

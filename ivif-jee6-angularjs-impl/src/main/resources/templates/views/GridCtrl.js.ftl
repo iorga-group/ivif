@@ -21,7 +21,7 @@ angular.module('sara')
                     type: null
                 };
                 var paramsSorting = params.sorting();
-                for (field in paramsSorting) {
+                for (var field in paramsSorting) {
                     sorting.ref = field;
                     sorting.type = paramsSorting[field];
                 }
