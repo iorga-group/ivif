@@ -1,5 +1,6 @@
 package com.iorga.ivif.ja.tag.entities;
 
+import com.iorga.ivif.ja.tag.JavaStaticField;
 import com.iorga.ivif.tag.bean.AttributeType;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,6 +12,9 @@ public class EntityAttribute {
     private final String capitalizedName;
     private final boolean manyToOne;
     private final String title;
+    private String fromType;
+    private JavaStaticField trueValueStaticField;
+    private JavaStaticField falseValueStaticField;
 
     public EntityAttribute(JAXBElement<? extends AttributeType> element) {
         this.element = element;
@@ -51,5 +55,30 @@ public class EntityAttribute {
 
     public String getTitle() {
         return title;
+    }
+
+
+    public void setFromType(String fromType) {
+        this.fromType = fromType;
+    }
+
+    public String getFromType() {
+        return fromType;
+    }
+
+    public void setTrueValueStaticField(JavaStaticField trueValueStaticField) {
+        this.trueValueStaticField = trueValueStaticField;
+    }
+
+    public JavaStaticField getTrueValueStaticField() {
+        return trueValueStaticField;
+    }
+
+    public void setFalseValueStaticField(JavaStaticField falseValueStaticField) {
+        this.falseValueStaticField = falseValueStaticField;
+    }
+
+    public JavaStaticField getFalseValueStaticField() {
+        return falseValueStaticField;
     }
 }

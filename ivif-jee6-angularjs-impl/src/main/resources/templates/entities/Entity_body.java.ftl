@@ -7,6 +7,11 @@
 @${util.useClass("javax.persistence.Table")}(name = "${entity.table}")
 </#if>
 public class ${entity.name} {
+
+<#list model.staticFields as staticField>
+    public static ${util.useClass(staticField.type)} ${staticField.name} = <#if staticField.type == "java.lang.Character">new ${util.useClass("java.lang.Character")}('${staticField.value}')<#elseif staticField.type == "java.lang.String">"${staticField.value}"<#else>new ${util.useClass(staticField.type)}("${staticField.value}")</#if>;
+</#list>
+
 <#list model.attributes as attribute>
     <#assign element=attribute.element.value>
     <#if attribute.manyToOne>
@@ -24,6 +29,9 @@ public class ${entity.name} {
     </#if>
     <#if element.required || element.id>
     @${util.useClass("javax.validation.constraints.NotNull")}
+    </#if>
+    <#if element.formula?has_content>
+    @${util.useClass("org.hibernate.annotations.Formula")}("${element.formula}")
     </#if>
     private ${util.useClass(attribute.type)} ${element.name};
 
@@ -66,6 +74,17 @@ public class ${entity.name} {
 
     public void set${attribute.capitalizedName}(${util.useClass(attribute.type)} ${element.name}) {
         this.${element.name} = ${element.name};
+    <#if element.fromType?has_content>
+        <#-- this is a boolean attribute with a "from-type" defined, that is to say, we must set the original _value attribute -->
+        // set the original value
+        if (${util.useClass("java.lang.Boolean")}.TRUE.equals(${element.name})) {
+            set${attribute.capitalizedName}_value(${attribute.trueValueStaticField.name});
+        } else if (${util.useClass("java.lang.Boolean")}.FALSE.equals(${element.name})) {
+            set${attribute.capitalizedName}_value(${attribute.falseValueStaticField.name});
+        } else {
+            set${attribute.capitalizedName}_value(null);
+        }
+    </#if>
     }
 
 </#list>

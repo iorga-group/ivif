@@ -8,6 +8,7 @@
 
     <xs:include schemaLocation="ivif-attributeType_1_0.xsd"/>
 
+    <xs:element name="character" type="attributeType" substitutionGroup="entityAttribute"/>
     <xs:element name="string" type="attributeType" substitutionGroup="entityAttribute"/>
     <xs:element name="long" type="attributeType" substitutionGroup="entityAttribute"/>
 
