@@ -18,6 +18,8 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
         private String searchResultClassName;
         private String searchFilterSimpleClassName;
         private String searchFilterClassName;
+        private String searchParamSimpleClassName;
+        private String searchParamClassName;
 
         @Override
         public void prepare(JAGeneratorContext context, TargetFile targetFile) throws Exception {
@@ -27,6 +29,8 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
             this.searchResultClassName = GridBaseWSTargetFile.this.getClassName() + "." + searchResultSimpleClassName;
             this.searchFilterSimpleClassName = grid.getName() + "SearchFilter";
             this.searchFilterClassName = GridBaseWSTargetFile.this.getClassName() + "." + searchFilterSimpleClassName;
+            this.searchParamSimpleClassName = grid.getName() + "SearchParam";
+            this.searchParamClassName = GridBaseWSTargetFile.this.getClassName() + "." + searchParamSimpleClassName;
 
             // Adding the search method
             baseService.addRenderPart(new RenderPart("entities/EntityBaseService_gridSearch_bodyPart.java.ftl", this));
@@ -63,6 +67,13 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
             return searchFilterClassName;
         }
 
+        public String getSearchParamSimpleClassName() {
+            return searchParamSimpleClassName;
+        }
+
+        public String getSearchParamClassName() {
+            return searchParamClassName;
+        }
     }
 
     public GridBaseWSTargetFile(WSTargetFileId id, JAGeneratorContext context) {

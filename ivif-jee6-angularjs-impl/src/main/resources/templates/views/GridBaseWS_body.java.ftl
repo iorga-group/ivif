@@ -22,11 +22,12 @@ public class ${grid.name}BaseWS {
     public static class ${model.searchFilterSimpleClassName} extends ${util.useClass(model.searchResultClassName)} {
 <#-- TODO add target entity id attribute -->
     }
+    public static class ${model.searchParamSimpleClassName} extends ${util.useClass("com.iorga.ivif.ja.GridSearchParam")}<${util.useClass(model.searchFilterClassName)}> {}
     @${util.useClass("javax.ws.rs.POST")}
     @${util.useClass("javax.ws.rs.Path")}("/search")
     @${util.useClass("javax.ws.rs.Consumes")}("application/json")
     @${util.useClass("javax.ws.rs.Produces")}("application/json")
-    public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass("com.iorga.ivif.ja.GridSearchParam")}<${util.useClass(model.searchFilterClassName)}> searchParam) {
+    public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass(model.searchParamClassName)} searchParam) {
         return ${model.baseService.variableName}.search(searchParam);
     }
 }

@@ -1,4 +1,4 @@
-    public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass("com.iorga.ivif.ja.GridSearchParam")}<${util.useClass(model.searchFilterClassName)}> searchParam) {
+    public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass(model.searchParamClassName)} searchParam) {
         ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery = new ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")}(entityManager, ${util.useClass("com.mysema.query.jpa.JPQLTemplates")}.DEFAULT);
         ${util.useClass(baseModel.qEntityClassName)} qEntity = new ${util.useClass(baseModel.qEntityClassName)}("${baseModel.entityTargetFile.variableName}");
         jpaQuery.from(qEntity);
