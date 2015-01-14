@@ -113,8 +113,8 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
                             attributeColumn = attributeName;
                         }
                         attribute.setFormula("(CASE " +
-                                "WHEN " + attributeColumn + " = " + quote + booleanAttribute.getTrueValue() + quote + " THEN TRUE " +
-                                "WHEN " + attributeColumn + " = " + quote + booleanAttribute.getFalseValue() + quote + " THEN FALSE " +
+                                "WHEN " + attributeColumn + " = " + quote + booleanAttribute.getTrueValue() + quote + " THEN 1 " +
+                                "WHEN " + attributeColumn + " = " + quote + booleanAttribute.getFalseValue() + quote + " THEN 0 " +
                                 "ELSE NULL END)");
                     }
                 }
