@@ -31,6 +31,7 @@ angular.module('sara')
                     sorting: sorting,
                     filter: params.filter()
                 }).success(function(data) {
+                    params.total(data.total);
                     $defer.resolve(data.results);
                 });
             }
