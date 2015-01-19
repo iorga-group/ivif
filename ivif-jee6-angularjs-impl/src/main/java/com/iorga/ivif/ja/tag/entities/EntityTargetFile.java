@@ -94,6 +94,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
                         valueAttribute.setColumn(attributeColumn);
                         attribute.setColumn(null);
                         valueAttribute.setRequired(attribute.isRequired());
+                        attribute.setRequired(false);
                         valueAttribute.setName(attributeName +"_value");
                         EntityAttribute valueEntityAttribute = new EntityAttribute(new JAXBElement(new QName(null, fromType), valueAttributeClass, valueAttribute));
                         valueEntityAttribute.setType(fromTypeClassName);
