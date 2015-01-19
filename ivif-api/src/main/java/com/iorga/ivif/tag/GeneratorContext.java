@@ -114,11 +114,21 @@ public abstract class GeneratorContext<C extends GeneratorContext<C>> {
 
     public Collection<TargetFile<C, ?>> getTargetFiles() {
         List<TargetFile<C, ?>> finalList = new ArrayList<>();
-        for (Map<Object, TargetFileContext> targetFileMap : targetFileContexts.values()) {
-            for (TargetFileContext targetFileContext : targetFileMap.values()) {
+        for (Map<Object, TargetFileContext> targetFileContextMap : targetFileContexts.values()) {
+            for (TargetFileContext targetFileContext : targetFileContextMap.values()) {
                 if (targetFileContext.targetFile != null) { // TODO why it would be null here ?
                     finalList.add(targetFileContext.targetFile);
                 }
+            }
+        }
+        return finalList;
+    }
+
+    public Collection<TargetFileWaiter<? extends TargetFile<C, ?>, ?, C>> getTargetFileWaiters() {
+        List<TargetFileWaiter<? extends TargetFile<C, ?>, ?, C>> finalList = new ArrayList<>();
+        for (Map<Object, TargetFileContext> targetFileContextMap : targetFileContexts.values()) {
+            for (TargetFileContext targetFileContext : targetFileContextMap.values()) {
+                finalList.addAll(targetFileContext.waiters);
             }
         }
         return finalList;

@@ -50,10 +50,27 @@ public abstract class Generator<C extends GeneratorContext<C>> {
 
         prepareTargetFiles(context);
 
-        //TODO FIXME check if there are no target files waiting for others to be prepared
+        checkWaitingPreparedTargetFilesOrParts(context);
 
         // End finally render the target files
         renderTargetFiles(context);
+    }
+
+    protected void checkWaitingPreparedTargetFilesOrParts(C context) {
+        boolean waitersStillExist = false;
+        for (TargetFileWaiter<? extends TargetFile<C, ?>, ?, C> targetFileWaiter : context.getTargetFileWaiters()) {
+            LOG.error(targetFileWaiter.getWaiter() + " is still waiting " + targetFileWaiter.getTargetClass() + ":" + targetFileWaiter.getTargetId() + " to be prepared.");
+            waitersStillExist = true;
+        }
+        for (TargetFile<C, ?> targetFile : context.getTargetFiles()) {
+            for (PartWaiter<?, ?, C> partWaiter : targetFile.getPartWaiters()) {
+                LOG.error(partWaiter.getWaiter() + " is still waiting " + partWaiter.getTargetClass() + ":" + partWaiter.getTargetId() + " to be prepared.");
+                waitersStillExist = true;
+            }
+        }
+        if (waitersStillExist) {
+            throw new IllegalStateException("Waiters still exists, can't render");
+        }
     }
 
     public void prepareTargetFiles(C context) throws Exception {

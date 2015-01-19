@@ -70,6 +70,16 @@ public abstract class TargetFile<C extends GeneratorContext<C>, I> {
         }
     }
 
+    public Collection<PartWaiter<?, ?, C>> getPartWaiters() {
+        List<PartWaiter<?, ?, C>> finalList = new ArrayList<>();
+        for (Map<?, ? extends PartAndWaiters<?, ?>> partsMap : partsByClass.values()) {
+            for (PartAndWaiters<?, ?> partAndWaiters : partsMap.values()) {
+                finalList.addAll(partAndWaiters.waiters);
+            }
+        }
+        return finalList;
+    }
+
     public Path getPath(C context) {
         return context.getTargetPath().resolve(getPathRelativeToTargetPath(context));
     }
