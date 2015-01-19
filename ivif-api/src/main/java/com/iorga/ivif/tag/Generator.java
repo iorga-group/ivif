@@ -59,6 +59,7 @@ public abstract class Generator<C extends GeneratorContext<C>> {
     public void prepareTargetFiles(C context) throws Exception {
         for (TargetFile targetFile : context.getTargetFiles()) {
             targetFile.prepare(context);
+            context.declareTargetFilePrepared(targetFile);
         }
     }
 

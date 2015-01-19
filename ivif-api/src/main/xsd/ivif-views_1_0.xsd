@@ -11,7 +11,7 @@
             <xs:choice minOccurs="1" maxOccurs="unbounded">
                 <xs:element ref="grid"/>
                 <xs:element ref="form"/>
-                <xs:element ref="action-view"/>
+                <xs:element ref="action-open-view"/>
             </xs:choice>
         </xs:complexType>
     </xs:element>
@@ -21,7 +21,7 @@
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element ref="column"/>
             </xs:choice>
-            <xs:attribute name="on-double-click" type="xs:string"/>
+            <xs:attribute name="on-open" type="xs:string"/>
             <xs:attribute name="editable" type="xs:boolean" default="false"/>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="title" type="xs:string"/>
@@ -41,13 +41,13 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="action-view">
+    <xs:element name="action-open-view">
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="1">
                 <xs:element ref="query"/>
             </xs:choice>
             <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="grid" type="xs:string"/>
+            <xs:attribute name="grid-name" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 
@@ -67,10 +67,10 @@
 
     <xs:element name="query">
         <xs:complexType>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="where" maxOccurs="1"/>
-                <xs:element ref="parameter"/>
-            </xs:choice>
+            <xs:sequence>
+                <xs:element ref="where" minOccurs="1" maxOccurs="1"/>
+                <xs:element ref="parameter" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
         </xs:complexType>
     </xs:element>
 

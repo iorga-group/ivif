@@ -1,5 +1,6 @@
 package com.iorga.ivif.ja.tag;
 
+import com.iorga.ivif.ja.tag.util.FreemarkerJavaClassGeneratorUtil;
 import com.iorga.ivif.ja.tag.util.TargetFileUtils;
 import com.iorga.ivif.tag.TargetFile;
 import com.iorga.ivif.util.JavaClassGeneratorUtil;
@@ -16,7 +17,7 @@ import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
 public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetFile<JAGeneratorContext, I> {
 
     protected final String variableName;
-    protected JavaClassGeneratorUtil util;
+    protected FreemarkerJavaClassGeneratorUtil util;
 
     public static class JavaTargetFileId {
         protected String simpleClassName;
@@ -70,7 +71,7 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
 
     @Override
     public void render(JAGeneratorContext context) throws Exception {
-        util = new JavaClassGeneratorUtil();
+        util = new FreemarkerJavaClassGeneratorUtil(context);
         ByteArrayOutputStream bodyStream = renderBody(context);
         // Now add the header
         SimpleHash freemarkerContext = context.createSimpleHash();

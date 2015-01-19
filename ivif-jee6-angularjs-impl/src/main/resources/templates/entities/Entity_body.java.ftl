@@ -31,7 +31,7 @@ public class ${entity.name} {
     @${util.useClass("javax.validation.constraints.NotNull")}
     </#if>
     <#if element.formula?has_content>
-    @${util.useClass("org.hibernate.annotations.Formula")}("${element.formula}")
+    @${util.useClass("org.hibernate.annotations.Formula")}("(${element.formula})")
     </#if>
     private ${util.useClass(attribute.type)} ${element.name};
 

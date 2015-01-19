@@ -3,11 +3,17 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-views">
 
-    <grid name="UserGrid" title="Users" entity="User">
+    <grid name="UserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: line.profile.id})">
         <column ref="name"/>
     </grid>
 
     <form name="UserForm" title="User" entity="User">
         <field ref="name"/>
     </form>
+
+    <action-open-view name="openProfileGridFromUser" grid-name="ProfileGrid">
+        <query>
+            <where>record.id = :profileId</where>
+        </query>
+    </action-open-view>
 </views>

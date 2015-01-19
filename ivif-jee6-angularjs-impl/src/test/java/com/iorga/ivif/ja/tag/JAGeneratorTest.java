@@ -16,6 +16,7 @@ public class JAGeneratorTest {
         generator.parseAndGenerate(
                 Paths.get(getClass().getResource("/simpleTest").toURI()),
                 getTargetPath());
+        //TODO check if there were no exceptions during render
     }
 
     protected Path getTargetPath() throws URISyntaxException {

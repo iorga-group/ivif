@@ -2,6 +2,7 @@ package com.iorga.ivif.ja.tag;
 
 import com.iorga.ivif.ja.tag.configurations.ConfigurationsSourceTagHandler;
 import com.iorga.ivif.ja.tag.entities.EntitySourceTagHandler;
+import com.iorga.ivif.ja.tag.views.ActionOpenViewSourceTagHandler;
 import com.iorga.ivif.ja.tag.views.GridSourceTagHandler;
 import com.iorga.ivif.tag.JAXBGenerator;
 
@@ -11,6 +12,7 @@ public class JAGenerator extends JAXBGenerator<JAGeneratorContext> {
         registerSourceTagHandlerClassForTagName("entity", EntitySourceTagHandler.class);
         registerSourceTagHandlerClassForTagName("configurations", ConfigurationsSourceTagHandler.class);
         registerSourceTagHandlerClassForTagName("grid", GridSourceTagHandler.class);
+        registerSourceTagHandlerClassForTagName("action-open-view", ActionOpenViewSourceTagHandler.class);
     }
 
     @Override

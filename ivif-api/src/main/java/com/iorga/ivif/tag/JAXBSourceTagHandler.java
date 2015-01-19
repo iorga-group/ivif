@@ -42,4 +42,8 @@ public abstract class JAXBSourceTagHandler<T, C extends GeneratorContext<C>> imp
     public void prepareTargetFiles(C context) throws Exception {
         // Do nothing by default
     }
+
+    public T getElement() {
+        return element;
+    }
 }

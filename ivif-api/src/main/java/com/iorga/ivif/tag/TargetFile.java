@@ -34,8 +34,8 @@ public abstract class TargetFile<C extends GeneratorContext<C>, I> {
         return Paths.get("");
     }
 
-    public <T, TI> void waitForPartToBePrepared(Class<T> partClass, TI id, PartWaiter<T, TI, C> partWaiter) throws Exception {
-        PartAndWaiters<TI, T> partAndWaiters = getOrCreatePartAndWaiters(partClass, id);
+    public <T, TI> void waitForPartToBePrepared(PartWaiter<T, TI, C> partWaiter) throws Exception {
+        PartAndWaiters<TI, T> partAndWaiters = getOrCreatePartAndWaiters(partWaiter.getTargetClass(), partWaiter.getTargetId());
         if (partAndWaiters.part == null) {
             // this part does not exists yet, must register the part waiter
             partAndWaiters.waiters.add(partWaiter);

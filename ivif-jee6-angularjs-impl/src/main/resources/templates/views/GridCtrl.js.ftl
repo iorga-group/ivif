@@ -1,18 +1,25 @@
+<#assign grid=model.grid>
 'use strict';
 
 angular.module('sara')
     .config(['$routeProvider',
         function($routeProvider) {
             $routeProvider.
-                when('/${model.variableName}', {
-                    templateUrl: 'templates/views/${grid.name}.html',
-                    controller: '${grid.name}Ctrl'
+                when('/${grid.variableName}', {
+                    templateUrl: 'templates/views/${grid.element.name}.html',
+                    controller: '${grid.element.name}Ctrl'
                 });
         }])
-    .controller('${grid.name}Ctrl', ['$scope', 'ngTableParams', '$timeout', '$http', function($scope, ngTableParams, $timeout, $http) {
-        $scope.${model.variableName}TableParams = new ngTableParams({
+    .controller('${grid.element.name}Ctrl', ['$scope', 'ngTableParams', '$timeout', '$http'<#if model.onOpenMethod?has_content>, '${model.onOpenMethod}'</#if><#if model.actionOpenViewDefined>, '$location', 'locationUtils'</#if>, function($scope, ngTableParams, $timeout, $http<#if model.onOpenMethod?has_content>, ${model.onOpenMethod}</#if><#if model.actionOpenViewDefined>, $location, locationUtils</#if>) {
+<#if model.onOpenCode?has_content>
+        $scope.openLine = function(line) {
+            ${model.onOpenCode};
+        };
+</#if>
+        $scope.${grid.variableName}TableParams = new ngTableParams({
             page: 1,
-            count: 10
+            count: 10<#if model.actionOpenViewDefined>,
+            filter: locationUtils.fromSearchToObject($location.search())</#if>
         }, {
             total: 0, // length of data
             getData: function($defer, params) {
@@ -25,7 +32,7 @@ angular.module('sara')
                     sorting.ref = field;
                     sorting.type = paramsSorting[field];
                 }
-                $http.post('api/${model.variableName}/search', {
+                $http.post('api/${grid.variableName}/search', {
                     limit: params.count(),
                     offset: (params.page() - 1) * params.count(),
                     sorting: sorting,

@@ -1,6 +1,7 @@
 package com.iorga.ivif.ja.tag.views;
 
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
+import com.iorga.ivif.ja.tag.util.RenderUtils;
 import com.iorga.ivif.tag.TargetFile;
 import com.iorga.ivif.tag.bean.Grid;
 import freemarker.template.SimpleHash;
@@ -14,22 +15,15 @@ import java.nio.file.Paths;
 
 public class GridHtmlTargetFile extends TargetFile<JAGeneratorContext, String> {
 
-    private GridTargetFileModel model = new GridTargetFileModel();
+    private GridSourceTagHandler gridSourceTagHandler;
 
     public GridHtmlTargetFile(String name, JAGeneratorContext context) {
         super(name, context);
     }
 
     @Override
-    public void prepare(JAGeneratorContext context) throws Exception {
-        super.prepare(context);
-
-        model.prepare(context, this);
-    }
-
-    @Override
     public void render(JAGeneratorContext context) throws Exception {
-        model.render("views/Grid.html.ftl", context);
+        RenderUtils.simpleRender("views/Grid.html.ftl", this, context);
     }
 
     @Override
@@ -37,9 +31,13 @@ public class GridHtmlTargetFile extends TargetFile<JAGeneratorContext, String> {
         return context.getWebappBaseGenerationPathRelativeToTargetPath().resolve(Paths.get("templates", "views")).resolve(getId()+".html");
     }
 
-    public void setGrid(Grid grid) {
-        model.setGrid(grid);
+    public GridSourceTagHandler getGrid() {
+        return gridSourceTagHandler;
     }
 
     /// Getters & Setters
+
+    public void setGridSourceTagHandler(GridSourceTagHandler gridSourceTagHandler) {
+        this.gridSourceTagHandler = gridSourceTagHandler;
+    }
 }

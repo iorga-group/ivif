@@ -3,9 +3,8 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-entities">
 
-    <entity name="User" table="TEST_USER">
+    <entity name="Profile" table="TEST_PROFILE">
         <integer name="id" id="true"/>
-        <string name="name" column="LAST_NAME" required="true" name-column="true"/>
-        <many-to-one name="profile" column="PROFILE_ID" ref="Profile"/>
+        <string name="name" column="NAME" required="true" name-column="true"/>
     </entity>
 </entities>

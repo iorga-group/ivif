@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<views xmlns="http://www.iorga.com/xml/ns/ivif-views"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-views">
+
+    <grid name="ProfileGrid" title="Profiles" entity="Profile">
+        <column ref="name"/>
+    </grid>
+
+    <form name="ProfileForm" title="Profile" entity="Profile">
+        <field ref="name"/>
+    </form>
+</views>

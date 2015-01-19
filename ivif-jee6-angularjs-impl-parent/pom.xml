@@ -34,6 +34,11 @@
                 <artifactId>freemarker</artifactId>
                 <version>2.3.21</version>
             </dependency>
+            <dependency>
+                <groupId>org.datanucleus</groupId>
+                <artifactId>datanucleus-core</artifactId>
+                <version>4.0.4</version>
+            </dependency>
             <!-- scope test -->
             <dependency>
                 <groupId>junit</groupId>

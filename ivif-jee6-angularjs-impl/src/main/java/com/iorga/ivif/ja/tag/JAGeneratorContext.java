@@ -31,4 +31,8 @@ public class JAGeneratorContext extends GeneratorContext<JAGeneratorContext> {
     public SimpleHash createSimpleHash() {
         return new SimpleHash(wrapper);
     }
+
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 }
