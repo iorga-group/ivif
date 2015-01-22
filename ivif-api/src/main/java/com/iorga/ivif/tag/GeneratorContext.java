@@ -1,152 +1,185 @@
 package com.iorga.ivif.tag;
 
 import com.google.common.collect.*;
+import com.iorga.ivif.util.QueueRemoverIterable;
 
-import javax.xml.stream.XMLStreamReader;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
 public abstract class GeneratorContext<C extends GeneratorContext<C>> {
 
-    protected String basePackage = ""; // TODO parse from config
-    protected Deque<DocumentToProcess> documentsToProcess = new LinkedList<>();
 
-    //protected Map<Class<?>, Map<Object, TargetFile>> targetFiles = Maps.newHashMap();
+    protected class EventContext<I, E extends Event<I>> {
+        protected E event;
+        protected Deque<EventWaiter<E, I>> waiters = new LinkedList<>();
+    }
+    protected Map<Class<? extends Event<?>>, Map<?, ? extends EventContext<?, ?>>> eventContexts = Maps.newHashMap();
+    protected Multimap<Target<?, C>, EventWaiter<?, ?>> targetSourceWaitersByTarget = HashMultimap.create();
+
+    protected class TargetContext<I, T extends Target<I, C>> {
+        protected T target;
+    }
+    protected Map<Class<? extends Target<?, C>>, Map<?, ? extends TargetContext<?, ?>>> targetContexts = Maps.newHashMap();
+
+    private Deque<Target<?, C>> newTargets = new LinkedList<>();
+    private Set<Target<?, C>> preparedTargetsButTargetPreparedNotThrown = new HashSet<>();
+
+    private Deque<TargetFile<?, C>> preparedTargetsButNotRendered = new LinkedList<>();
+
     private Path sourcePath = Paths.get("");
     private Path targetPath;
-    private List<SourceTagHandler<C>> sourceTagHandlers = new ArrayList<>();
 
-    protected Map<Class<? extends TargetFile<C, ?>>, Map<Object, TargetFileContext>> targetFileContexts = Maps.newHashMap();
 
-    protected class TargetFileContext<I, T extends TargetFile<C, I>> {
-        protected boolean targetFilePrepared = false;
-        protected T targetFile;
-        protected Deque<TargetFileWaiter<T, I, C>> waiters = new LinkedList<>();
-    }
-
-    protected <I, T extends TargetFile<C, I>> TargetFileContext<I, T> getOrCreateTargetFileContext(Class<T> targetFileClass, I id) {
-        Map<Object, TargetFileContext> targetFileContextForThatClass = targetFileContexts.get(targetFileClass);
-        if (targetFileContextForThatClass == null) {
-            targetFileContextForThatClass = Maps.newHashMap();
-            targetFileContexts.put(targetFileClass, targetFileContextForThatClass);
+    protected <I, E extends Event<I>> EventContext<I, E> getOrCreateEventContext(Class<E> eventClass, I eventId) {
+        Map<I, EventContext<I, E>> eventContextsForThatClass = (Map<I, EventContext<I, E>>) eventContexts.get(eventClass);
+        if (eventContextsForThatClass == null) {
+            eventContextsForThatClass = Maps.newHashMap();
+            eventContexts.put(eventClass, eventContextsForThatClass);
         }
-        TargetFileContext<I, T> targetFileContext = targetFileContextForThatClass.get(id);
-        if (targetFileContext == null) {
-            targetFileContext = new TargetFileContext<>();
-            targetFileContextForThatClass.put(id, targetFileContext);
+        EventContext<I, E> eventContext = eventContextsForThatClass.get(eventId);
+        if (eventContext == null) {
+            eventContext = new EventContext<>();
+            eventContextsForThatClass.put(eventId, eventContext);
         }
-        return targetFileContext;
+        return eventContext;
     }
 
-    public <I, T extends TargetFile<C, I>> void waitForTargetFileToBePrepared(TargetFileWaiter<T, I, C> waiter) throws Exception {
-        TargetFileContext<I, T> targetFileContext = getOrCreateTargetFileContext(waiter.getTargetClass(), waiter.getTargetId());
-        if (!targetFileContext.targetFilePrepared) {
-            // this targetFile is not yet prepared, must register the waiter
-            targetFileContext.waiters.add(waiter);
-        } else {
-            // this targetFile is prepared, we just have to call the waiter on it
-            waiter.onPrepared(targetFileContext.targetFile);
-        }
-    }
-
-    public <I, T extends TargetFile<C, I>> void declareTargetFilePrepared(T targetFile) throws Exception {
-        TargetFileContext<I, T> targetFileContext = getOrCreateTargetFileContext((Class<T>)(Class)targetFile.getClass(), targetFile.getId());
-        targetFileContext.targetFile = targetFile;
-        targetFileContext.targetFilePrepared = true;
-        // now call each waiter
-        Deque<TargetFileWaiter<T, I, C>> waiters = targetFileContext.waiters;
-        while (!waiters.isEmpty()) {
-            TargetFileWaiter<T, I, C> waiter = waiters.remove();
-            waiter.onPrepared(targetFile);
-        }
-    }
-
-    public <I, T extends TargetFile<C, I>> T getOrCreateTargetFile(Class<T> targetFileType, I id) throws Exception {
-        TargetFileContext<I, T> targetFileContext = getOrCreateTargetFileContext(targetFileType, id);
-        T targetFile = targetFileContext.targetFile;
-        if (targetFile == null) {
-            // create target file
-            targetFile = createTargetFile(targetFileType, id, this);
-            targetFileContext.targetFile = targetFile;
-        }
-        return targetFile;
-    }
-
-    protected <T extends TargetFile<C, I>, I> T createTargetFile(Class<T> targetFileType, I id, GeneratorContext<C> generatorContext) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Constructor<T> constructor = targetFileType.getConstructor(id.getClass(), generatorContext.getClass());
-        return constructor.newInstance(id, generatorContext);
-    }
-
-    public void addDocumentToProcess(Path path, XMLStreamReader document) {
-        addDocumentToProcess(new DocumentToProcess(path, document));
-    }
-
-    public void addDocumentToProcess(DocumentToProcess documentToProcess) {
-        documentsToProcess.add(documentToProcess);
-    }
-
-    public Iterable<DocumentToProcess> processDocument() {
-        return new Iterable<DocumentToProcess>() {
-            @Override
-            public Iterator<DocumentToProcess> iterator() {
-                return new Iterator<DocumentToProcess>() {
-                    @Override
-                    public boolean hasNext() {
-                        return !documentsToProcess.isEmpty();
-                    }
-
-                    @Override
-                    public DocumentToProcess next() {
-                        return documentsToProcess.remove();
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
+    public <I, E extends Event<I>> void waitForEvent(EventWaiter<E, I> waiter) throws Exception {
+        EventContext<I, E> eventContext = getOrCreateEventContext(waiter.getEventClass(), waiter.getEventId());
+        if (eventContext.event == null) {
+            // event not yet thrown, must register the waiter
+            eventContext.waiters.add(waiter);
+            Object waiterSource = waiter.getWaiterSource();
+            if (waiterSource instanceof Target) {
+                // this is a Target, will register it also
+                targetSourceWaitersByTarget.put((Target<?, C>) waiterSource, waiter);
             }
-        };
+        } else {
+            // event already thrown, let's say the waiter so
+            waiter.onThrown(eventContext.event);
+        }
     }
 
-    public Collection<TargetFile<C, ?>> getTargetFiles() {
-        List<TargetFile<C, ?>> finalList = new ArrayList<>();
-        for (Map<Object, TargetFileContext> targetFileContextMap : targetFileContexts.values()) {
-            for (TargetFileContext targetFileContext : targetFileContextMap.values()) {
-                if (targetFileContext.targetFile != null) { // TODO why it would be null here ?
-                    finalList.add(targetFileContext.targetFile);
+    public <I, E extends Event<I>> void throwEvent(E event) throws Exception {
+        EventContext<I, E> eventContext = getOrCreateEventContext((Class<E>)event.getClass(), event.getId());
+        if (eventContext.event == null) {
+            eventContext.event = event;
+            Deque<EventWaiter<E, I>> waiters = eventContext.waiters;
+            while (!waiters.isEmpty()) {
+                EventWaiter<E, I> waiter = waiters.remove();
+                Object waiterSource = waiter.getWaiterSource();
+                if (waiterSource instanceof Target) {
+                    // this is a Target, will deregister it it also
+                    targetSourceWaitersByTarget.remove(waiterSource, waiter);
+                }
+                waiter.onThrown(event);
+            }
+        } else {
+            // weird, this has already been thrown
+            throw new IllegalStateException("Event has already been thrown : " + eventContext.event + ". Wanted to throw " + event);
+        }
+    }
+
+
+    protected <I, T extends Target<I, C>> TargetContext<I, T> getOrCreateTargetContext(Class<T> targetClass, I targetId) {
+        Map<I, TargetContext<I, T>> targetContextsForThatClass = (Map<I, TargetContext<I, T>>) targetContexts.get(targetClass);
+        if (targetContextsForThatClass == null) {
+            targetContextsForThatClass = Maps.newHashMap();
+            targetContexts.put(targetClass, targetContextsForThatClass);
+        }
+        TargetContext<I, T> targetContext = targetContextsForThatClass.get(targetId);
+        if (targetContext == null) {
+            targetContext = new TargetContext<>();
+            targetContextsForThatClass.put(targetId, targetContext);
+        }
+        return targetContext;
+    }
+
+    public <I, T extends Target<I, C>> T getOrCreateTarget(Class<T> targetClass, I targetId, TargetFactory<T, I, C> targetFactory) throws Exception {
+        TargetContext<I, T> targetContext = getOrCreateTargetContext(targetClass, targetId);
+        T target = targetContext.target;
+        if (target == null) {
+            // create target file
+            target = targetFactory.createTarget();
+            targetContext.target = target;
+            // Append to new targets
+            newTargets.add(target);
+        }
+        return target;
+    }
+
+    public <I, T extends Target<I, C>> T getOrCreateTarget(Class<T> targetClass) throws Exception {
+        return getOrCreateTarget(targetClass, (I)null);
+    }
+
+    public <I, T extends Target<I, C>> T getOrCreateTarget(Class<T> targetClass, TargetFactory<T, I, C> targetFactory) throws Exception {
+        return getOrCreateTarget(targetClass, null, targetFactory);
+    }
+
+    public <I, T extends Target<I, C>> T getOrCreateTarget(final Class<T> targetClass, final I targetId) throws Exception {
+        return getOrCreateTarget(targetClass, targetId, new TargetFactory<T, I, C>() {
+            @Override
+            public T createTarget() throws Exception {
+                if (targetId != null) {
+                    Constructor<T> constructor = targetClass.getConstructor(targetId.getClass(), GeneratorContext.this.getClass());
+                    return constructor.newInstance(targetId, GeneratorContext.this);
+                } else {
+                    Constructor<T> constructor = targetClass.getConstructor(GeneratorContext.this.getClass());
+                    return constructor.newInstance(GeneratorContext.this);
+                }
+            }
+        });
+    }
+
+    public Iterable<Target<?, C>> iterateOnNewTargetsToPrepareThem() {
+        return new QueueRemoverIterable<>(newTargets);
+    }
+
+    public void declarePreparedCalled(Target<?, C> target) throws Exception {
+        preparedTargetsButTargetPreparedNotThrown.add(target);
+        // now must throw "TargetPrepared" for each Target which are not waiting for something
+        // First duplicate the current preparedTargetsButTargetPreparedNotThrown in order to remove from them the waiting targets
+        throwTargetPreparedEvents();
+    }
+
+    protected void throwTargetPreparedEvents() throws Exception {
+        boolean atLeastOneTargetPreparedEventThrown = true;
+        while (atLeastOneTargetPreparedEventThrown) {
+            atLeastOneTargetPreparedEventThrown = false;
+            Set<Target<?, C>> canThrowTargetPreparedTargets = new HashSet<>(preparedTargetsButTargetPreparedNotThrown);
+            for (Target<?, C> targetWaiter : targetSourceWaitersByTarget.keySet()) {
+                // remove each waiting targets : they are still waiting so they are not yet fully "prepared"
+                canThrowTargetPreparedTargets.remove(targetWaiter);
+            }
+            for (Target<?, C> canThrowTargetPreparedTarget : canThrowTargetPreparedTargets) {
+                preparedTargetsButTargetPreparedNotThrown.remove(canThrowTargetPreparedTarget);
+                atLeastOneTargetPreparedEventThrown = true;
+                throwEvent(new TargetPreparedEvent(canThrowTargetPreparedTarget));
+                if (canThrowTargetPreparedTarget instanceof TargetFile) {
+                    preparedTargetsButNotRendered.add((TargetFile<?, C>) canThrowTargetPreparedTarget);
                 }
             }
         }
-        return finalList;
     }
 
-    public Collection<TargetFileWaiter<? extends TargetFile<C, ?>, ?, C>> getTargetFileWaiters() {
-        List<TargetFileWaiter<? extends TargetFile<C, ?>, ?, C>> finalList = new ArrayList<>();
-        for (Map<Object, TargetFileContext> targetFileContextMap : targetFileContexts.values()) {
-            for (TargetFileContext targetFileContext : targetFileContextMap.values()) {
-                finalList.addAll(targetFileContext.waiters);
+    public Iterable<TargetFile<?, C>> iterateOnPreparedTargetFilesToRenderThem() {
+        return new QueueRemoverIterable<>(preparedTargetsButNotRendered);
+    }
+
+    public Collection<EventWaiter<? extends Event<?>, ?>> getAllEventWaiters() {
+        List<EventWaiter<? extends Event<?>, ?>> list = new ArrayList<>();
+        for (Map<?, ? extends EventContext<?, ?>> eventContextsMap : eventContexts.values()) {
+            for (EventContext<?, ?> eventContext : eventContextsMap.values()) {
+                list.addAll(eventContext.waiters);
             }
         }
-        return finalList;
-    }
-
-    public void registerSourceTagHandler(SourceTagHandler<C> sourceTagHandler, DocumentToProcess documentToProcess) {
-        sourceTagHandlers.add(sourceTagHandler);
+        return list;
     }
 
     /// Getters & Setters
 
-    public void setBasePackage(String basePackage) {
-        this.basePackage = basePackage;
-    }
-
-    public String getBasePackage() {
-        return basePackage;
-    }
 
     public void setSourcePath(Path sourcePath) {
         this.sourcePath = sourcePath;
@@ -162,9 +195,5 @@ public abstract class GeneratorContext<C extends GeneratorContext<C>> {
 
     public Path getTargetPath() {
         return targetPath;
-    }
-
-    public List<SourceTagHandler<C>> getSourceTagHandlers() {
-        return sourceTagHandlers;
     }
 }

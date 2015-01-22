@@ -1,21 +1,19 @@
 package com.iorga.ivif.ja.tag.views;
 
-import com.iorga.ivif.ja.tag.JAGeneratorContext;
-import com.iorga.ivif.ja.tag.JavaTargetFile;
-import com.iorga.ivif.ja.tag.RenderPart;
-import com.iorga.ivif.ja.tag.WSTargetFileId;
+import com.iorga.ivif.ja.tag.*;
 import com.iorga.ivif.ja.tag.entities.EntityBaseServiceTargetFile;
+import com.iorga.ivif.ja.tag.views.GridModel.GridColumn;
+import com.iorga.ivif.tag.TargetPreparedWaiter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.iorga.ivif.ja.tag.views.GridSourceTagHandler.GridColumn;
-
 public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
 
+    private final String gridName;
+    private GridModel gridModel;
     private EntityBaseServiceTargetFile baseService;
-    private GridSourceTagHandler gridSourceTagHandler;
 
     private String searchResultSimpleClassName;
     private String searchResultClassName;
@@ -56,25 +54,39 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
         }
     }
 
-    public GridBaseWSTargetFile(WSTargetFileId id, JAGeneratorContext context) {
+    public GridBaseWSTargetFile(WSTargetFileId id, JAGeneratorContext context, String gridName) {
         super(id, context);
+        this.gridName = gridName;
     }
 
     @Override
-    public void prepare(JAGeneratorContext context) throws Exception {
+    public void prepare(final JAGeneratorContext context) throws Exception {
         super.prepare(context);
 
-        String gridName = gridSourceTagHandler.getElement().getName();
+        searchResultSimpleClassName = gridName + "SearchResult";
+        searchResultClassName = getClassName() + "." + searchResultSimpleClassName;
+        searchFilterSimpleClassName = gridName + "SearchFilter";
+        searchFilterClassName = getClassName() + "." + searchFilterSimpleClassName;
+        searchParamSimpleClassName = gridName + "SearchParam";
+        searchParamClassName = getClassName() + "." + searchParamSimpleClassName;
 
-        this.searchResultSimpleClassName = gridName + "SearchResult";
-        this.searchResultClassName = GridBaseWSTargetFile.this.getClassName() + "." + searchResultSimpleClassName;
-        this.searchFilterSimpleClassName = gridName + "SearchFilter";
-        this.searchFilterClassName = GridBaseWSTargetFile.this.getClassName() + "." + searchFilterSimpleClassName;
-        this.searchParamSimpleClassName = gridName + "SearchParam";
-        this.searchParamClassName = GridBaseWSTargetFile.this.getClassName() + "." + searchParamSimpleClassName;
+        context.waitForEvent(new TargetPreparedWaiter<GridModel, String, JAGeneratorContext>(GridModel.class, gridName, this) {
 
-        // Adding the search method
-        baseService.addRenderPart(new RenderPart("entities/EntityBaseService_gridSearch_bodyPart.java.ftl", this));
+            @Override
+            protected void onTargetPrepared(GridModel gridModel) throws Exception {
+                GridBaseWSTargetFile.this.gridModel = gridModel;
+
+                context.waitForEvent(new TargetPreparedWaiter<EntityBaseServiceTargetFile, ServiceTargetFileId, JAGeneratorContext>(EntityBaseServiceTargetFile.class, gridModel.getServiceTargetFileId(), GridBaseWSTargetFile.this) {
+                    @Override
+                    protected void onTargetPrepared(EntityBaseServiceTargetFile baseService) throws Exception {
+                        GridBaseWSTargetFile.this.baseService = baseService;
+
+                        // Adding the search method
+                        baseService.addRenderPart(new RenderPart("entities/EntityBaseService_gridSearch_bodyPart.java.ftl", GridBaseWSTargetFile.this));
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -88,8 +100,8 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
 
 
 
-    public GridSourceTagHandler getGrid() {
-        return gridSourceTagHandler;
+    public GridModel getGrid() {
+        return gridModel;
     }
 
 
@@ -104,20 +116,8 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
 
     /// Getters & Setters
 
-    public void setGridSourceTagHandler(GridSourceTagHandler gridSourceTagHandler) {
-        this.gridSourceTagHandler = gridSourceTagHandler;
-    }
-
-    public GridSourceTagHandler getGridSourceTagHandler() {
-        return gridSourceTagHandler;
-    }
-
     public EntityBaseServiceTargetFile getBaseService() {
         return baseService;
-    }
-
-    public void setBaseService(EntityBaseServiceTargetFile baseService) {
-        this.baseService = baseService;
     }
 
     public String getSearchResultSimpleClassName() {

@@ -3,7 +3,9 @@ package com.iorga.ivif.ja.tag.entities;
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.JavaStaticField;
 import com.iorga.ivif.ja.tag.JavaTargetFile;
+import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
+import com.iorga.ivif.tag.TargetPartPreparedEvent;
 import com.iorga.ivif.tag.bean.AttributeType;
 import com.iorga.ivif.tag.bean.Entity;
 import com.iorga.ivif.tag.bean.ManyToOne;
@@ -36,17 +38,18 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
     }
 
     public static class EntityTargetFileId extends JavaTargetFileId {
-        public EntityTargetFileId(String simpleOrFullClassName, String packageNameOrNull, JAGeneratorContext context) {
-            super(simpleOrFullClassName, packageNameOrNull, "entity", context);
+        public EntityTargetFileId(String simpleOrFullClassName, String packageNameOrNull, JAConfiguration configuration) {
+            super(simpleOrFullClassName, packageNameOrNull, "entity", configuration);
         }
 
-        public EntityTargetFileId(String simpleOrFullClassName, JAGeneratorContext context) {
-            this(simpleOrFullClassName, null, context);
+        public EntityTargetFileId(String simpleOrFullClassName, JAConfiguration configuration) {
+            this(simpleOrFullClassName, null, configuration);
         }
     }
 
-    public EntityTargetFile(EntityTargetFileId id, JAGeneratorContext context) {
+    public EntityTargetFile(EntityTargetFileId id, JAGeneratorContext context, Entity entity) {
         super(id, context);
+        this.entity = entity;
     }
 
     @Override
@@ -57,7 +60,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
         idAttributes = new ArrayList<>();
         staticFields = new ArrayList<>();
         for (JAXBElement<? extends AttributeType> attributeElement : entity.getEntityAttribute()) {
-            EntityAttribute entityAttribute = new EntityAttribute(attributeElement);
+            EntityAttribute entityAttribute = new EntityAttribute(attributeElement, this);
 
             AttributeType attribute = attributeElement.getValue();
             String attributeName = attribute.getName();
@@ -96,9 +99,9 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
                         valueAttribute.setRequired(attribute.isRequired());
                         attribute.setRequired(false);
                         valueAttribute.setName(attributeName +"_value");
-                        EntityAttribute valueEntityAttribute = new EntityAttribute(new JAXBElement(new QName(null, fromType), valueAttributeClass, valueAttribute));
+                        EntityAttribute valueEntityAttribute = new EntityAttribute(new JAXBElement(new QName(null, fromType), valueAttributeClass, valueAttribute), this);
                         valueEntityAttribute.setType(fromTypeClassName);
-                        addEntityAttribute(valueEntityAttribute);
+                        addEntityAttribute(valueEntityAttribute, context);
 
                         // add a static field
                         JavaStaticField trueValueStaticField = JavaStaticField.createFromVariableName(attributeName + "TrueValue", fromTypeClassName, booleanAttribute.getTrueValue());
@@ -120,7 +123,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
                     }
                 }
             }
-            addEntityAttribute(entityAttribute);
+            addEntityAttribute(entityAttribute, context);
             // group id attributes
             if (attribute.isId()) {
                 idAttributes.add(entityAttribute);
@@ -144,10 +147,10 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
         }
     }
 
-    protected void addEntityAttribute(EntityAttribute entityAttribute) throws Exception {
+    protected void addEntityAttribute(EntityAttribute entityAttribute, JAGeneratorContext context) throws Exception {
         String attributeName = entityAttribute.getElement().getValue().getName();
         attributes.put(attributeName, entityAttribute);
-        declarePartPrepared(entityAttribute, attributeName);
+        context.throwEvent(new TargetPartPreparedEvent<>(entityAttribute));
     }
 
     @Override

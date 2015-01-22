@@ -1,6 +1,10 @@
 package com.iorga.ivif.ja.tag;
 
 import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
+import com.iorga.ivif.ja.tag.bean.AngularModuleName;
+import com.iorga.ivif.ja.tag.bean.BasePackage;
+import com.iorga.ivif.ja.tag.bean.Configurations;
+import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -20,8 +24,16 @@ public class JavaTargetFileTest {
     @Test
     public void idTest() throws Exception {
         JAGeneratorContext context = new JAGeneratorContext();
-        SimpleJavaTargetFile targetFile1 = context.getOrCreateTargetFile(SimpleJavaTargetFile.class, new JavaTargetFileId("test", null, null, context));
-        SimpleJavaTargetFile targetFile2 = context.getOrCreateTargetFile(SimpleJavaTargetFile.class, new JavaTargetFileId("test", null, null, context));
+        final Configurations element = new Configurations();
+        final AngularModuleName angularModuleName = new AngularModuleName();
+        angularModuleName.setValue("test");
+        element.setAngularModuleName(angularModuleName);
+        final BasePackage basePackage = new BasePackage();
+        basePackage.setValue("com.iorga.test");
+        element.setBasePackage(basePackage);
+        JAConfiguration configuration = new JAConfiguration(element);
+        SimpleJavaTargetFile targetFile1 = context.getOrCreateTarget(SimpleJavaTargetFile.class, new JavaTargetFileId("test", null, null, configuration));
+        SimpleJavaTargetFile targetFile2 = context.getOrCreateTarget(SimpleJavaTargetFile.class, new JavaTargetFileId("test", null, null, configuration));
         Assert.assertEquals(targetFile1, targetFile2);
     }
 }

@@ -16,6 +16,8 @@ public class JAGeneratorContext extends GeneratorContext<JAGeneratorContext> {
         configuration.setDefaultEncoding("UTF-8");
     }
 
+    private String angularModuleName;
+
     public Path getJavaBaseGenerationPathRelativeToTargetPath() {
         return Paths.get("ivif-generated-sources", "java");
     }
@@ -34,5 +36,13 @@ public class JAGeneratorContext extends GeneratorContext<JAGeneratorContext> {
 
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    public void setAngularModuleName(String angularModuleName) {
+        this.angularModuleName = angularModuleName;
+    }
+
+    public String getAngularModuleName() {
+        return angularModuleName;
     }
 }

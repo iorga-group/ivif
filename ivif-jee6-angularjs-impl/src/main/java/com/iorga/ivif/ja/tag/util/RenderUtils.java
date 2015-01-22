@@ -14,6 +14,7 @@ public class RenderUtils {
     public static void simpleRender(String templateName, TargetFile targetFile, JAGeneratorContext context) throws Exception {
         SimpleHash freemarkerContext = context.createSimpleHash();
         freemarkerContext.put("model", targetFile);
+        freemarkerContext.put("context", context);
         // First process body
         Template template = context.getTemplate(templateName);
         File file = targetFile.getPath(context).toFile();

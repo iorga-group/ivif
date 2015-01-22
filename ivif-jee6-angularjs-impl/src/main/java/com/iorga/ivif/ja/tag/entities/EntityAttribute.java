@@ -1,12 +1,16 @@
 package com.iorga.ivif.ja.tag.entities;
 
+import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.JavaStaticField;
+import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
+import com.iorga.ivif.tag.AbstractTargetPart;
+import com.iorga.ivif.tag.TargetPart;
 import com.iorga.ivif.tag.bean.AttributeType;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBElement;
 
-public class EntityAttribute {
+public class EntityAttribute extends AbstractTargetPart<String, EntityTargetFile, EntityTargetFileId, JAGeneratorContext> {
     private final JAXBElement<? extends AttributeType> element;
     private String type;
     private final String capitalizedName;
@@ -16,7 +20,9 @@ public class EntityAttribute {
     private JavaStaticField trueValueStaticField;
     private JavaStaticField falseValueStaticField;
 
-    public EntityAttribute(JAXBElement<? extends AttributeType> element) {
+    public EntityAttribute(JAXBElement<? extends AttributeType> element, EntityTargetFile entityTargetFile) {
+        super(element.getValue().getName(), entityTargetFile);
+
         this.element = element;
         AttributeType elementValue = element.getValue();
         capitalizedName = StringUtils.capitalize(elementValue.getName());

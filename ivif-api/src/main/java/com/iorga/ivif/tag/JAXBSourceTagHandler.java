@@ -1,6 +1,5 @@
 package com.iorga.ivif.tag;
 
-import com.google.common.base.Throwables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +38,7 @@ public abstract class JAXBSourceTagHandler<T, C extends GeneratorContext<C>> imp
     }
 
     @Override
-    public void init(C context) throws Exception {
-        // Do nothing by default
-    }
-
-    @Override
-    public void prepareTargetFiles(C context) throws Exception {
+    public void declareTargets(C context) throws Exception {
         // Do nothing by default
     }
 

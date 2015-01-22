@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configurations xmlns="http://www.iorga.com/xml/ns/ivif-ja-configurations"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-ja-configurations">
+    <base-package value="com.iorga.ivif.test"/>
+    <angular-module-name value="test"/>
+</configurations>

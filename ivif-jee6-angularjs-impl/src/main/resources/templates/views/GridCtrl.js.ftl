@@ -1,7 +1,7 @@
 <#assign grid=model.grid>
 'use strict';
 
-angular.module('sara')
+angular.module('${model.configuration.angularModuleName}')
     .config(['$routeProvider',
         function($routeProvider) {
             $routeProvider.

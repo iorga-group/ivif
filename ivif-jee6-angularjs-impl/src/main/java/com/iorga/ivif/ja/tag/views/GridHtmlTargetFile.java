@@ -3,22 +3,29 @@ package com.iorga.ivif.ja.tag.views;
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.util.RenderUtils;
 import com.iorga.ivif.tag.TargetFile;
-import com.iorga.ivif.tag.bean.Grid;
-import freemarker.template.SimpleHash;
-import freemarker.template.Template;
+import com.iorga.ivif.tag.TargetPreparedWaiter;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class GridHtmlTargetFile extends TargetFile<JAGeneratorContext, String> {
+public class GridHtmlTargetFile extends TargetFile<String, JAGeneratorContext> {
 
-    private GridSourceTagHandler gridSourceTagHandler;
+    private GridModel gridModel;
 
     public GridHtmlTargetFile(String name, JAGeneratorContext context) {
         super(name, context);
+    }
+
+    @Override
+    public void prepare(JAGeneratorContext context) throws Exception {
+        super.prepare(context);
+
+        context.waitForEvent(new TargetPreparedWaiter<GridModel, String, JAGeneratorContext>(GridModel.class, getId(), this) {
+            @Override
+            protected void onTargetPrepared(GridModel gridModel) throws Exception {
+                GridHtmlTargetFile.this.gridModel = gridModel;
+            }
+        });
     }
 
     @Override
@@ -31,13 +38,9 @@ public class GridHtmlTargetFile extends TargetFile<JAGeneratorContext, String> {
         return context.getWebappBaseGenerationPathRelativeToTargetPath().resolve(Paths.get("templates", "views")).resolve(getId()+".html");
     }
 
-    public GridSourceTagHandler getGrid() {
-        return gridSourceTagHandler;
+    public GridModel getGrid() {
+        return gridModel;
     }
 
     /// Getters & Setters
-
-    public void setGridSourceTagHandler(GridSourceTagHandler gridSourceTagHandler) {
-        this.gridSourceTagHandler = gridSourceTagHandler;
-    }
 }

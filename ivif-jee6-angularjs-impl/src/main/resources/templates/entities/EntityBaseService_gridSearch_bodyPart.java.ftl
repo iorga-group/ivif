@@ -1,7 +1,7 @@
 <#assign grid=model.grid>
     public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass(model.searchParamClassName)} searchParam) {
         ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery = new ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")}(entityManager, ${util.useClass("com.mysema.query.jpa.JPQLTemplates")}.DEFAULT);
-        ${util.useClass(baseModel.qEntityClassName)} record = new ${util.useClass(baseModel.qEntityClassName)}("${baseModel.entityTargetFile.variableName}");
+        ${util.useClass(baseModel.qEntityClassName)} record = new ${util.useClass(baseModel.qEntityClassName)}("${baseModel.entityVariableName}");
         jpaQuery.from(record);
         // Applying filter
         ${util.useClass(model.searchFilterClassName)} filter = searchParam.filter;

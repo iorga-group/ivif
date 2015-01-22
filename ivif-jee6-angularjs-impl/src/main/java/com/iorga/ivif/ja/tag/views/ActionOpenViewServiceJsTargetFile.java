@@ -1,18 +1,20 @@
 package com.iorga.ivif.ja.tag.views;
 
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
-import com.iorga.ivif.ja.tag.util.RenderUtils;
+import com.iorga.ivif.ja.tag.JsTargetFile;
+import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
+import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
 import com.iorga.ivif.ja.tag.util.TargetFileUtils;
-import com.iorga.ivif.tag.TargetFile;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class ActionOpenViewServiceJsTargetFile extends TargetFile<JAGeneratorContext, String> {
+public class ActionOpenViewServiceJsTargetFile extends JsTargetFile<String> {
 
     private ActionOpenViewSourceTagHandler actionOpenViewSourceTagHandler;
     private String gridPath;
+    private JAConfiguration configuration;
 
     public ActionOpenViewServiceJsTargetFile(String id, JAGeneratorContext context) {
         super(id, context);
@@ -23,16 +25,24 @@ public class ActionOpenViewServiceJsTargetFile extends TargetFile<JAGeneratorCon
         super.prepare(context);
 
         this.gridPath = "/" + TargetFileUtils.getVariableNameFromName(actionOpenViewSourceTagHandler.getElement().getGridName());
+
+        context.waitForEvent(new JAConfigurationPreparedWaiter(this) {
+
+            @Override
+            protected void onConfigurationPrepared(JAConfiguration configuration) throws Exception {
+                ActionOpenViewServiceJsTargetFile.this.configuration = configuration;
+            }
+        });
     }
 
     @Override
-    public void render(JAGeneratorContext context) throws Exception {
-        RenderUtils.simpleRender("views/ActionOpenViewService.js.ftl", this, context);
+    protected String getFreemarkerTemplateName() {
+        return "views/ActionOpenViewService.js.ftl";
     }
 
     @Override
-    public Path getPathRelativeToTargetPath(JAGeneratorContext context) {
-        return context.getWebappBaseGenerationPathRelativeToTargetPath().resolve(Paths.get("scripts", "services")).resolve(StringUtils.capitalize(getId())+"ActionService.js");
+    public Path getPathRelativeToWebappPath(JAGeneratorContext context) {
+        return Paths.get("scripts", "services", StringUtils.capitalize(getId()) + "ActionService.js");
     }
 
     public ActionOpenViewSourceTagHandler getActionOpenView() {
@@ -51,5 +61,9 @@ public class ActionOpenViewServiceJsTargetFile extends TargetFile<JAGeneratorCon
 
     public String getGridPath() {
         return gridPath;
+    }
+
+    public JAConfiguration getConfiguration() {
+        return configuration;
     }
 }

@@ -3,31 +3,20 @@ package com.iorga.ivif.tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collection;
 
 public abstract class Generator<C extends GeneratorContext<C>> {
     private final static Logger LOG = LoggerFactory.getLogger(Generator.class);
 
-    protected XMLInputFactory xmlInputFactory;
-
-    {
-        xmlInputFactory = XMLInputFactory.newInstance();
-    }
-
     public abstract C createGeneratorContext();
 
-    protected abstract SourceTagHandler<C> createSourceTagHandler(QName name, C context) throws JAXBException, NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException;
+    public abstract SourceFileHandler createSourceFileHandler(Path file, C context);
 
     public void parseAndGenerate(Path sourceDirectory, Path targetDirectory) throws Exception {
         final C context = createGeneratorContext();
@@ -40,106 +29,90 @@ public abstract class Generator<C extends GeneratorContext<C>> {
 
     public void parseAndGenerate(C context) throws Exception {
         // First, we will parse XML files to DOM and find their associated FileHandlers
-        addDocumentsToProcess(context);
+        discoverSourceFiles(context);
 
-        // For each sources files, create a new file handler and init it
-        createSourceTagHandlersThenParseAndInit(context);
+        // Now we render all prepared target files (that should be all files)
+        renderPreparedTargetFiles(context);
 
-        // Now, we "prepareTargetFiles", that is to say, every fileHandler will create target files in the generator context using getOrCreateTargetFile method, and add modifications to it using addFileModification method
-        makeSourceTagHandlersPrepareTargetFiles(context);
-
-        prepareTargetFiles(context);
-
-        checkWaitingPreparedTargetFilesOrParts(context);
-
-        // End finally render the target files
-        renderTargetFiles(context);
+        // At last we check that nothing is still waiting for other thing
+        checkNoWaiterLeft(context);
     }
 
-    protected void checkWaitingPreparedTargetFilesOrParts(C context) {
+
+    protected void checkNoWaiterLeft(C context) {
         boolean waitersStillExist = false;
-        for (TargetFileWaiter<? extends TargetFile<C, ?>, ?, C> targetFileWaiter : context.getTargetFileWaiters()) {
-            LOG.error(targetFileWaiter.getWaiter() + " is still waiting " + targetFileWaiter.getTargetClass() + ":" + targetFileWaiter.getTargetId() + " to be prepared.");
-            waitersStillExist = true;
+
+        final Collection<EventWaiter<? extends Event<?>, ?>> allEventWaiters = context.getAllEventWaiters();
+        for (EventWaiter<? extends Event<?>, ?> waiter : allEventWaiters) {
+            LOG.error("{} is still waiting {}:{}", waiter.getWaiterSource(), waiter.getEventClass(), waiter.getEventId());
         }
-        for (TargetFile<C, ?> targetFile : context.getTargetFiles()) {
-            for (PartWaiter<?, ?, C> partWaiter : targetFile.getPartWaiters()) {
-                LOG.error(partWaiter.getWaiter() + " is still waiting " + partWaiter.getTargetClass() + ":" + partWaiter.getTargetId() + " to be prepared.");
-                waitersStillExist = true;
-            }
-        }
+
         if (waitersStillExist) {
-            throw new IllegalStateException("Waiters still exists, can't render");
+            throw new IllegalStateException("Waiters still exists.");
         }
     }
 
-    public void prepareTargetFiles(C context) throws Exception {
-        for (TargetFile targetFile : context.getTargetFiles()) {
-            targetFile.prepare(context);
-            context.declareTargetFilePrepared(targetFile);
-        }
-    }
-
-    public void renderTargetFiles(C context) {
-        for (TargetFile targetFile : context.getTargetFiles()) {
-            try {
-                targetFile.render(context);
-            } catch (Exception e) {
-                LOG.error("Problem while rendering " + targetFile.getPath(context), e);
-            }
-        }
-    }
-
-    public void makeSourceTagHandlersPrepareTargetFiles(C context) throws Exception {
-        for (SourceTagHandler<C> sourceTagHandler : context.getSourceTagHandlers()) {
-            sourceTagHandler.prepareTargetFiles(context);
-        }
-    }
-
-    public void createSourceTagHandlersThenParseAndInit(C context) throws Exception {
-        for (DocumentToProcess documentToProcess : context.processDocument()) {
-            XMLStreamReader reader = documentToProcess.getXmlStreamReader();
-            // Inspect file until a tag handler is found
-            int eventType;
-            int nbSourceTagHandlers = 0;
-            while (reader.hasNext()) {
-                eventType = reader.next();
-                if (eventType == XMLStreamReader.START_ELEMENT) {
-                    // check if we have a tag handler for this
-                    SourceTagHandler<C> sourceTagHandler = createSourceTagHandler(reader.getName(), context);
-                    if (sourceTagHandler != null) {
-                        boolean parsed = sourceTagHandler.parse(documentToProcess, context);
-                        if (parsed) {
-                            nbSourceTagHandlers++;
-                            context.registerSourceTagHandler(sourceTagHandler, documentToProcess);
-                        }
-                    }
-                }
-            }
-            if (nbSourceTagHandlers == 0) {
-                LOG.warn("Found no tag handlers for file {}", documentToProcess.getPath());
-            }
-        }
-        for (SourceTagHandler sourceTagHandler : context.getSourceTagHandlers()) {
-            sourceTagHandler.init(context);
-        }
-    }
-
-    public void addDocumentsToProcess(final C context) throws IOException {
+    public void discoverSourceFiles(final C context) throws IOException {
         Files.walkFileTree(context.getSourcePath(), new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 try {
-                    //TODO change to xml stream here & cut SourceFileHandlers to SourceTagHandlers and make JAXB the default impl
-                    XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(file.toString(), new FileInputStream(file.toFile()));
-                    context.addDocumentToProcess(file, xmlStreamReader);
+                    processNewFile(file, context);
                 } catch (Exception e) {
-                    LOG.warn("Ignoring {} as it must not be a parseable source file (Problem: [{}] {})", file, e.getClass().getName(), e.getMessage());
+                    LOG.error("Error while handling " + file, e);
                 }
                 return super.visitFile(file, attrs);
             }
         });
     }
 
+    public void processNewFile(Path file, C context) throws Exception {
+        SourceFileHandler<C> sourceFileHandler = createSourceFileHandler(file, context);
+        if (sourceFileHandler != null) {
+            // Parse source file
+            sourceFileHandler.parse(context);
 
+            // Then create TargetFiles for prepared sourceFileHandlers
+            sourceFileHandler.declareTargets(context);
+
+            // Now iterates on all new targets to prepare them
+            prepareTargets(context);
+
+            // Finally, render prepared target files
+            // TODO renderPreparedTargetFiles(context); here, but there is a problem : how to handle Targets which will change other already prepared Targets ? Potentially, those one will be already rendered
+
+            // TODO processPendingNewFiles(context);
+        } else {
+            LOG.warn("Ignoring {} as no SourceFileHandler was created for it", file);
+        }
+    }
+
+    public void prepareTargets(C context) throws Exception {
+        boolean atLeastOneTargetPrepared = true;
+
+        while (atLeastOneTargetPrepared) {
+            atLeastOneTargetPrepared = false;
+            for (Target<?, C> target : context.iterateOnNewTargetsToPrepareThem()) {
+                atLeastOneTargetPrepared = true;
+                target.prepare(context);
+                context.declarePreparedCalled(target);
+            }
+        }
+    }
+
+    public void renderPreparedTargetFiles(C context) throws Exception {
+        for (TargetFile<?, C> targetFile : context.iterateOnPreparedTargetFilesToRenderThem()) {
+            targetFile.render(context);
+        }
+    }
+
+    public void processPendingNewFiles(C context) throws Exception {
+        // TODO processPendingNewFiles
+        /*
+        for (Path newFile : context.iterateOnNewFilesToProcessThem()) {
+            processNewFile(newFile, context);
+            context.declareFileProcessed(newFile);
+        }
+        */
+    }
 }

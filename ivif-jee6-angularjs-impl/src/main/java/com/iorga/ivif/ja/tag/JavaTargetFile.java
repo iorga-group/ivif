@@ -1,9 +1,9 @@
 package com.iorga.ivif.ja.tag;
 
+import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.util.FreemarkerJavaClassGeneratorUtil;
 import com.iorga.ivif.ja.tag.util.TargetFileUtils;
 import com.iorga.ivif.tag.TargetFile;
-import com.iorga.ivif.util.JavaClassGeneratorUtil;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
 
-public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetFile<JAGeneratorContext, I> {
+public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetFile<I, JAGeneratorContext> {
 
     protected final String variableName;
     protected FreemarkerJavaClassGeneratorUtil util;
@@ -24,7 +24,7 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
         protected String packageName;
         protected String className;
 
-        public JavaTargetFileId(String simpleOrFullClassName, String packageNameOrNull, String packageNameRelativeToBase, JAGeneratorContext context) {
+        public JavaTargetFileId(String simpleOrFullClassName, String packageNameOrNull, String packageNameRelativeToBase, JAConfiguration configuration) {
             if (simpleOrFullClassName.contains(".")) {
                 // this is a full class name, let's split it
                 simpleClassName = StringUtils.substringAfterLast(simpleOrFullClassName, ".");
@@ -34,7 +34,7 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
                 simpleClassName = simpleOrFullClassName;
                 if (StringUtils.isBlank(packageNameOrNull)) {
                     // package name has not been given, let's determine it
-                    packageName = context.getBasePackage();
+                    packageName = configuration.getBasePackage();
                     if (StringUtils.isNotBlank(packageNameRelativeToBase)) {
                         packageName = (StringUtils.isNotBlank(packageName) ? packageName + "." : "") + packageNameRelativeToBase;
                     }
@@ -60,6 +60,18 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
         public boolean equals(Object obj) {
             return obj instanceof JavaTargetFileId ? className.equals(((JavaTargetFileId) obj).className) : false;
         }
+
+        public String getClassName() {
+            return className;
+        }
+
+        public String getSimpleClassName() {
+            return simpleClassName;
+        }
+
+        public String getPackageName() {
+            return packageName;
+        }
     }
 
     public JavaTargetFile(I id, JAGeneratorContext context) {
@@ -77,6 +89,7 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
         SimpleHash freemarkerContext = context.createSimpleHash();
         freemarkerContext.put("model", this);
         freemarkerContext.put("util", util);
+        freemarkerContext.put("context", context);
         Template template = context.getTemplate("JavaHeader.ftl");
         File file = getPath(context).toFile();
         // create file structure
@@ -92,6 +105,7 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
         SimpleHash freemarkerContext = context.createSimpleHash();
         freemarkerContext.put("model", getFreemarkerModel());
         freemarkerContext.put("util", util);
+        freemarkerContext.put("context", context);
         // First process body
         Template template = context.getTemplate(getFreemarkerBodyTemplateName());
         ByteArrayOutputStream bodyStream = new ByteArrayOutputStream();
