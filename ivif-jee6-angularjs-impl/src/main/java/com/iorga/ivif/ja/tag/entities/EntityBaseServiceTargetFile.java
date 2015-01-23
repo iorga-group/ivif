@@ -8,6 +8,7 @@ import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 import com.iorga.ivif.ja.tag.util.TargetFileUtils;
+import com.iorga.ivif.tag.TargetPreparedWaiter;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -25,6 +26,9 @@ public class EntityBaseServiceTargetFile extends JavaTargetFile<ServiceTargetFil
     private String qEntitySimpleClassName;
     private String qEntityClassName;
     private String entityVariableName;
+    private String entityClassName;
+    private String entitySimpleClassName;
+    private EntityTargetFile entityTargetFile;
 
     public EntityBaseServiceTargetFile(ServiceTargetFileId id, JAGeneratorContext context) {
         super(id, context);
@@ -40,15 +44,23 @@ public class EntityBaseServiceTargetFile extends JavaTargetFile<ServiceTargetFil
         super.prepare(context);
         // Compute entity name & qentity name
         // TODO handle entities in another package
-        final String entitySimpleClassName = StringUtils.substringBeforeLast(getSimpleClassName(), "BaseService");
+        this.entitySimpleClassName = StringUtils.substringBeforeLast(getSimpleClassName(), "BaseService");
         context.waitForEvent(new JAConfigurationPreparedWaiter(this) {
 
             @Override
             protected void onConfigurationPrepared(JAConfiguration configuration) throws Exception {
                 entityTargetFileId = new EntityTargetFileId(entitySimpleClassName, configuration);
-                entityVariableName = TargetFileUtils.getVariableNameFromName(entityTargetFileId.getSimpleClassName());
-                qEntitySimpleClassName = "Q" + entityTargetFileId.getSimpleClassName();
+                entityClassName = entityTargetFileId.getClassName();
+                entityVariableName = TargetFileUtils.getVariableNameFromName(entitySimpleClassName);
+                qEntitySimpleClassName = "Q" + entitySimpleClassName;
                 qEntityClassName = entityTargetFileId.getPackageName() + "." + qEntitySimpleClassName;
+
+                context.waitForEvent(new TargetPreparedWaiter<EntityTargetFile, EntityTargetFileId, JAGeneratorContext>(EntityTargetFile.class, entityTargetFileId, EntityBaseServiceTargetFile.this) {
+                    @Override
+                    protected void onTargetPrepared(EntityTargetFile entityTargetFile) throws Exception {
+                        EntityBaseServiceTargetFile.this.entityTargetFile = entityTargetFile;
+                    }
+                });
             }
         });
     }
@@ -93,5 +105,17 @@ public class EntityBaseServiceTargetFile extends JavaTargetFile<ServiceTargetFil
 
     public String getqEntitySimpleClassName() {
         return qEntitySimpleClassName;
+    }
+
+    public String getEntityClassName() {
+        return entityClassName;
+    }
+
+    public String getEntitySimpleClassName() {
+        return entitySimpleClassName;
+    }
+
+    public EntityTargetFile getEntityTargetFile() {
+        return entityTargetFile;
     }
 }

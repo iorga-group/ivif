@@ -19,6 +19,8 @@ public class EntityAttribute extends AbstractTargetPart<String, EntityTargetFile
     private String fromType;
     private JavaStaticField trueValueStaticField;
     private JavaStaticField falseValueStaticField;
+    private String getterName;
+    private String setterName;
 
     public EntityAttribute(JAXBElement<? extends AttributeType> element, EntityTargetFile entityTargetFile) {
         super(element.getValue().getName(), entityTargetFile);
@@ -26,6 +28,8 @@ public class EntityAttribute extends AbstractTargetPart<String, EntityTargetFile
         this.element = element;
         AttributeType elementValue = element.getValue();
         capitalizedName = StringUtils.capitalize(elementValue.getName());
+        getterName = "get" + capitalizedName;
+        setterName = "set" + capitalizedName;
         manyToOne = "many-to-one".equals(element.getName().getLocalPart());
         String elementTitle = elementValue.getTitle();
         if (StringUtils.isNotBlank(elementTitle)) {
@@ -86,5 +90,13 @@ public class EntityAttribute extends AbstractTargetPart<String, EntityTargetFile
 
     public JavaStaticField getFalseValueStaticField() {
         return falseValueStaticField;
+    }
+
+    public String getGetterName() {
+        return getterName;
+    }
+
+    public String getSetterName() {
+        return setterName;
     }
 }

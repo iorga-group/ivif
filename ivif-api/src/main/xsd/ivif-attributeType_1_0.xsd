@@ -24,6 +24,14 @@
         <xs:attribute name="updatable" type="xs:boolean" default="true"/>
     </xs:complexType>
 
+    <xs:complexType name="versionableAttributeType">
+        <xs:complexContent>
+            <xs:extension base="attributeType">
+                <xs:attribute name="version" type="xs:boolean" default="false"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
     <xs:element name="default-editor">
         <xs:complexType>
             <xs:attribute name="editor" type="xs:string" default="field"/>

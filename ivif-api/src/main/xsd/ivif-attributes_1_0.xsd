@@ -10,7 +10,7 @@
 
     <xs:element name="character" type="attributeType" substitutionGroup="entityAttribute"/>
     <xs:element name="string" type="attributeType" substitutionGroup="entityAttribute"/>
-    <xs:element name="long" type="attributeType" substitutionGroup="entityAttribute"/>
+    <xs:element name="long" type="versionableAttributeType" substitutionGroup="entityAttribute"/>
 
     <xs:element name="boolean" substitutionGroup="entityAttribute">
         <xs:complexType>
@@ -26,8 +26,8 @@
     </xs:element>
 
     <xs:element name="date" type="attributeType" substitutionGroup="entityAttribute"/>
-    <xs:element name="datetime" type="attributeType" substitutionGroup="entityAttribute"/>
-    <xs:element name="integer" type="attributeType" substitutionGroup="entityAttribute"/>
+    <xs:element name="datetime" type="versionableAttributeType" substitutionGroup="entityAttribute"/>
+    <xs:element name="integer" type="versionableAttributeType" substitutionGroup="entityAttribute"/>
     
     <xs:element name="many-to-one" substitutionGroup="entityAttribute">
         <xs:complexType>

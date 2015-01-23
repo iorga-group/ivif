@@ -2,16 +2,15 @@ package com.iorga.ivif.ja.tag.views;
 
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.ServiceTargetFileId;
-import com.iorga.ivif.ja.tag.WSTargetFileId;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
 import com.iorga.ivif.ja.tag.entities.EntityAttribute;
 import com.iorga.ivif.ja.tag.entities.EntityAttributePreparedWaiter;
-import com.iorga.ivif.ja.tag.entities.EntityBaseServiceTargetFile;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile;
+import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 import com.iorga.ivif.ja.tag.util.TargetFileUtils;
 import com.iorga.ivif.tag.AbstractTarget;
-import com.iorga.ivif.tag.TargetFactory;
+import com.iorga.ivif.tag.TargetPreparedWaiter;
 import com.iorga.ivif.tag.bean.Column;
 import com.iorga.ivif.tag.bean.Grid;
 import org.apache.commons.lang3.StringUtils;
@@ -28,13 +27,32 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected String variableName;
     protected List<GridColumn> selectedColumns;
     protected List<DisplayedGridColumn> displayedColumns;
-    protected EntityTargetFile.EntityTargetFileId entityTargetFileId;
+    protected EntityTargetFileId entityTargetFileId;
     protected ServiceTargetFileId serviceTargetFileId;
+    protected Set<String> selectedColumnsRefVariableNames;
+    protected Map<String, GridColumn> gridColumnsByRefVariableName;
+    protected List<GridColumn> idColumns;
+    /**
+     * Editable columns are all columns which are editable = true
+     */
+    protected LinkedHashSet<GridColumn> editableColumns;
+    /**
+     * Save columns are all editable columns + all id columns + version column if any
+     */
+    protected LinkedHashSet<GridColumn> saveColumns;
+    protected LinkedHashSet<GridColumn> selectedWithoutSaveColumns;
+    protected GridColumn versionColumn;
 
     public static class GridColumn {
         protected String refVariableName;
         protected String ref;
         private EntityAttribute entityAttribute;
+        private List<EntityAttribute> refEntityAttributes = new ArrayList<>();
+
+        public GridColumn(EntityAttribute entityAttribute) {
+            this(entityAttribute.getElement().getValue().getName());
+            this.entityAttribute = entityAttribute;
+        }
 
         public GridColumn(String ref) {
             this.ref = ref;
@@ -55,6 +73,10 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
         public EntityAttribute getEntityAttribute() {
             return entityAttribute;
+        }
+
+        public List<EntityAttribute> getRefEntityAttributes() {
+            return refEntityAttributes;
         }
     }
 
@@ -77,6 +99,10 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         public String getTitle() {
             return title;
         }
+
+        public Column getElement() {
+            return column;
+        }
     }
 
     public GridModel(String id, Grid element) {
@@ -94,14 +120,22 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         // Prepare displayed columns
         selectedColumns = new ArrayList<>();
         displayedColumns = new ArrayList<>();
+        selectedColumnsRefVariableNames = new HashSet<>();
+        gridColumnsByRefVariableName = new HashMap<>();
+        idColumns = new ArrayList<>();
+        editableColumns = new LinkedHashSet<>();
+
         context.waitForEvent(new JAConfigurationPreparedWaiter(this) {
             @Override
             protected void onConfigurationPrepared(final JAConfiguration configuration) throws Exception {
 
-                entityTargetFileId = new EntityTargetFile.EntityTargetFileId(element.getEntity(), configuration);
+                entityTargetFileId = new EntityTargetFileId(element.getEntity(), configuration);
                 for (Column column : element.getColumn()) {
                     DisplayedGridColumn displayedGridColumn = new DisplayedGridColumn(column);
                     displayedColumns.add(displayedGridColumn);
+                    if (column.isEditable()) {
+                        editableColumns.add(displayedGridColumn);
+                    }
                     prepareSelectedColumn(displayedGridColumn, context, configuration);
                 }
 
@@ -116,6 +150,41 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     }
                 }
 
+                selectedWithoutSaveColumns = new LinkedHashSet<>(selectedColumns);
+
+                // Now if the grid is editable, we must be sure that id columns & verion columns of the entity is selected
+                if (element.isEditable()) {
+                    context.waitForEvent(new TargetPreparedWaiter<EntityTargetFile, EntityTargetFileId, JAGeneratorContext>(EntityTargetFile.class, entityTargetFileId, GridModel.this) {
+                        @Override
+                        protected void onTargetPrepared(EntityTargetFile entityTargetFile) throws Exception {
+                            saveColumns = new LinkedHashSet<>(editableColumns);
+
+                            // Add id columns if not specified on selected columns
+                            for (EntityAttribute entityAttribute : entityTargetFile.getIdAttributes()) {
+                                final GridColumn gridColumn = addNewGridColumnIfNecessary(entityAttribute);
+                                idColumns.add(gridColumn);
+                                saveColumns.add(gridColumn);
+                            }
+                            final EntityAttribute versionAttribute = entityTargetFile.getVersionAttribute();
+                            if (versionAttribute != null) {
+                                final GridColumn gridColumn = addNewGridColumnIfNecessary(versionAttribute);
+                                saveColumns.add(gridColumn);
+                                versionColumn = gridColumn;
+                            }
+                            selectedWithoutSaveColumns.removeAll(saveColumns);
+                        }
+
+                        private GridColumn addNewGridColumnIfNecessary(EntityAttribute entityAttribute) throws Exception {
+                            final String attributeName = entityAttribute.getElement().getValue().getName();
+                            if (!selectedColumnsRefVariableNames.contains(attributeName)) {
+                                // Add this non already added id column
+                                prepareSelectedColumn(new GridColumn(entityAttribute), context, configuration);
+                            }
+                            return gridColumnsByRefVariableName.get(attributeName);
+                        }
+                    });
+                }
+
                 //TODO create main JAX-RS Application to set base WS path to '/api'
                 // Create Java Entity Base Service
                 serviceTargetFileId = new ServiceTargetFileId(element.getEntity() + "BaseService", null, configuration);
@@ -126,22 +195,27 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected void prepareSelectedColumn(GridColumn gridColumn, JAGeneratorContext context, final JAConfiguration configuration) throws Exception {
         String ref = gridColumn.ref;
         selectedColumns.add(gridColumn);
-        Deque<String> refPath = new LinkedList<>(Arrays.asList(ref.split("\\.")));
-        waitToPrepareGridColumnRecursive(refPath, entityTargetFileId, gridColumn, context, configuration);
+        selectedColumnsRefVariableNames.add(gridColumn.refVariableName);
+        gridColumnsByRefVariableName.put(gridColumn.refVariableName, gridColumn);
+        if (gridColumn.entityAttribute == null) {
+            Deque<String> refPath = new LinkedList<>(Arrays.asList(ref.split("\\.")));
+            waitToPrepareGridColumnRecursive(refPath, entityTargetFileId, gridColumn, context, configuration);
+        }
     }
 
-    private void waitToPrepareGridColumnRecursive(final Deque<String> refPath, EntityTargetFile.EntityTargetFileId entityTargetFileId, final GridColumn displayedGridColumn, final JAGeneratorContext context, final JAConfiguration configuration) throws Exception {
+    private void waitToPrepareGridColumnRecursive(final Deque<String> refPath, EntityTargetFileId entityTargetFileId, final GridColumn gridColumn, final JAGeneratorContext context, final JAConfiguration configuration) throws Exception {
         String curPath = refPath.remove();
         context.waitForEvent(new EntityAttributePreparedWaiter(curPath, entityTargetFileId, this) {
             @Override
             protected void onEntityAttributePrepared(EntityAttribute entityAttribute) throws Exception {
+                gridColumn.refEntityAttributes.add(entityAttribute);
                 if (refPath.isEmpty()) {
                     // that was the last part of the path, we can resolve the attribute
-                    displayedGridColumn.setEntityAttribute(entityAttribute);
+                    gridColumn.setEntityAttribute(entityAttribute);
                 } else {
                     // this is not the last part of the path, let's wait on next part
-                    EntityTargetFile.EntityTargetFileId entityTargetFileId = new EntityTargetFile.EntityTargetFileId(entityAttribute.getType(), configuration);
-                    GridModel.this.waitToPrepareGridColumnRecursive(refPath, entityTargetFileId, displayedGridColumn, context, configuration);
+                    EntityTargetFileId entityTargetFileId = new EntityTargetFileId(entityAttribute.getType(), configuration);
+                    GridModel.this.waitToPrepareGridColumnRecursive(refPath, entityTargetFileId, gridColumn, context, configuration);
                 }
             }
         });
@@ -157,7 +231,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         return serviceTargetFileId;
     }
 
-    public EntityTargetFile.EntityTargetFileId getEntityTargetFileId() {
+    public EntityTargetFileId getEntityTargetFileId() {
         return entityTargetFileId;
     }
 
@@ -175,5 +249,25 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public Grid getElement() {
         return element;
+    }
+
+    public List<GridColumn> getIdColumns() {
+        return idColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getEditableColumns() {
+        return editableColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getSelectedWithoutSaveColumns() {
+        return selectedWithoutSaveColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getSaveColumns() {
+        return saveColumns;
+    }
+
+    public GridColumn getVersionColumn() {
+        return versionColumn;
     }
 }

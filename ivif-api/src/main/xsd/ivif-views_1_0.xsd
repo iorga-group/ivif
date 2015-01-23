@@ -55,6 +55,7 @@
         <xs:complexType>
             <xs:attribute name="ref" type="xs:string" use="required"/>
             <xs:attribute name="title" type="xs:string"/>
+            <xs:attribute name="editable" type="xs:boolean" default="false"/>
         </xs:complexType>
     </xs:element>
 

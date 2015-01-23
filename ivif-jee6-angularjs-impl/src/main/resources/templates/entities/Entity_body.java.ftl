@@ -33,6 +33,9 @@ public class ${entity.name} {
     <#if element.formula?has_content>
     @${util.useClass("org.hibernate.annotations.Formula")}("(${element.formula})")
     </#if>
+    <#if element.version!false>
+    @${util.useClass("javax.persistence.Version")}
+    </#if>
     private ${util.useClass(attribute.type)} ${element.name};
 
 </#list>
@@ -55,10 +58,10 @@ public class ${entity.name} {
 
     <#list model.idAttributes as attribute>
         <#assign element=attribute.element.value>
-        public ${util.useClass(attribute.type)} get${attribute.capitalizedName}() {
+        public ${util.useClass(attribute.type)} ${attribute.getterName}() {
             return ${element.name};
         }
-        public void set${attribute.capitalizedName}(${util.useClass(attribute.type)} ${element.name}) {
+        public void ${attribute.setterName}(${util.useClass(attribute.type)} ${element.name}) {
             this.${element.name} = ${element.name};
         }
     </#list>
@@ -68,21 +71,21 @@ public class ${entity.name} {
     /// Getters & Setters
 <#list model.attributes as attribute>
     <#assign element=attribute.element.value>
-    public ${util.useClass(attribute.type)} get${attribute.capitalizedName}() {
+    public ${util.useClass(attribute.type)} ${attribute.getterName}() {
         return ${element.name};
     }
 
-    public void set${attribute.capitalizedName}(${util.useClass(attribute.type)} ${element.name}) {
+    public void ${attribute.setterName}(${util.useClass(attribute.type)} ${element.name}) {
         this.${element.name} = ${element.name};
     <#if element.fromType?has_content>
         <#-- this is a boolean attribute with a "from-type" defined, that is to say, we must set the original _value attribute -->
         // set the original value
         if (${util.useClass("java.lang.Boolean")}.TRUE.equals(${element.name})) {
-            set${attribute.capitalizedName}_value(${attribute.trueValueStaticField.name});
+            ${attribute.setterName}_value(${attribute.trueValueStaticField.name});
         } else if (${util.useClass("java.lang.Boolean")}.FALSE.equals(${element.name})) {
-            set${attribute.capitalizedName}_value(${attribute.falseValueStaticField.name});
+            ${attribute.setterName}_value(${attribute.falseValueStaticField.name});
         } else {
-            set${attribute.capitalizedName}_value(null);
+            ${attribute.setterName}_value(null);
         }
     </#if>
     }

@@ -21,6 +21,8 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
     private String searchFilterClassName;
     private String searchParamSimpleClassName;
     private String searchParamClassName;
+    private String saveParamSimpleClassName;
+    private String saveParamClassName;
 
     private List<OpenViewAction> openViewActions = new ArrayList<>();
 
@@ -69,6 +71,8 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
         searchFilterClassName = getClassName() + "." + searchFilterSimpleClassName;
         searchParamSimpleClassName = gridName + "SearchParam";
         searchParamClassName = getClassName() + "." + searchParamSimpleClassName;
+        saveParamSimpleClassName = gridName + "SaveParam";
+        saveParamClassName = getClassName() + "." + saveParamSimpleClassName;
 
         context.waitForEvent(new TargetPreparedWaiter<GridModel, String, JAGeneratorContext>(GridModel.class, gridName, this) {
 
@@ -146,5 +150,13 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
 
     public List<OpenViewAction> getOpenViewActions() {
         return openViewActions;
+    }
+
+    public String getSaveParamClassName() {
+        return saveParamClassName;
+    }
+
+    public String getSaveParamSimpleClassName() {
+        return saveParamSimpleClassName;
     }
 }

@@ -5,6 +5,12 @@
 
     <grid name="UserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: line.profile.id})">
         <column ref="name"/>
+        <column ref="profile.id"/>
+    </grid>
+
+    <grid name="EditableUserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: line.profile.id})" editable="true">
+        <column ref="firstName"/>
+        <column ref="name" editable="true"/>
     </grid>
 
     <form name="UserForm" title="User" entity="User">

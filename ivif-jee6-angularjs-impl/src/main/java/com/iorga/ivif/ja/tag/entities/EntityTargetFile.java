@@ -9,11 +9,13 @@ import com.iorga.ivif.tag.TargetPartPreparedEvent;
 import com.iorga.ivif.tag.bean.AttributeType;
 import com.iorga.ivif.tag.bean.Entity;
 import com.iorga.ivif.tag.bean.ManyToOne;
+import com.iorga.ivif.tag.bean.VersionableAttributeType;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import java.util.*;
+
 import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
 
 public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
@@ -24,6 +26,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
     private String idSimpleClassName;
     private Map<String, EntityAttribute> attributes = new LinkedHashMap<>();
     private List<JavaStaticField> staticFields;
+    private EntityAttribute versionAttribute;
 
     // Declare attribute tag names to Class mapping
     private final static Map<String, Class<?>> attributeTypesToClass = new HashMap<>();
@@ -106,7 +109,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
                         // add a static field
                         JavaStaticField trueValueStaticField = JavaStaticField.createFromVariableName(attributeName + "TrueValue", fromTypeClassName, booleanAttribute.getTrueValue());
                         staticFields.add(trueValueStaticField);
-                        JavaStaticField falseValueStaticField = JavaStaticField.createFromVariableName(attributeName + "FalseValue", fromTypeClassName, booleanAttribute.getTrueValue());
+                        JavaStaticField falseValueStaticField = JavaStaticField.createFromVariableName(attributeName + "FalseValue", fromTypeClassName, booleanAttribute.getFalseValue());
                         staticFields.add(falseValueStaticField);
                         entityAttribute.setTrueValueStaticField(trueValueStaticField);
                         entityAttribute.setFalseValueStaticField(falseValueStaticField);
@@ -116,10 +119,10 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
                         if (attributeColumn == null) {
                             attributeColumn = attributeName;
                         }
-                        attribute.setFormula("(CASE " +
+                        attribute.setFormula("CASE " +
                                 "WHEN " + attributeColumn + " = " + quote + booleanAttribute.getTrueValue() + quote + " THEN 1 " +
                                 "WHEN " + attributeColumn + " = " + quote + booleanAttribute.getFalseValue() + quote + " THEN 0 " +
-                                "ELSE NULL END)");
+                                "ELSE NULL END");
                     }
                 }
             }
@@ -127,6 +130,13 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
             // group id attributes
             if (attribute.isId()) {
                 idAttributes.add(entityAttribute);
+            }
+            if (attribute instanceof VersionableAttributeType && ((VersionableAttributeType) attribute).isVersion()) {
+                if (versionAttribute != null) {
+                    throw new IllegalStateException("Cannot have multiple version attribute");
+                } else {
+                    versionAttribute = entityAttribute;
+                }
             }
         }
         // And full id class name if necessary
@@ -190,5 +200,9 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
 
     public List<JavaStaticField> getStaticFields() {
         return staticFields;
+    }
+
+    public EntityAttribute getVersionAttribute() {
+        return versionAttribute;
     }
 }
