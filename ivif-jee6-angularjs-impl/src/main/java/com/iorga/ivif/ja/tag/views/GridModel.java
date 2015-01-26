@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected final Grid element;
 
-    public static final Pattern LINE_REF_PATTERN = Pattern.compile("(?<![\\w$])line\\.[\\p{Alpha}$_][\\w$\\.]*");
+    public static final Pattern LINE_REF_PATTERN = Pattern.compile("(?<![\\w\\$])\\$line\\.[\\p{Alpha}\\$_][\\w\\$\\.]*");
 
     protected String variableName;
     protected List<GridColumn> selectedColumns;
@@ -144,7 +144,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 if (StringUtils.isNotBlank(onOpenAction)) {
                     Matcher matcher = LINE_REF_PATTERN.matcher(onOpenAction);
                     while (matcher.find()) {
-                        String ref = StringUtils.substringAfter(matcher.group(), "line.");
+                        String ref = StringUtils.substringAfter(matcher.group(), "$line.");
                         GridColumn gridColumn = new GridColumn(ref);
                         prepareSelectedColumn(gridColumn, context, configuration);
                     }

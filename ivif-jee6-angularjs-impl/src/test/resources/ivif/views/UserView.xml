@@ -3,12 +3,12 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-views">
 
-    <grid name="UserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: line.profile.id})">
+    <grid name="UserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: $line.profile.id})">
         <column ref="name"/>
         <column ref="profile.id"/>
     </grid>
 
-    <grid name="EditableUserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: line.profile.id})" editable="true">
+    <grid name="EditableUserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: $line.profile.id})" editable="true">
         <column ref="firstName"/>
         <column ref="name" editable="true"/>
     </grid>
@@ -19,7 +19,7 @@
 
     <action-open-view name="openProfileGridFromUser" grid-name="ProfileGrid">
         <query>
-            <where>record.id = :profileId</where>
+            <where>$record.id = :profileId</where>
         </query>
     </action-open-view>
 </views>

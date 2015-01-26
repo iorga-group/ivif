@@ -81,9 +81,9 @@ public class ActionOpenViewSourceTagHandler extends JAXBSourceTagHandler<ActionO
                                 // This is a literal parameter
                             } else {
                                 List<Node> identifierPath = operatorContext.identifierPath;
-                                if (!"record".equals(identifierPath.get(0).getNodeValue())) {
+                                if (!"$record".equals(identifierPath.get(0).getNodeValue())) {
                                     // TODO handle another root, if there are declared joins
-                                    throw new IllegalStateException("An identifier must always begin with 'record'. Found " + identifierPath.toString());
+                                    throw new IllegalStateException("An identifier must always begin with '$record'. Found " + identifierPath.toString());
                                 } else {
                                     Deque<Node> identifierPathDequeue = new LinkedList<>(identifierPath);
                                     identifierPathDequeue.removeFirst();

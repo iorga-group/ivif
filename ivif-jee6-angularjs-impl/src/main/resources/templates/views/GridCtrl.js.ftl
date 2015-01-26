@@ -15,7 +15,7 @@ angular.module('${model.configuration.angularModuleName}')
     .controller('${grid.element.name}Ctrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService'<#if model.onOpenMethod?has_content>, '${model.onOpenMethod}'</#if><#if model.actionOpenViewDefined>, '$location', 'locationUtils'</#if>, function($scope, ngTableParams, $timeout, $http, locationService<#if model.onOpenMethod?has_content>, ${model.onOpenMethod}</#if><#if model.actionOpenViewDefined>, $location, locationUtils</#if>) {
         // Declare actions
 <#if model.onOpenCode?has_content>
-        $scope.openLine = function(line) {
+        $scope.openLine = function($line) {
             ${model.onOpenCode};
         };
 </#if>

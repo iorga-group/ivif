@@ -45,7 +45,7 @@ public class GridCtrlJsTargetFile extends JsTargetFile<String> {
                     StringBuffer onOpenCodeBuilder = new StringBuffer(onOpenAction.length());
                     while (matcher.find()) {
                         String ref = matcher.group();
-                        ref = "line." + StringUtils.substringAfter(ref, "line.").replaceAll("\\.", "_");
+                        ref = "\\$line." + StringUtils.substringAfter(ref, "$line.").replaceAll("\\.", "_");
                         matcher.appendReplacement(onOpenCodeBuilder, ref);
                     }
                     matcher.appendTail(onOpenCodeBuilder);
