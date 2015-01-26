@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<entities xmlns="http://www.iorga.com/xml/ns/ivif-entities"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-entities">
+
+    <entity name="Computer" table="TEST_COMPUTER">
+        <integer name="id" id="true"/>
+        <string name="name" required="true"/>
+        <long name="version" version="true"/>
+        <many-to-one name="user" column="USER_ID" ref="User"/>
+        <many-to-one name="defaultProfile" column="DEFAULT_PROFILE_ID" ref="Profile"/>
+    </entity>
+</entities>

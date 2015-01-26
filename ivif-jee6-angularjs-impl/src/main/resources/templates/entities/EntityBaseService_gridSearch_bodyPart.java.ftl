@@ -14,7 +14,7 @@
 <#list model.openViewActions as openViewAction>
         if (filter.${openViewAction.variableName} != null) {
             ${util.useClass(openViewAction.className)} parameters = filter.${openViewAction.variableName};
-            jpaQuery.where(${util.fromTemplateString(openViewAction.action.queryDslCode)});
+            jpaQuery.where(<@openViewAction.queryModel.queryDslCode?interpret/>);
         }
 </#list>
         // Applying sorting

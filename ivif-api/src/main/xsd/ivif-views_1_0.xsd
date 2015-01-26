@@ -18,9 +18,10 @@
 
     <xs:element name="grid">
         <xs:complexType>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="column"/>
-            </xs:choice>
+            <xs:sequence>
+                <xs:element ref="column" minOccurs="1" maxOccurs="unbounded"/>
+                <xs:element ref="query" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
             <xs:attribute name="on-open" type="xs:string"/>
             <xs:attribute name="editable" type="xs:boolean" default="false"/>
             <xs:attribute name="name" type="xs:string" use="required"/>

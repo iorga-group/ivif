@@ -43,6 +43,10 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
             return action;
         }
 
+        public QueryModel getQueryModel() {
+            return action.getQueryModel();
+        }
+
         public String getSimpleClassName() {
             return simpleClassName;
         }

@@ -5,6 +5,7 @@ import com.iorga.ivif.ja.tag.JsTargetFile;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
 import com.iorga.ivif.ja.tag.util.TargetFileUtils;
+import com.iorga.ivif.tag.TargetPreparedWaiter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Path;
@@ -12,19 +13,20 @@ import java.nio.file.Paths;
 
 public class ActionOpenViewServiceJsTargetFile extends JsTargetFile<String> {
 
-    private ActionOpenViewSourceTagHandler actionOpenViewSourceTagHandler;
     private String gridPath;
     private JAConfiguration configuration;
+    private String gridName;
 
-    public ActionOpenViewServiceJsTargetFile(String id, JAGeneratorContext context) {
+    public ActionOpenViewServiceJsTargetFile(String id, String gridName, JAGeneratorContext context) {
         super(id, context);
+        this.gridName = gridName;
     }
 
     @Override
     public void prepare(JAGeneratorContext context) throws Exception {
         super.prepare(context);
 
-        this.gridPath = "/" + TargetFileUtils.getVariableNameFromName(actionOpenViewSourceTagHandler.getElement().getGridName());
+        this.gridPath = "/" + TargetFileUtils.getVariableNameFromName(gridName);
 
         context.waitForEvent(new JAConfigurationPreparedWaiter(this) {
 
@@ -45,19 +47,9 @@ public class ActionOpenViewServiceJsTargetFile extends JsTargetFile<String> {
         return Paths.get("scripts", "services", StringUtils.capitalize(getId()) + "ActionService.js");
     }
 
-    public ActionOpenViewSourceTagHandler getActionOpenView() {
-        return actionOpenViewSourceTagHandler;
-    }
-
     /// Getters & Setters
 
-    public void setActionOpenViewSourceTagHandler(ActionOpenViewSourceTagHandler actionOpenViewSourceTagHandler) {
-        this.actionOpenViewSourceTagHandler = actionOpenViewSourceTagHandler;
-    }
 
-    public ActionOpenViewSourceTagHandler getActionOpenViewSourceTagHandler() {
-        return actionOpenViewSourceTagHandler;
-    }
 
     public String getGridPath() {
         return gridPath;

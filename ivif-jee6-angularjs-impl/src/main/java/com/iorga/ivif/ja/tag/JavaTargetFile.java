@@ -23,6 +23,7 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
         protected String simpleClassName;
         protected String packageName;
         protected String className;
+        protected JAConfiguration configuration;
 
         public JavaTargetFileId(String simpleOrFullClassName, String packageNameOrNull, String packageNameRelativeToBase, JAConfiguration configuration) {
             if (simpleOrFullClassName.contains(".")) {
@@ -71,6 +72,10 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
 
         public String getPackageName() {
             return packageName;
+        }
+
+        public JAConfiguration getConfiguration() {
+            return configuration;
         }
     }
 

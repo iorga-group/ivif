@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<views xmlns="http://www.iorga.com/xml/ns/ivif-views"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-views">
+
+    <grid name="ComputerGrid" title="Computers" entity="Computer" on-open="openUserGridFromComputer({userId: $line.user.id})">
+        <column ref="name"/>
+        <column ref="user.name"/>
+        <query>
+            <where>$record.defaultProfile IS NULL</where>
+        </query>
+    </grid>
+
+    <action-open-view name="openUserGridFromComputer" grid-name="UserGrid">
+        <query>
+            <where>$record.id = :userId</where>
+        </query>
+    </action-open-view>
+</views>

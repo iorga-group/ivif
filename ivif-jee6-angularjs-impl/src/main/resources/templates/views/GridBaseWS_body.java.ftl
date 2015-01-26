@@ -60,7 +60,7 @@ public class ${grid.element.name}BaseWS {
 <#-- Actions class -->
 <#list model.openViewActions as openViewAction>
     public static class ${openViewAction.simpleClassName} {
-    <#list openViewAction.action.parameters as parameter>
+    <#list openViewAction.queryModel.parameters as parameter>
         public ${util.useClass(parameter.className)} ${parameter.name};
     </#list>
     }
