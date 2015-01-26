@@ -34,8 +34,11 @@ angular.module('${model.configuration.angularModuleName}', [
                         search: $location.search(),
                         savedScopeAttributes: null
                     };
-                    if (!newLocationToBePushed) {
-                        locationContexts = []; // re-init location contexts because it's a new root
+                    if (!locationLoading) {
+                        if (!newLocationToBePushed) {
+                            locationContexts = []; // re-init location contexts because it's a new root
+                        }
+                        locationContexts.push(locationContext);
                     }
                     locationContexts.push(locationContext);
                     newLocationToBePushed = false;
