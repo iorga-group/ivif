@@ -3,6 +3,10 @@
         ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery = new ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")}(entityManager, ${util.useClass("com.mysema.query.jpa.JPQLTemplates")}.DEFAULT);
         ${util.useClass(baseModel.qEntityClassName)} $record = new ${util.useClass(baseModel.qEntityClassName)}("${baseModel.entityVariableName}");
         jpaQuery.from($record);
+<#if grid.queryModel.queryDslCode?exists>
+        // Applying static query
+        jpaQuery.where(<@grid.queryModel.queryDslCode?interpret/>);
+</#if>
         // Applying filter
         ${util.useClass(model.searchFilterClassName)} filter = searchParam.filter;
 <#list grid.displayedColumns as column>
@@ -10,8 +14,8 @@
             jpaQuery.where($record.${column.ref}.${model.getSearchRelationMethodForGridColumn(column)}(filter.${column.refVariableName}));
         }
 </#list>
-        // Applying action filters
 <#list model.openViewActions as openViewAction>
+        // Applying action filters
         if (filter.${openViewAction.variableName} != null) {
             ${util.useClass(openViewAction.className)} parameters = filter.${openViewAction.variableName};
             jpaQuery.where(<@openViewAction.queryModel.queryDslCode?interpret/>);

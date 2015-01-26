@@ -8,6 +8,7 @@ import com.iorga.ivif.tag.bean.Query;
 import org.apache.commons.lang3.BooleanUtils;
 import org.datanucleus.query.compiler.JPQLParser;
 import org.datanucleus.query.compiler.Node;
+import org.datanucleus.query.compiler.NodeType;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -58,34 +59,38 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
         super.prepare(context);
 
         parameters = new ArrayList<>();
+        queryDslCode = null;
 
-        List<OperatorContext> parametersToResolve = new ArrayList<>();
+        if (element != null) {
 
-        String where = element.getWhere();
-        Node rootNode = new JPQLParser(null, null).parse(where);
-        StringBuilder queryDslCode = new StringBuilder();
-        visit(rootNode, queryDslCode, null, parametersToResolve);
+            List<OperatorContext> parametersToResolve = new ArrayList<>();
 
-        this.queryDslCode = queryDslCode.toString();
+            String where = element.getWhere();
+            Node rootNode = new JPQLParser(null, null).parse(where);
+            StringBuilder queryDslCode = new StringBuilder();
+            visit(rootNode, queryDslCode, null, parametersToResolve);
 
-        // Now we will resolve the parameters and add them
-        for (OperatorContext operatorContext : parametersToResolve) {
-            // TODO handle parameters declared multiple times
-            final QueryParameter parameter = new QueryParameter();
-            parameter.name = (String) operatorContext.parameter.getNodeValue();
-            parameters.add(parameter);
-            // solve its type
-            if (operatorContext.literal != null) {
-                // This is a literal parameter
-            } else {
-                List<Node> identifierPath = operatorContext.identifierPath;
-                if (!"$record".equals(identifierPath.get(0).getNodeValue())) {
-                    // TODO handle another root, if there are declared joins
-                    throw new IllegalStateException("An identifier must always begin with '$record'. Found " + identifierPath.toString());
+            this.queryDslCode = queryDslCode.toString();
+
+            // Now we will resolve the parameters and add them
+            for (OperatorContext operatorContext : parametersToResolve) {
+                // TODO handle parameters declared multiple times
+                final QueryParameter parameter = new QueryParameter();
+                parameter.name = (String) operatorContext.parameter.getNodeValue();
+                parameters.add(parameter);
+                // solve its type
+                if (operatorContext.literal != null) {
+                    // This is a literal parameter
                 } else {
-                    Deque<Node> identifierPathDequeue = new LinkedList<>(identifierPath);
-                    identifierPathDequeue.removeFirst();
-                    resolveParameterClassName(parameter, identifierPathDequeue, baseEntityId, context, waiter);
+                    List<Node> identifierPath = operatorContext.identifierPath;
+                    if (!"$record".equals(identifierPath.get(0).getNodeValue())) {
+                        // TODO handle another root, if there are declared joins
+                        throw new IllegalStateException("An identifier must always begin with '$record'. Found " + identifierPath.toString());
+                    } else {
+                        Deque<Node> identifierPathDequeue = new LinkedList<>(identifierPath);
+                        identifierPathDequeue.removeFirst();
+                        resolveParameterClassName(parameter, identifierPathDequeue, baseEntityId, context, waiter);
+                    }
                 }
             }
         }
@@ -153,6 +158,8 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
                     OperatorContext operatorContext = new OperatorContext();
                     // We consider a binary operator, let's interpret left part
                     visit(node.getFirstChild(), queryDslCode, operatorContext, parametersToResolve);
+                    final Node rightChild = node.getNextChild();
+                    boolean visitRightPart = true;
                     switch ((String) nodeValue) {
                         case "&&":
                             queryDslCode.append(".and("); // TODO break line & add correct number of spaces for readability ?
@@ -161,11 +168,19 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
                             queryDslCode.append(".or("); // TODO break line & add correct number of spaces for readability ?
                             break;
                         case "==":
-                            queryDslCode.append(".eq(");
+                            // If the right part is a NULL literal, then we have a IS NULL where clause, which can be different from eq(null) (which QueryDSL forbids anyways)
+                            if (rightChild.getNodeType() == NodeType.LITERAL && rightChild.getNodeValue() == null) {
+                                queryDslCode.append(".isNull(");
+                                visitRightPart = false;
+                            } else {
+                                queryDslCode.append(".eq(");
+                            }
                             // TODO handle other operators
                     }
-                    // visit right part
-                    visit(node.getNextChild(), queryDslCode, operatorContext, parametersToResolve);
+                    if (visitRightPart) {
+                        // visit right part
+                        visit(rightChild, queryDslCode, operatorContext, parametersToResolve);
+                    }
                     // and close the operator
                     queryDslCode.append(")");
                     if (operatorContext.parameter != null) {

@@ -10,6 +10,7 @@ import com.iorga.ivif.ja.tag.entities.EntityTargetFile;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 import com.iorga.ivif.ja.tag.util.TargetFileUtils;
 import com.iorga.ivif.tag.AbstractTarget;
+import com.iorga.ivif.tag.TargetFactory;
 import com.iorga.ivif.tag.TargetPreparedWaiter;
 import com.iorga.ivif.tag.bean.Column;
 import com.iorga.ivif.tag.bean.Grid;
@@ -42,6 +43,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected LinkedHashSet<GridColumn> saveColumns;
     protected LinkedHashSet<GridColumn> selectedWithoutSaveColumns;
     protected GridColumn versionColumn;
+    protected QueryModel queryModel;
 
     public static class GridColumn {
         protected String refVariableName;
@@ -188,6 +190,15 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 //TODO create main JAX-RS Application to set base WS path to '/api'
                 // Create Java Entity Base Service
                 serviceTargetFileId = new ServiceTargetFileId(element.getEntity() + "BaseService", null, configuration);
+
+                // Create QueryModel
+                final String queryModelId = "grid:" + element.getName();
+                queryModel = context.getOrCreateTarget(QueryModel.class, queryModelId, new TargetFactory<QueryModel, String, JAGeneratorContext>() {
+                    @Override
+                    public QueryModel createTarget() throws Exception {
+                        return new QueryModel(queryModelId, element.getQuery(), entityTargetFileId, GridModel.this);
+                    }
+                });
             }
         });
     }
@@ -269,5 +280,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public GridColumn getVersionColumn() {
         return versionColumn;
+    }
+
+    public QueryModel getQueryModel() {
+        return queryModel;
     }
 }
