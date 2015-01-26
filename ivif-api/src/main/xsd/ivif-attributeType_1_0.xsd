@@ -11,6 +11,7 @@
     <xs:complexType name="attributeType">
         <xs:sequence minOccurs="0" maxOccurs="1">
             <xs:element ref="default-editor"/>
+            <xs:element ref="join-column"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string" use="required"/>
         <xs:attribute name="column" type="xs:string"/>
@@ -27,6 +28,13 @@
         <xs:complexType>
             <xs:attribute name="editor" type="xs:string" default="field"/>
             <xs:attribute name="show" type="xs:boolean" default="true"/>
+        </xs:complexType>
+    </xs:element>
+    
+        <xs:element name="join-column">
+        <xs:complexType>
+            <xs:attribute name="ref-column" type="xs:string" default="field"/>
+            <xs:attribute name="column" type="xs:boolean" default="true"/>
         </xs:complexType>
     </xs:element>
 
