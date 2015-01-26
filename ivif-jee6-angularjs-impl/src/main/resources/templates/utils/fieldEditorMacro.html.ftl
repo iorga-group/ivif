@@ -1,10 +1,8 @@
-<#macro tabulate nbTabs>
-    <#list 0..nbTabs as i>    </#list><#t>
-</#macro>
+<#include "utils.ftl">
 <#macro fieldEditor model fieldClassName nbTabs editable editSwitch>
     <#switch fieldClassName>
         <#case "java.lang.Boolean">
-<@tabulate nbTabs=nbTabs/><input type="checkbox" class="form-control" ng-model="${model}"<#if editable> ng-disabled="!${editSwitch}"</#if> />
+<@tabulate nbTabs=nbTabs/><input type="checkbox" class="form-control" ng-model="${model}" ng-disabled="<#if editable>!${editSwitch}<#else>true</#if>" />
             <#break>
         <#default>
             <#if editable>

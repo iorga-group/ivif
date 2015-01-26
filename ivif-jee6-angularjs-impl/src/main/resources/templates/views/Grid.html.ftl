@@ -1,4 +1,4 @@
-<#include "fieldEditorMacro.html.ftl">
+<#include "../utils/fieldEditorMacro.html.ftl">
 <#assign grid=model.grid>
 <#assign editable=grid.element.editable>
 <div class="container-fluid">
