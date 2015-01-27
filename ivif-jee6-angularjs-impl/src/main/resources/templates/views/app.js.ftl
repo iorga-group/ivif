@@ -40,7 +40,6 @@ angular.module('${model.configuration.angularModuleName}', [
                         }
                         locationContexts.push(locationContext);
                     }
-                    locationContexts.push(locationContext);
                     newLocationToBePushed = false;
                     locationLoading = false;
                 },
