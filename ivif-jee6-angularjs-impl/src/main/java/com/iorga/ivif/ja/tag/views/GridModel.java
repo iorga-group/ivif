@@ -14,6 +14,7 @@ import com.iorga.ivif.tag.TargetFactory;
 import com.iorga.ivif.tag.TargetPreparedWaiter;
 import com.iorga.ivif.tag.bean.Column;
 import com.iorga.ivif.tag.bean.Grid;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -235,10 +236,15 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     public String getGridName() {
         return getId();
     }
+    
+    @Override
+	public String toString() {
+		return "GridModel [id=" + getId() + "]";
+	}
 
     /// Getters & Setters
 
-    public ServiceTargetFileId getServiceTargetFileId() {
+	public ServiceTargetFileId getServiceTargetFileId() {
         return serviceTargetFileId;
     }
 

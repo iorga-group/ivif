@@ -44,6 +44,15 @@ public class TargetPartPreparedEvent<P extends TargetPart<I, T, TI, C>, I, T ext
             result = 31 * result + targetId.hashCode();
             return result;
         }
+
+		@Override
+		public String toString() {
+			return "TargetPartPreparedEventId [targetClass=" + targetClass
+					+ ", targetId=" + targetId + ", targetPartClass="
+					+ targetPartClass + ", targetPartId=" + targetPartId + "]";
+		}
+        
+        
     }
 
     public TargetPartPreparedEvent(P targetPart) {
