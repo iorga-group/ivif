@@ -17,6 +17,14 @@
         <column ref="user.id"/>
     </grid>
 
+    <grid name="ComputerForConnectedUserGrid" title="Computers" entity="Computer">
+        <column ref="name"/>
+        <query>
+            <where>$record.user.id = :currentUserId</where>
+            <parameter name="currentUserId" value="$inject(com.iorga.ivif.ja.test.ConnectedUser).getUserId()"/>
+        </query>
+    </grid>
+
     <action-open-view name="openUserGridFromComputer" grid-name="UserGrid">
         <query>
             <where>$record.id = :userId</where>

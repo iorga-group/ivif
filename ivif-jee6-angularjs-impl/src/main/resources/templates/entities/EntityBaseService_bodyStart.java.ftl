@@ -8,6 +8,12 @@ public class ${model.simpleClassName} {
     @${util.useClass("javax.persistence.PersistenceContext")}
     protected ${util.useClass("javax.persistence.EntityManager")} entityManager;
 
+<#list util.injections.iterator() as injection>
+    @${util.useClass("javax.inject.Inject")}
+    protected ${util.useClass(injection.className)} ${injection.variableName};
+
+</#list>
+
 
 <#if entity.hasMultipleIds()>
     public <@useEntityClass/> find(<#list entity.idAttributes as attribute>${util.useClass(attribute.type)} ${attribute.element.value.name}<#if attribute_has_next>, </#if></#list>) {

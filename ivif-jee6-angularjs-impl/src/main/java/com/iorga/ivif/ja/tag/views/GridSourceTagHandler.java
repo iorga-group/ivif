@@ -5,21 +5,12 @@ import com.iorga.ivif.ja.tag.ServiceTargetFileId;
 import com.iorga.ivif.ja.tag.WSTargetFileId;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
-import com.iorga.ivif.ja.tag.entities.EntityAttribute;
-import com.iorga.ivif.ja.tag.entities.EntityAttributePreparedWaiter;
 import com.iorga.ivif.ja.tag.entities.EntityBaseServiceTargetFile;
-import com.iorga.ivif.ja.tag.util.TargetFileUtils;
 import com.iorga.ivif.tag.JAXBSourceTagHandler;
 import com.iorga.ivif.tag.TargetFactory;
-import com.iorga.ivif.tag.bean.Column;
 import com.iorga.ivif.tag.bean.Grid;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 
 public class GridSourceTagHandler extends JAXBSourceTagHandler<Grid, JAGeneratorContext> {
 

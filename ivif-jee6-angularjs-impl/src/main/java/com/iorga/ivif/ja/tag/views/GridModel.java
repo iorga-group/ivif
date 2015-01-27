@@ -8,7 +8,7 @@ import com.iorga.ivif.ja.tag.entities.EntityAttribute;
 import com.iorga.ivif.ja.tag.entities.EntityAttributePreparedWaiter;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
-import com.iorga.ivif.ja.tag.util.TargetFileUtils;
+import com.iorga.ivif.util.TargetFileUtils;
 import com.iorga.ivif.tag.AbstractTarget;
 import com.iorga.ivif.tag.TargetFactory;
 import com.iorga.ivif.tag.TargetPreparedWaiter;
@@ -117,7 +117,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         super.prepare(context);
 
 
-        variableName = TargetFileUtils.getVariableNameFromName(element.getName());
+        variableName = TargetFileUtils.getVariableNameFromCamelCasedName(element.getName());
 
         // Prepare displayed columns
         selectedColumns = new ArrayList<>();

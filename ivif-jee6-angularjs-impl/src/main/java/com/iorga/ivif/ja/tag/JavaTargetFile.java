@@ -1,7 +1,7 @@
 package com.iorga.ivif.ja.tag;
 
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
-import com.iorga.ivif.ja.tag.util.TargetFileUtils;
+import com.iorga.ivif.util.TargetFileUtils;
 import com.iorga.ivif.tag.TargetFile;
 import com.iorga.ivif.util.JavaClassGeneratorUtil;
 import freemarker.template.SimpleHash;
@@ -82,7 +82,7 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
     public JavaTargetFile(I id, JAGeneratorContext context) {
         super(id, context);
 
-        this.variableName = TargetFileUtils.getVariableNameFromName(id.simpleClassName);
+        this.variableName = TargetFileUtils.getVariableNameFromCamelCasedName(id.simpleClassName);
     }
 
 
@@ -90,6 +90,8 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
     public void render(JAGeneratorContext context) throws Exception {
         util = new JavaClassGeneratorUtil();
         ByteArrayOutputStream bodyStream = renderBody(context);
+        // Now render header in case there are injections
+        ByteArrayOutputStream headerStream = renderHeader(context);
         // Now add the header
         SimpleHash freemarkerContext = context.createSimpleHash();
         freemarkerContext.put("model", this);
@@ -102,8 +104,33 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
         // before writing to it
         FileOutputStream outputStream = new FileOutputStream(file);
         template.process(freemarkerContext, new OutputStreamWriter(outputStream));
-        // And append the body
+        // And append the header & body
+        if (headerStream != null) {
+            headerStream.writeTo(outputStream);
+        }
         bodyStream.writeTo(outputStream);
+    }
+
+    private ByteArrayOutputStream renderHeader(JAGeneratorContext context) throws IOException, TemplateException {
+        String headerTemplate = getFreemarkerHeaderTemplateName();
+        if (headerTemplate != null) {
+            SimpleHash freemarkerContext = context.createSimpleHash();
+            freemarkerContext.put("model", getFreemarkerModel());
+            freemarkerContext.put("util", util);
+            freemarkerContext.put("context", context);
+            // First process body
+            Template template = context.getTemplate(headerTemplate);
+            ByteArrayOutputStream headerStream = new ByteArrayOutputStream();
+            template.process(freemarkerContext, new OutputStreamWriter(headerStream));
+            return headerStream;
+        } else {
+            return null;
+        }
+    }
+
+    protected String getFreemarkerHeaderTemplateName() {
+        // By default, no header is generated
+        return null;
     }
 
     protected ByteArrayOutputStream renderBody(JAGeneratorContext context) throws IOException, TemplateException {

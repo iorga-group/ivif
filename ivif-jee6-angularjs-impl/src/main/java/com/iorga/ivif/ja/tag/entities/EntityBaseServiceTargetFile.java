@@ -7,7 +7,7 @@ import com.iorga.ivif.ja.tag.ServiceTargetFileId;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
-import com.iorga.ivif.ja.tag.util.TargetFileUtils;
+import com.iorga.ivif.util.TargetFileUtils;
 import com.iorga.ivif.tag.TargetPreparedWaiter;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
@@ -51,7 +51,7 @@ public class EntityBaseServiceTargetFile extends JavaTargetFile<ServiceTargetFil
             protected void onConfigurationPrepared(JAConfiguration configuration) throws Exception {
                 entityTargetFileId = new EntityTargetFileId(entitySimpleClassName, configuration);
                 entityClassName = entityTargetFileId.getClassName();
-                entityVariableName = TargetFileUtils.getVariableNameFromName(entitySimpleClassName);
+                entityVariableName = TargetFileUtils.getVariableNameFromCamelCasedName(entitySimpleClassName);
                 qEntitySimpleClassName = "Q" + entitySimpleClassName;
                 qEntityClassName = entityTargetFileId.getPackageName() + "." + qEntitySimpleClassName;
 
@@ -66,16 +66,20 @@ public class EntityBaseServiceTargetFile extends JavaTargetFile<ServiceTargetFil
     }
 
     @Override
+    protected String getFreemarkerHeaderTemplateName() {
+        return "entities/EntityBaseService_bodyStart.java.ftl";
+    }
+
+    @Override
     protected ByteArrayOutputStream renderBody(JAGeneratorContext context) throws IOException, TemplateException {
         SimpleHash freemarkerContext = context.createSimpleHash();
         freemarkerContext.put("model", getFreemarkerModel());
         freemarkerContext.put("util", util);
         freemarkerContext.put("context", context);
         // First process body start
-        Template template = context.getTemplate("entities/EntityBaseService_bodyStart.java.ftl");
+        Template template;
         ByteArrayOutputStream bodyStream = new ByteArrayOutputStream();
         OutputStreamWriter out = new OutputStreamWriter(bodyStream);
-        template.process(freemarkerContext, out);
         // Then each body parts
         for (RenderPart renderPart : renderParts) {
             template = context.getTemplate(renderPart.getFreemarkerTemplateName());

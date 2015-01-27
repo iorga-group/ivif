@@ -4,29 +4,32 @@ import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.entities.EntityAttribute;
 import com.iorga.ivif.ja.tag.entities.EntityAttributePreparedWaiter;
 import com.iorga.ivif.tag.AbstractTarget;
+import com.iorga.ivif.tag.bean.Parameter;
 import com.iorga.ivif.tag.bean.Query;
 import org.apache.commons.lang3.BooleanUtils;
 import org.datanucleus.query.compiler.JPQLParser;
 import org.datanucleus.query.compiler.Node;
 import org.datanucleus.query.compiler.NodeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static com.iorga.ivif.ja.tag.entities.EntityTargetFile.*;
 
 public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
+    private final static Logger LOG = LoggerFactory.getLogger(QueryModel.class);
+
     private final Query element;
     private final EntityTargetFileId baseEntityId;
     private final Object waiter;
     private String queryDslCode;
     private List<QueryParameter> parameters;
+    private Map<String, String> parametersValueByName;
 
 
-    private class OperatorContext {
+    private static class OperatorContext {
         private Node parameter;
         private List<Node> identifierPath = new ArrayList<>();
         private Node literal;
@@ -35,6 +38,7 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
     public static class QueryParameter {
         protected String name;
         protected String className;
+        protected String value;
 
         public String getName() {
             return name;
@@ -42,6 +46,10 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
 
         public String getClassName() {
             return className;
+        }
+
+        public String getValue() {
+            return value;
         }
     }
 
@@ -59,9 +67,15 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
         super.prepare(context);
 
         parameters = new ArrayList<>();
+        parametersValueByName = new HashMap<>();
         queryDslCode = null;
 
         if (element != null) {
+            // Parsing parameter values
+            for (Parameter parameter : element.getParameter()) {
+                final String parameterName = parameter.getName();
+                parametersValueByName.put(parameterName, ExpressionParser.parse(parameter.getValue()));
+            }
 
             List<OperatorContext> parametersToResolve = new ArrayList<>();
 
@@ -129,7 +143,14 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
                 case PARAMETER:
                     // mark this to resolve the type later (at the end of the interpretation of the parent operator)
                     parentOperatorContext.parameter = node;
-                    queryDslCode.append("parameters.").append(nodeValue);
+                    final String parameterValue = parametersValueByName.get(nodeValue);
+                    if (parameterValue != null) {
+                        // The value of this parameter is specified, let's append its value
+                        queryDslCode.append(parameterValue);
+                    } else {
+                        // The value of this param is not specified, will be a parameter to pass
+                        queryDslCode.append("parameters.").append(nodeValue);
+                    }
                     break;
                 case LITERAL:
                     parentOperatorContext.literal = node;
@@ -201,7 +222,7 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
         return queryDslCode;
     }
 
-    public List<QueryParameter> getParameters() {
+    public Collection<QueryParameter> getParameters() {
         return parameters;
     }
 }

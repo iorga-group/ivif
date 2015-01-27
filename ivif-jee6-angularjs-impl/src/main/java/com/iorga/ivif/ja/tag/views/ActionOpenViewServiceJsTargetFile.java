@@ -4,8 +4,7 @@ import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.JsTargetFile;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
-import com.iorga.ivif.ja.tag.util.TargetFileUtils;
-import com.iorga.ivif.tag.TargetPreparedWaiter;
+import com.iorga.ivif.util.TargetFileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Path;
@@ -26,7 +25,7 @@ public class ActionOpenViewServiceJsTargetFile extends JsTargetFile<String> {
     public void prepare(JAGeneratorContext context) throws Exception {
         super.prepare(context);
 
-        this.gridPath = "/" + TargetFileUtils.getVariableNameFromName(gridName);
+        this.gridPath = "/" + TargetFileUtils.getVariableNameFromCamelCasedName(gridName);
 
         context.waitForEvent(new JAConfigurationPreparedWaiter(this) {
 

@@ -39,6 +39,11 @@
                 <artifactId>datanucleus-core</artifactId>
                 <version>4.0.4</version>
             </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>4.5</version>
+            </dependency>
             <!-- scope test -->
             <dependency>
                 <groupId>junit</groupId>
@@ -81,6 +86,19 @@
                     <configuration>
                         <packageName>com.iorga.ivif.ja.tag.bean</packageName>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.antlr</groupId>
+                    <artifactId>antlr4-maven-plugin</artifactId>
+                    <version>4.5</version>
+                    <executions>
+                        <execution>
+                            <id>antlr4</id>
+                            <goals>
+                                <goal>antlr4</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
