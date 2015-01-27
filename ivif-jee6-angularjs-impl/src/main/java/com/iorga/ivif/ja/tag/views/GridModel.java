@@ -31,8 +31,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected List<DisplayedGridColumn> displayedColumns;
     protected EntityTargetFileId entityTargetFileId;
     protected ServiceTargetFileId serviceTargetFileId;
-    protected Set<String> selectedColumnsRefVariableNames;
-    protected Map<String, GridColumn> gridColumnsByRefVariableName;
+    protected Map<String, GridColumn> selectedColumnsByRef;
     protected List<GridColumn> idColumns;
     /**
      * Editable columns are all columns which are editable = true
@@ -123,8 +122,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         // Prepare displayed columns
         selectedColumns = new ArrayList<>();
         displayedColumns = new ArrayList<>();
-        selectedColumnsRefVariableNames = new HashSet<>();
-        gridColumnsByRefVariableName = new HashMap<>();
+        selectedColumnsByRef = new HashMap<>();
         idColumns = new ArrayList<>();
         editableColumns = new LinkedHashSet<>();
 
@@ -148,8 +146,11 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     Matcher matcher = LINE_REF_PATTERN.matcher(onOpenAction);
                     while (matcher.find()) {
                         String ref = StringUtils.substringAfter(matcher.group(), "$line.");
-                        GridColumn gridColumn = new GridColumn(ref);
-                        prepareSelectedColumn(gridColumn, context, configuration);
+                        if (!selectedColumnsByRef.containsKey(ref)) {
+                            // Add this non already added id column
+                            GridColumn gridColumn = new GridColumn(ref);
+                            prepareSelectedColumn(gridColumn, context, configuration);
+                        }
                     }
                 }
 
@@ -179,11 +180,11 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
                         private GridColumn addNewGridColumnIfNecessary(EntityAttribute entityAttribute) throws Exception {
                             final String attributeName = entityAttribute.getElement().getValue().getName();
-                            if (!selectedColumnsRefVariableNames.contains(attributeName)) {
+                            if (!selectedColumnsByRef.containsKey(attributeName)) {
                                 // Add this non already added id column
                                 prepareSelectedColumn(new GridColumn(entityAttribute), context, configuration);
                             }
-                            return gridColumnsByRefVariableName.get(attributeName);
+                            return selectedColumnsByRef.get(attributeName);
                         }
                     });
                 }
@@ -207,8 +208,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected void prepareSelectedColumn(GridColumn gridColumn, JAGeneratorContext context, final JAConfiguration configuration) throws Exception {
         String ref = gridColumn.ref;
         selectedColumns.add(gridColumn);
-        selectedColumnsRefVariableNames.add(gridColumn.refVariableName);
-        gridColumnsByRefVariableName.put(gridColumn.refVariableName, gridColumn);
+        selectedColumnsByRef.put(gridColumn.ref, gridColumn);
         if (gridColumn.entityAttribute == null) {
             Deque<String> refPath = new LinkedList<>(Arrays.asList(ref.split("\\.")));
             waitToPrepareGridColumnRecursive(refPath, entityTargetFileId, gridColumn, context, configuration);

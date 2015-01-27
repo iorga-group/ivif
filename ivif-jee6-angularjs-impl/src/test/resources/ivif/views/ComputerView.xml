@@ -11,9 +11,21 @@
         </query>
     </grid>
 
+    <grid name="ComputerToDesktopSessionGrid" title="Computers" entity="Computer" on-open="openDesktopSessionGridFromComputer({userId: $line.user.id, computerId: $line.id})">
+        <column ref="id"/>
+        <column ref="name"/>
+        <column ref="user.id"/>
+    </grid>
+
     <action-open-view name="openUserGridFromComputer" grid-name="UserGrid">
         <query>
             <where>$record.id = :userId</where>
+        </query>
+    </action-open-view>
+    
+    <action-open-view name="openDesktopSessionGridFromComputer" grid-name="DesktopSessionGrid">
+        <query>
+            <where>$record.userId = :userId AND $record.computerId = :computerId</where>
         </query>
     </action-open-view>
 </views>
