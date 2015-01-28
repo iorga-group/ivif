@@ -25,6 +25,10 @@
         </query>
     </grid>
 
+    <grid name="ComputerToCurrentUserDesktopSessionGrid" title="Computers" entity="Computer" on-open="openCurrentUserDesktopSessionGridFromComputer({computerId: $line.id})">
+        <column ref="name"/>
+    </grid>
+
     <action-open-view name="openUserGridFromComputer" grid-name="UserGrid">
         <query>
             <where>$record.id = :userId</where>
@@ -34,6 +38,13 @@
     <action-open-view name="openDesktopSessionGridFromComputer" grid-name="DesktopSessionGrid">
         <query>
             <where>$record.userId = :userId AND $record.computerId = :computerId</where>
+        </query>
+    </action-open-view>
+
+    <action-open-view name="openCurrentUserDesktopSessionGridFromComputer" grid-name="DesktopSessionGrid">
+        <query>
+            <where>$record.userId = :userId AND $record.computerId = :computerId</where>
+            <parameter name="userId" value="$inject(com.iorga.ivif.ja.test.ConnectedUser).getUserId()"/>
         </query>
     </action-open-view>
 </views>

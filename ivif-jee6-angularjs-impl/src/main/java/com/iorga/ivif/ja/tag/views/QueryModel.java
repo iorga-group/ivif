@@ -91,6 +91,10 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
                 // TODO handle parameters declared multiple times
                 final QueryParameter parameter = new QueryParameter();
                 parameter.name = (String) operatorContext.parameter.getNodeValue();
+                final String parameterValue = parametersValueByName.get(parameter.name);
+                if (parameterValue != null) {
+                    parameter.value = parameterValue;
+                }
                 parameters.add(parameter);
                 // solve its type
                 if (operatorContext.literal != null) {

@@ -61,7 +61,9 @@ public class ${grid.element.name}BaseWS {
 <#list model.openViewActions as openViewAction>
     public static class ${openViewAction.simpleClassName} {
     <#list openViewAction.queryModel.parameters as parameter>
+        <#if !parameter.value?exists>
         public ${util.useClass(parameter.className)} ${parameter.name};
+        </#if>
     </#list>
     }
 </#list>
