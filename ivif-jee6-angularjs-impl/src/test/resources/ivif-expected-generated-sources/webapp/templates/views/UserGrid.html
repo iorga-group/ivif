@@ -1,0 +1,19 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <fieldset>
+                <legend>Users</legend>
+                <table ng-table="userGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover table-striped">
+                    <tr ng-repeat="line in $data" ng-click="openLine(line)">
+                        <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
+                            {{line.name}}
+                        </td>
+                        <td data-title="'Id'" sortable="'profile_id'" filter="{'profile_id':'text'}">
+                            {{line.profile_id}}
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+        </div>
+    </div>
+</div>

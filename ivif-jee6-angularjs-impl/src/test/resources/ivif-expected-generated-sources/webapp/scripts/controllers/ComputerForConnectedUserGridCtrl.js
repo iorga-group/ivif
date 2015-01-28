@@ -1,0 +1,46 @@
+'use strict';
+
+angular.module('test')
+    .config(['$routeProvider',
+        function($routeProvider) {
+            $routeProvider.
+                when('/computerForConnectedUserGrid', {
+                    templateUrl: 'templates/views/ComputerForConnectedUserGrid.html',
+                    controller: 'ComputerForConnectedUserGridCtrl'
+                });
+        }])
+    .controller('ComputerForConnectedUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', function($scope, ngTableParams, $timeout, $http, locationService) {
+        // Declare actions
+
+        // Init variables
+        if (!locationService.initializeController($scope)) {
+            $scope.computerForConnectedUserGridTableParams = new ngTableParams({
+                page: 1,
+                count: 10
+            }, {
+                total: 0, // length of data
+                getData: function($defer, params) {
+                    var sorting = {
+                        ref: null,
+                        type: null
+                    };
+                    var paramsSorting = params.sorting();
+                    for (var field in paramsSorting) {
+                        sorting.ref = field;
+                        sorting.type = paramsSorting[field];
+                    }
+                    $http.post('api/computerForConnectedUserGrid/search', {
+                        limit: params.count(),
+                        offset: (params.page() - 1) * params.count(),
+                        sorting: sorting,
+                        filter: params.filter()
+                    }).success(function(data) {
+                        params.total(data.total);
+                        $defer.resolve(data.results);
+                    });
+                }
+            });
+        }
+        locationService.controllerInitialized('Computers', $scope, ['computerForConnectedUserGridTableParams']);
+    }])
+;

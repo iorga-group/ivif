@@ -1,5 +1,6 @@
 package com.iorga.ivif.tag;
 
+import com.google.common.collect.Ordering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class Generator<C extends GeneratorContext<C>> {
     private final static Logger LOG = LoggerFactory.getLogger(Generator.class);
@@ -53,17 +56,24 @@ public abstract class Generator<C extends GeneratorContext<C>> {
     }
 
     public void discoverSourceFiles(final C context) throws IOException {
+        final List<Path> discoveredSourceFiles = new LinkedList<>();
+
         Files.walkFileTree(context.getSourcePath(), new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                try {
-                    processNewFile(file, context);
-                } catch (Exception e) {
-                    LOG.error("Error while handling " + file, e);
-                }
+                discoveredSourceFiles.add(file);
                 return super.visitFile(file, attrs);
             }
         });
+        // Order source files in order that for a same file hierarchy, the generated files will be the same, necessary for tests
+        final List<Path> orderedDiscoveredSourceFiles = Ordering.natural().sortedCopy(discoveredSourceFiles);
+        for (Path file : orderedDiscoveredSourceFiles) {
+            try {
+                processNewFile(file, context);
+            } catch (Exception e) {
+                LOG.error("Error while handling " + file, e);
+            }
+        }
     }
 
     public void processNewFile(Path file, C context) throws Exception {
