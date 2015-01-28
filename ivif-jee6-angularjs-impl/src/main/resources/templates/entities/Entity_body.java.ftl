@@ -27,6 +27,13 @@ public class ${entity.name} {
     @${util.useClass("javax.persistence.Column")}(name = "${element.column}"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
         </#if>
     </#if>
+    <#if element.joinColumn?size &gt; 0>
+    @${util.useClass("javax.persistence.JoinColumns")}({
+        <#list element.joinColumn as joinColumn>
+        @${util.useClass("javax.persistence.JoinColumn")}(name = "${joinColumn.column}", referencedColumnName="${joinColumn.refColumn}"<#if !joinColumn.insertable>, insertable = false</#if><#if !joinColumn.updatable>, updatable = false</#if>)<#if joinColumn_has_next>,</#if>
+        </#list>
+    })
+    </#if>
     <#if element.required || element.id>
     @${util.useClass("javax.validation.constraints.NotNull")}
     </#if>

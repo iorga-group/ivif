@@ -42,7 +42,9 @@
         <xs:element name="join-column">
         <xs:complexType>
             <xs:attribute name="ref-column" type="xs:string" default="field"/>
-            <xs:attribute name="column" type="xs:boolean" default="true"/>
+            <xs:attribute name="column" type="xs:string" default="true"/>
+            <xs:attribute name="insertable" type="xs:boolean" default="false"/>
+            <xs:attribute name="updatable" type="xs:boolean" default="false"/>
         </xs:complexType>
     </xs:element>
 
