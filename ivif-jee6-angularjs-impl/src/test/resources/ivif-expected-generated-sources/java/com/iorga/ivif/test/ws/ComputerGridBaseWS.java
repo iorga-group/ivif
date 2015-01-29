@@ -6,6 +6,7 @@ import com.iorga.ivif.test.service.ComputerBaseService;
 import com.iorga.ivif.test.ws.ComputerGridBaseWS.ComputerGridSearchFilter;
 import com.iorga.ivif.test.ws.ComputerGridBaseWS.ComputerGridSearchParam;
 import com.iorga.ivif.test.ws.ComputerGridBaseWS.ComputerGridSearchResult;
+import com.iorga.ivif.test.ws.ComputerGridBaseWS.OpenComputerGridFromUser;
 import com.mysema.query.SearchResults;
 import java.lang.Integer;
 import java.lang.String;
@@ -36,7 +37,11 @@ public class ComputerGridBaseWS {
             this.user_id = user_id;
         }
     }
+    public static class OpenComputerGridFromUser {
+        public Integer userid;
+    }
     public static class ComputerGridSearchFilter extends ComputerGridSearchResult {
+        public OpenComputerGridFromUser openComputerGridFromUser;
     }
     public static class ComputerGridSearchParam extends GridSearchParam<ComputerGridSearchFilter> {}
     @POST

@@ -19,6 +19,7 @@
     <xs:element name="grid">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="toolbar" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="column" minOccurs="1" maxOccurs="unbounded"/>
                 <xs:element ref="query" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
@@ -27,6 +28,7 @@
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="entity" type="xs:string" use="required"/>
+            <xs:attribute name="selection" type="selectionType" default="none"/>
         </xs:complexType>
     </xs:element>
 
@@ -49,6 +51,21 @@
             </xs:choice>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="grid-name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="toolbar">
+        <xs:complexType>
+            <xs:choice minOccurs="1" maxOccurs="unbounded">
+                <xs:element ref="button"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="button">
+        <xs:complexType>
+            <xs:attribute name="title" type="xs:string" use="required"/>
+            <xs:attribute name="action" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -85,6 +102,12 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:simpleType name="selectionType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="single"/>
+            <xs:enumeration value="none"/>
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>
 
               

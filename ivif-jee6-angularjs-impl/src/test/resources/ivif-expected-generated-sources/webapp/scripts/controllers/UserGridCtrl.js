@@ -11,8 +11,8 @@ angular.module('test')
         }])
     .controller('UserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openProfileGridFromUserAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, openProfileGridFromUserAction, $location, locationUtils) {
         // Declare actions
-        $scope.openLine = function($line) {
-            openProfileGridFromUserAction({profileId: $line.profile_id});
+        $scope.clickLine = function(selectedLine) {
+            openProfileGridFromUserAction({profileId:selectedLine.profile_id});
         };
 
         // Init variables

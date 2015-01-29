@@ -4,23 +4,28 @@ angular.module('test')
     .config(['$routeProvider',
         function($routeProvider) {
             $routeProvider.
-                when('/computerGrid', {
-                    templateUrl: 'templates/views/ComputerGrid.html',
-                    controller: 'ComputerGridCtrl'
+                when('/toolbarUserGrid', {
+                    templateUrl: 'templates/views/ToolbarUserGrid.html',
+                    controller: 'ToolbarUserGridCtrl'
                 });
         }])
-    .controller('ComputerGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openUserGridFromComputerAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, openUserGridFromComputerAction, $location, locationUtils) {
+    .controller('ToolbarUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openProfileGridFromUserAction', 'openComputerGridFromUserAction', function($scope, ngTableParams, $timeout, $http, locationService, openProfileGridFromUserAction, openComputerGridFromUserAction) {
         // Declare actions
         $scope.clickLine = function(selectedLine) {
-            openUserGridFromComputerAction({userId:selectedLine.user_id});
+            $scope.selectedLine = selectedLine;
         };
+        $scope.clickOnButton0 = function() {
+            openProfileGridFromUserAction({profileId:$scope.selectedLine.profile_id});
+        }
+        $scope.clickOnButton1 = function() {
+            openComputerGridFromUserAction({userId:$scope.selectedLine.id});
+        }
 
         // Init variables
         if (!locationService.initializeController($scope)) {
-            $scope.computerGridTableParams = new ngTableParams({
+            $scope.toolbarUserGridTableParams = new ngTableParams({
                 page: 1,
-                count: 10,
-                filter: locationUtils.fromSearchToObject($location.search())
+                count: 10
             }, {
                 total: 0, // length of data
                 getData: function($defer, params) {
@@ -33,7 +38,7 @@ angular.module('test')
                         sorting.ref = field;
                         sorting.type = paramsSorting[field];
                     }
-                    $http.post('api/computerGrid/search', {
+                    $http.post('api/toolbarUserGrid/search', {
                         limit: params.count(),
                         offset: (params.page() - 1) * params.count(),
                         sorting: sorting,
@@ -45,6 +50,6 @@ angular.module('test')
                 }
             });
         }
-        locationService.controllerInitialized('Computers', $scope, ['computerGridTableParams']);
+        locationService.controllerInitialized('Toolbar User Grid', $scope, ['toolbarUserGridTableParams', 'selectedLine']);
     }])
 ;

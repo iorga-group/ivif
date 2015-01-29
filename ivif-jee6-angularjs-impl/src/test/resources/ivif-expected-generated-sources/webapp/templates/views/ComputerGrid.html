@@ -4,7 +4,7 @@
             <fieldset>
                 <legend>Computers</legend>
                 <table ng-table="computerGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover table-striped">
-                    <tr ng-repeat="line in $data" ng-click="openLine(line)">
+                    <tr ng-repeat="line in $data" ng-click="clickLine(line)">
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
                             {{line.name}}
                         </td>

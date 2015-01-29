@@ -1,6 +1,10 @@
 <#assign grid=model.grid>
 <#assign editable=grid.element.editable>
 <#assign tableParamsVariableName=grid.variableName+"TableParams">
+<#if grid.onOpen?exists>
+    <#assign onOpenMethod=grid.onOpen.injections[0]>
+    <#assign onOpenCode=grid.onOpen.expression>
+</#if>
 'use strict';
 
 angular.module('${model.configuration.angularModuleName}')
@@ -12,13 +16,23 @@ angular.module('${model.configuration.angularModuleName}')
                     controller: '${grid.element.name}Ctrl'
                 });
         }])
-    .controller('${grid.element.name}Ctrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService'<#if model.onOpenMethod?has_content>, '${model.onOpenMethod}'</#if><#if model.actionOpenViewDefined>, '$location', 'locationUtils'</#if>, function($scope, ngTableParams, $timeout, $http, locationService<#if model.onOpenMethod?has_content>, ${model.onOpenMethod}</#if><#if model.actionOpenViewDefined>, $location, locationUtils</#if>) {
+    .controller('${grid.element.name}Ctrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService'<#list model.injections as injection>, '${injection}'</#list><#if model.actionOpenViewDefined>, '$location', 'locationUtils'</#if>, function($scope, ngTableParams, $timeout, $http, locationService<#list model.injections as injection>, ${injection}</#list><#if model.actionOpenViewDefined>, $location, locationUtils</#if>) {
         // Declare actions
-<#if model.onOpenCode?has_content>
-        $scope.openLine = function($line) {
-            ${model.onOpenCode};
+<#if onOpenCode?exists>
+        $scope.clickLine = function(selectedLine) {
+            ${onOpenCode};
         };
 </#if>
+<#if grid.singleSelection>
+        $scope.clickLine = function(selectedLine) {
+            $scope.selectedLine = selectedLine;
+        };
+</#if>
+<#list grid.toolbarButtons as toolbarButton>
+        $scope.clickOnButton${toolbarButton_index} = function() {
+            ${toolbarButton.jsExpression.expression};
+        }
+</#list>
 <#if editable>
         $scope.edit = function() {
             $scope.$edit = true;
@@ -104,6 +118,6 @@ angular.module('${model.configuration.angularModuleName}')
                 }
             });
         }
-        locationService.controllerInitialized('${grid.element.title}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById'</#if>]);
+        locationService.controllerInitialized('${grid.title}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById'</#if><#if grid.singleSelection>, 'selectedLine'</#if>]);
     }])
 ;

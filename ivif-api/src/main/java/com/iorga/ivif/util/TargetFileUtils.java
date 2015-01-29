@@ -10,4 +10,10 @@ public class TargetFileUtils {
         return StringUtils.join(parts);
     }
 
+    public static String getTitleFromCamelCasedName(String name) {
+        String[] tempTitleCrumbs = StringUtils.splitByCharacterTypeCamelCase(name);
+        tempTitleCrumbs[0] = StringUtils.capitalize(tempTitleCrumbs[0]);
+        return StringUtils.join(tempTitleCrumbs, ' ');
+    }
+
 }

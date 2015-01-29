@@ -11,8 +11,8 @@ angular.module('test')
         }])
     .controller('EditableUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openProfileGridFromUserAction', function($scope, ngTableParams, $timeout, $http, locationService, openProfileGridFromUserAction) {
         // Declare actions
-        $scope.openLine = function($line) {
-            openProfileGridFromUserAction({profileId: $line.profile_id});
+        $scope.clickLine = function(selectedLine) {
+            openProfileGridFromUserAction({profileId:selectedLine.profile_id});
         };
         $scope.edit = function() {
             $scope.$edit = true;

@@ -8,6 +8,9 @@ import com.iorga.ivif.test.entity.User;
 import com.iorga.ivif.test.ws.EditableUserGridBaseWS.EditableUserGridSearchFilter;
 import com.iorga.ivif.test.ws.EditableUserGridBaseWS.EditableUserGridSearchParam;
 import com.iorga.ivif.test.ws.EditableUserGridBaseWS.EditableUserGridSearchResult;
+import com.iorga.ivif.test.ws.ToolbarUserGridBaseWS.ToolbarUserGridSearchFilter;
+import com.iorga.ivif.test.ws.ToolbarUserGridBaseWS.ToolbarUserGridSearchParam;
+import com.iorga.ivif.test.ws.ToolbarUserGridBaseWS.ToolbarUserGridSearchResult;
 import com.iorga.ivif.test.ws.UserGridBaseWS.OpenUserGridFromComputer;
 import com.iorga.ivif.test.ws.UserGridBaseWS.UserGridSearchFilter;
 import com.iorga.ivif.test.ws.UserGridBaseWS.UserGridSearchParam;
@@ -134,6 +137,31 @@ public class UserBaseService {
         jpaQuery.offset(searchParam.offset);
         // Returning projection
         return jpaQuery.listResults(ConstructorExpression.create(EditableUserGridSearchResult.class, $record.firstName, $record.name, $record.profile.id, $record.id, $record.version));
+    }
+
+    public SearchResults<ToolbarUserGridSearchResult> search(ToolbarUserGridSearchParam searchParam) {
+        JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        QUser $record = new QUser("user");
+        jpaQuery.from($record);
+        // Applying filter
+        ToolbarUserGridSearchFilter filter = searchParam.filter;
+        if (filter.name != null) {
+            jpaQuery.where($record.name.containsIgnoreCase(filter.name));
+        }
+        // Applying sorting
+        Sorting sorting = searchParam.sorting;
+        ComparableExpressionBase sortingExpression = null;
+        if ("name".equals(sorting.ref)) {
+            sortingExpression = $record.name;
+        }
+        if (sortingExpression != null) {
+            jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
+        }
+        // Applying limit & offset
+        jpaQuery.limit(searchParam.limit);
+        jpaQuery.offset(searchParam.offset);
+        // Returning projection
+        return jpaQuery.listResults(ConstructorExpression.create(ToolbarUserGridSearchResult.class, $record.name, $record.profile.id, $record.id));
     }
 
 

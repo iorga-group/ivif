@@ -8,18 +8,18 @@ import com.iorga.ivif.ja.tag.entities.EntityAttribute;
 import com.iorga.ivif.ja.tag.entities.EntityAttributePreparedWaiter;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
+import com.iorga.ivif.tag.bean.*;
 import com.iorga.ivif.util.TargetFileUtils;
 import com.iorga.ivif.tag.AbstractTarget;
 import com.iorga.ivif.tag.TargetFactory;
 import com.iorga.ivif.tag.TargetPreparedWaiter;
-import com.iorga.ivif.tag.bean.Column;
-import com.iorga.ivif.tag.bean.Grid;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.iorga.ivif.ja.tag.views.JsExpressionParser.*;
 
 public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected final Grid element;
@@ -44,6 +44,11 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected LinkedHashSet<GridColumn> selectedWithoutSaveColumns;
     protected GridColumn versionColumn;
     protected QueryModel queryModel;
+
+    protected boolean singleSelection;
+    protected JsExpression onOpen;
+    protected List<ToolbarButton> toolbarButtons;
+    protected String title;
 
     public static class GridColumn {
         protected String refVariableName;
@@ -107,6 +112,24 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         }
     }
 
+    public static class ToolbarButton {
+        private final Button element;
+        private final JsExpression jsExpression;
+
+        public ToolbarButton(Button element, JsExpression jsExpression) {
+            this.element = element;
+            this.jsExpression = jsExpression;
+        }
+
+        public Button getElement() {
+            return element;
+        }
+
+        public JsExpression getJsExpression() {
+            return jsExpression;
+        }
+    }
+
     public GridModel(String id, Grid element) {
         super(id);
         this.element = element;
@@ -116,6 +139,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     public void prepare(final JAGeneratorContext context) throws Exception {
         super.prepare(context);
 
+        final String elementTitle = element.getTitle();
+        title = StringUtils.isNotBlank(elementTitle) ? elementTitle : TargetFileUtils.getTitleFromCamelCasedName(element.getName());
 
         variableName = TargetFileUtils.getVariableNameFromCamelCasedName(element.getName());
 
@@ -125,6 +150,11 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         selectedColumnsByRef = new HashMap<>();
         idColumns = new ArrayList<>();
         editableColumns = new LinkedHashSet<>();
+
+        // Handle selection
+        singleSelection = SelectionType.SINGLE.equals(element.getSelection());
+
+        toolbarButtons = new ArrayList<>();
 
         context.waitForEvent(new JAConfigurationPreparedWaiter(this) {
             @Override
@@ -140,17 +170,13 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     prepareSelectedColumn(displayedGridColumn, context, configuration);
                 }
 
-                // Add columns selected by an action
-                String onOpenAction = element.getOnOpen();
-                if (StringUtils.isNotBlank(onOpenAction)) {
-                    Matcher matcher = LINE_REF_PATTERN.matcher(onOpenAction);
-                    while (matcher.find()) {
-                        String ref = StringUtils.substringAfter(matcher.group(), "$line.");
-                        if (!selectedColumnsByRef.containsKey(ref)) {
-                            // Add this non already added id column
-                            GridColumn gridColumn = new GridColumn(ref);
-                            prepareSelectedColumn(gridColumn, context, configuration);
-                        }
+                // Add columns selected by actions
+                onOpen = addSelectColumnForActionIfNecessary(element.getOnOpen(), "selectedLine", configuration, context);
+                Toolbar toolbar = element.getToolbar();
+                if (toolbar != null) {
+                    for (Button button : toolbar.getButton()) {
+                        final JsExpression expression = addSelectColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", configuration, context);
+                        toolbarButtons.add(new ToolbarButton(button, expression));
                     }
                 }
 
@@ -203,6 +229,24 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 });
             }
         });
+    }
+
+    private JsExpression addSelectColumnForActionIfNecessary(String action, String dollarLineReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+        if (StringUtils.isNotBlank(action)) {
+            final JsExpression jsExpression = JsExpressionParser.parse(action, dollarLineReplacement);
+
+            for (LineRef lineRef : jsExpression.getLineRefs()) {
+                final String ref = lineRef.getRef();
+                if (!selectedColumnsByRef.containsKey(ref)) {
+                    // Add this non already added id column
+                    GridColumn gridColumn = new GridColumn(ref);
+                    prepareSelectedColumn(gridColumn, context, configuration);
+                }
+            }
+            return jsExpression;
+        } else {
+            return null;
+        }
     }
 
     protected void prepareSelectedColumn(GridColumn gridColumn, JAGeneratorContext context, final JAConfiguration configuration) throws Exception {
@@ -290,5 +334,21 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public QueryModel getQueryModel() {
         return queryModel;
+    }
+
+    public boolean isSingleSelection() {
+        return singleSelection;
+    }
+
+    public JsExpression getOnOpen() {
+        return onOpen;
+    }
+
+    public List<ToolbarButton> getToolbarButtons() {
+        return toolbarButtons;
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

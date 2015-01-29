@@ -6,6 +6,7 @@ import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 import com.iorga.ivif.tag.AbstractTargetPart;
 import com.iorga.ivif.tag.TargetPart;
 import com.iorga.ivif.tag.bean.AttributeType;
+import com.iorga.ivif.util.TargetFileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBElement;
@@ -35,9 +36,7 @@ public class EntityAttribute extends AbstractTargetPart<String, EntityTargetFile
         if (StringUtils.isNotBlank(elementTitle)) {
             title = elementTitle;
         } else {
-            String[] tempTitleCrumbs = StringUtils.splitByCharacterTypeCamelCase(elementValue.getName());
-            tempTitleCrumbs[0] = StringUtils.capitalize(tempTitleCrumbs[0]);
-            title = StringUtils.join(tempTitleCrumbs, ' ');
+            title = TargetFileUtils.getTitleFromCamelCasedName(elementValue.getName());
         }
     }
 

@@ -11,8 +11,8 @@ angular.module('test')
         }])
     .controller('ComputerToCurrentUserDesktopSessionGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openCurrentUserDesktopSessionGridFromComputerAction', function($scope, ngTableParams, $timeout, $http, locationService, openCurrentUserDesktopSessionGridFromComputerAction) {
         // Declare actions
-        $scope.openLine = function($line) {
-            openCurrentUserDesktopSessionGridFromComputerAction({computerId: $line.id});
+        $scope.clickLine = function(selectedLine) {
+            openCurrentUserDesktopSessionGridFromComputerAction({computerId:selectedLine.id});
         };
 
         // Init variables

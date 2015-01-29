@@ -12,6 +12,7 @@ import com.iorga.ivif.test.ws.ComputerForConnectedUserGridBaseWS.ComputerForConn
 import com.iorga.ivif.test.ws.ComputerGridBaseWS.ComputerGridSearchFilter;
 import com.iorga.ivif.test.ws.ComputerGridBaseWS.ComputerGridSearchParam;
 import com.iorga.ivif.test.ws.ComputerGridBaseWS.ComputerGridSearchResult;
+import com.iorga.ivif.test.ws.ComputerGridBaseWS.OpenComputerGridFromUser;
 import com.iorga.ivif.test.ws.ComputerToCurrentUserDesktopSessionGridBaseWS.ComputerToCurrentUserDesktopSessionGridSearchFilter;
 import com.iorga.ivif.test.ws.ComputerToCurrentUserDesktopSessionGridBaseWS.ComputerToCurrentUserDesktopSessionGridSearchParam;
 import com.iorga.ivif.test.ws.ComputerToCurrentUserDesktopSessionGridBaseWS.ComputerToCurrentUserDesktopSessionGridSearchResult;
@@ -94,6 +95,11 @@ public class ComputerBaseService {
         }
         if (filter.user_name != null) {
             jpaQuery.where($record.user.name.containsIgnoreCase(filter.user_name));
+        }
+        // Applying action filters
+        if (filter.openComputerGridFromUser != null) {
+            OpenComputerGridFromUser parameters = filter.openComputerGridFromUser;
+            jpaQuery.where($record.user.id.eq(parameters.userid));
         }
         // Applying sorting
         Sorting sorting = searchParam.sorting;

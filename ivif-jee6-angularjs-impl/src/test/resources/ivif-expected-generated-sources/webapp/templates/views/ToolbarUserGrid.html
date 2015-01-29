@@ -1,0 +1,20 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <fieldset>
+                <legend>Toolbar User Grid</legend>
+                <nav class="navbar navbar-default">
+                    <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton0()">Open profile</button>
+                    <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton1()">Open computer</button>
+                </nav>
+                <table ng-table="toolbarUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover table-striped">
+                    <tr ng-repeat="line in $data" ng-click="clickLine(line)" ng-class="{'active': line === selectedLine}">
+                        <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
+                            {{line.name}}
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+        </div>
+    </div>
+</div>
