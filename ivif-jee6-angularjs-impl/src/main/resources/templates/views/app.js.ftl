@@ -75,6 +75,8 @@ angular.module('${model.configuration.angularModuleName}', [
                         angular.forEach(locationContext.scopeAttributesToSave, function(scopeAttributeToSave) {
                             scope[scopeAttributeToSave] = savedScopeAttributes[scopeAttributeToSave];
                         });
+                        // Change current scope to the new controller one
+                        locationContext.scope = scope;
                         return true; // controller initialized
                     } else {
                         return false; // controller must initialize

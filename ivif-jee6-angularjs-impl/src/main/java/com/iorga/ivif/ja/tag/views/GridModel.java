@@ -191,26 +191,28 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
                             // Add id columns if not specified on selected columns
                             for (EntityAttribute entityAttribute : entityTargetFile.getIdAttributes()) {
-                                final GridColumn gridColumn = addNewGridColumnIfNecessary(entityAttribute);
-                                idColumns.add(gridColumn);
+                                final GridColumn gridColumn = addNewIdGridColumnIfNecessary(entityAttribute, context, configuration);
                                 saveColumns.add(gridColumn);
                             }
                             final EntityAttribute versionAttribute = entityTargetFile.getVersionAttribute();
                             if (versionAttribute != null) {
-                                final GridColumn gridColumn = addNewGridColumnIfNecessary(versionAttribute);
+                                final GridColumn gridColumn = addNewGridColumnIfNecessary(versionAttribute, context, configuration);
                                 saveColumns.add(gridColumn);
                                 versionColumn = gridColumn;
                             }
                             selectedWithoutSaveColumns.removeAll(saveColumns);
                         }
-
-                        private GridColumn addNewGridColumnIfNecessary(EntityAttribute entityAttribute) throws Exception {
-                            final String attributeName = entityAttribute.getElement().getValue().getName();
-                            if (!selectedColumnsByRef.containsKey(attributeName)) {
-                                // Add this non already added id column
-                                prepareSelectedColumn(new GridColumn(entityAttribute), context, configuration);
+                    });
+                }
+                if (singleSelection) {
+                    // We can select a line, must add the id attributes to the selected column in order to identify which line is selected
+                    context.waitForEvent(new TargetPreparedWaiter<EntityTargetFile, EntityTargetFileId, JAGeneratorContext>(EntityTargetFile.class, entityTargetFileId, GridModel.this) {
+                        @Override
+                        protected void onTargetPrepared(EntityTargetFile entityTargetFile) throws Exception {
+                            // Add id columns if not specified on selected columns
+                            for (EntityAttribute entityAttribute : entityTargetFile.getIdAttributes()) {
+                                addNewIdGridColumnIfNecessary(entityAttribute, context, configuration);
                             }
-                            return selectedColumnsByRef.get(attributeName);
                         }
                     });
                 }
@@ -229,6 +231,21 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 });
             }
         });
+    }
+
+    private GridColumn addNewIdGridColumnIfNecessary(EntityAttribute entityAttribute, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
+        final GridColumn gridColumn = addNewGridColumnIfNecessary(entityAttribute, context, configuration);
+        idColumns.add(gridColumn);
+        return gridColumn;
+    }
+
+    private GridColumn addNewGridColumnIfNecessary(EntityAttribute entityAttribute, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
+        final String attributeName = entityAttribute.getElement().getValue().getName();
+        if (!selectedColumnsByRef.containsKey(attributeName)) {
+            // Add this non already added id column
+            prepareSelectedColumn(new GridColumn(entityAttribute), context, configuration);
+        }
+        return selectedColumnsByRef.get(attributeName);
     }
 
     private JsExpression addSelectColumnForActionIfNecessary(String action, String dollarLineReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {

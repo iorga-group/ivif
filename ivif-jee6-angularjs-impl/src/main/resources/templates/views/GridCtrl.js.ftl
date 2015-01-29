@@ -17,6 +17,12 @@ angular.module('${model.configuration.angularModuleName}')
                 });
         }])
     .controller('${grid.element.name}Ctrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService'<#list model.injections as injection>, '${injection}'</#list><#if model.actionOpenViewDefined>, '$location', 'locationUtils'</#if>, function($scope, ngTableParams, $timeout, $http, locationService<#list model.injections as injection>, ${injection}</#list><#if model.actionOpenViewDefined>, $location, locationUtils</#if>) {
+        // Utils
+<#if editable || grid.singleSelection>
+        function getIdForLine(line) {
+            return <#list grid.idColumns as idColumn>line.${idColumn.refVariableName}<#if idColumn_has_next>+':'+</#if></#list>;
+        }
+</#if>
         // Declare actions
 <#if onOpenCode?exists>
         $scope.clickLine = function(selectedLine) {
@@ -25,13 +31,19 @@ angular.module('${model.configuration.angularModuleName}')
 </#if>
 <#if grid.singleSelection>
         $scope.clickLine = function(selectedLine) {
+            // unselect previous selected line if any
+            if ($scope.selectedLine) {
+                delete $scope.selectedLine.$selected;
+            }
             $scope.selectedLine = selectedLine;
+            $scope.selectedLineId = getIdForLine(selectedLine);
+            selectedLine.$selected = true;
         };
 </#if>
 <#list grid.toolbarButtons as toolbarButton>
         $scope.clickOnButton${toolbarButton_index} = function() {
             ${toolbarButton.jsExpression.expression};
-        }
+        };
 </#list>
 <#if editable>
         $scope.edit = function() {
@@ -67,6 +79,58 @@ angular.module('${model.configuration.angularModuleName}')
 </#if>
 
         // Init variables
+        function getData($defer, params) {
+            var sorting = {
+                ref: null,
+                type: null
+            };
+            var paramsSorting = params.sorting();
+            for (var field in paramsSorting) {
+                sorting.ref = field;
+                sorting.type = paramsSorting[field];
+            }
+            $http.post('api/${grid.variableName}/search', {
+                limit: params.count(),
+                offset: (params.page() - 1) * params.count(),
+                sorting: sorting,
+                filter: params.filter()
+            }).success(function(data) {
+                params.total(data.total);
+                var results = data.results;
+<#if editable>
+                if ($scope.$edit) {
+                    results = [];
+                    var editedLinesById = $scope.editedLinesById;
+                    angular.forEach(data.results, function(result) {
+                        var id = getIdForLine(result);
+                        var editedLine = editedLinesById[id];
+                        if (editedLine === undefined) {
+                            editedLine = angular.copy(result);
+                            editedLine.$original = result;
+                            editedLinesById[id] = editedLine;
+                        }
+                        results.push(editedLine);
+                    });
+                }
+</#if>
+<#if grid.singleSelection>
+                if ($scope.selectedLineId) {
+                    // search if the selected line id is in current results and flag the result in that case
+                    for (var i = 0; i < results.length; i++) {
+                        var result = results[i],
+                            id = getIdForLine(result);
+                        if (id === $scope.selectedLineId) {
+                            $scope.selectedLine = result;
+                            result.$selected = true;
+                            break;
+                        }
+                    }
+                }
+</#if>
+                $defer.resolve(results);
+            });
+        }
+
         if (!locationService.initializeController($scope)) {
 <#if editable>
             $scope.editedLinesById = {};
@@ -77,47 +141,15 @@ angular.module('${model.configuration.angularModuleName}')
                 filter: locationUtils.fromSearchToObject($location.search())</#if>
             }, {
                 total: 0, // length of data
-                getData: function($defer, params) {
-                    var sorting = {
-                        ref: null,
-                        type: null
-                    };
-                    var paramsSorting = params.sorting();
-                    for (var field in paramsSorting) {
-                        sorting.ref = field;
-                        sorting.type = paramsSorting[field];
-                    }
-                    $http.post('api/${grid.variableName}/search', {
-                        limit: params.count(),
-                        offset: (params.page() - 1) * params.count(),
-                        sorting: sorting,
-                        filter: params.filter()
-                    }).success(function(data) {
-                        params.total(data.total);
-<#if editable>
-                        var results = data.results;
-                        if ($scope.$edit) {
-                            results = [];
-                            var editedLinesById = $scope.editedLinesById;
-                            angular.forEach(data.results, function(result) {
-                                var id = <#list grid.idColumns as idColumn>result.${idColumn.refVariableName}<#if idColumn_has_next>+':'+</#if></#list>;
-                                var editedLine = editedLinesById[id];
-                                if (editedLine === undefined) {
-                                    editedLine = angular.copy(result);
-                                    editedLine.$original = result;
-                                    editedLinesById[id] = editedLine;
-                                }
-                                results.push(editedLine);
-                            });
-                        }
-                        $defer.resolve(results);
-<#else>
-                        $defer.resolve(data.results);
-</#if>
-                    });
-                }
+                getData: getData
+            });
+        } else {
+            // refresh getData function as the $scope is different from the original one
+            $scope.${tableParamsVariableName}.settings({
+                total: 0, // length of data
+                getData: getData
             });
         }
-        locationService.controllerInitialized('${grid.title}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById'</#if><#if grid.singleSelection>, 'selectedLine'</#if>]);
+        locationService.controllerInitialized('${grid.title}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById'</#if><#if grid.singleSelection>, 'selectedLineId'</#if>]);
     }])
 ;

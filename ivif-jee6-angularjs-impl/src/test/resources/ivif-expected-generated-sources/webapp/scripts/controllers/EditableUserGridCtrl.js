@@ -10,6 +10,10 @@ angular.module('test')
                 });
         }])
     .controller('EditableUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openProfileGridFromUserAction', function($scope, ngTableParams, $timeout, $http, locationService, openProfileGridFromUserAction) {
+        // Utils
+        function getIdForLine(line) {
+            return line.id;
+        }
         // Declare actions
         $scope.clickLine = function(selectedLine) {
             openProfileGridFromUserAction({profileId:selectedLine.profile_id});
@@ -46,6 +50,42 @@ angular.module('test')
         };
 
         // Init variables
+        function getData($defer, params) {
+            var sorting = {
+                ref: null,
+                type: null
+            };
+            var paramsSorting = params.sorting();
+            for (var field in paramsSorting) {
+                sorting.ref = field;
+                sorting.type = paramsSorting[field];
+            }
+            $http.post('api/editableUserGrid/search', {
+                limit: params.count(),
+                offset: (params.page() - 1) * params.count(),
+                sorting: sorting,
+                filter: params.filter()
+            }).success(function(data) {
+                params.total(data.total);
+                var results = data.results;
+                if ($scope.$edit) {
+                    results = [];
+                    var editedLinesById = $scope.editedLinesById;
+                    angular.forEach(data.results, function(result) {
+                        var id = getIdForLine(result);
+                        var editedLine = editedLinesById[id];
+                        if (editedLine === undefined) {
+                            editedLine = angular.copy(result);
+                            editedLine.$original = result;
+                            editedLinesById[id] = editedLine;
+                        }
+                        results.push(editedLine);
+                    });
+                }
+                $defer.resolve(results);
+            });
+        }
+
         if (!locationService.initializeController($scope)) {
             $scope.editedLinesById = {};
             $scope.editableUserGridTableParams = new ngTableParams({
@@ -53,41 +93,13 @@ angular.module('test')
                 count: 10
             }, {
                 total: 0, // length of data
-                getData: function($defer, params) {
-                    var sorting = {
-                        ref: null,
-                        type: null
-                    };
-                    var paramsSorting = params.sorting();
-                    for (var field in paramsSorting) {
-                        sorting.ref = field;
-                        sorting.type = paramsSorting[field];
-                    }
-                    $http.post('api/editableUserGrid/search', {
-                        limit: params.count(),
-                        offset: (params.page() - 1) * params.count(),
-                        sorting: sorting,
-                        filter: params.filter()
-                    }).success(function(data) {
-                        params.total(data.total);
-                        var results = data.results;
-                        if ($scope.$edit) {
-                            results = [];
-                            var editedLinesById = $scope.editedLinesById;
-                            angular.forEach(data.results, function(result) {
-                                var id = result.id;
-                                var editedLine = editedLinesById[id];
-                                if (editedLine === undefined) {
-                                    editedLine = angular.copy(result);
-                                    editedLine.$original = result;
-                                    editedLinesById[id] = editedLine;
-                                }
-                                results.push(editedLine);
-                            });
-                        }
-                        $defer.resolve(results);
-                    });
-                }
+                getData: getData
+            });
+        } else {
+            // refresh getData function as the $scope is different from the original one
+            $scope.editableUserGridTableParams.settings({
+                total: 0, // length of data
+                getData: getData
             });
         }
         locationService.controllerInitialized('Users', $scope, ['editableUserGridTableParams', 'editedLinesById']);
