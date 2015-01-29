@@ -90,7 +90,7 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
                         GridBaseWSTargetFile.this.baseService = baseService;
 
                         // Adding the search method
-                        baseService.addRenderPart(new RenderPart("entities/EntityBaseService_gridSearch_bodyPart.java.ftl", GridBaseWSTargetFile.this));
+                        baseService.addRenderPart(new RenderPart("entities/EntityBaseService_gridSearch_bodyPart.java.ftl", GridBaseWSTargetFile.this, GridBaseWSTargetFile.this));
                     }
                 });
             }

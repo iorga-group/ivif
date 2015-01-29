@@ -4,10 +4,12 @@
             <fieldset>
                 <legend>Toolbar User Grid</legend>
                 <nav class="navbar navbar-default">
-                    <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton0()">Open profile</button>
-                    <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton1()">Open computer</button>
+                    <div class="collapse navbar-collapse">
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton0()">Open profile</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton1()">Open computer</button>
+                    </div>
                 </nav>
-                <table ng-table="toolbarUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover table-striped">
+                <table ng-table="toolbarUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
                     <tr ng-repeat="line in $data" ng-click="clickLine(line)" ng-class="{'active': line === selectedLine}">
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
                             {{line.name}}

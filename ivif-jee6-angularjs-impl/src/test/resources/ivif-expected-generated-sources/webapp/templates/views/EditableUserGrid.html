@@ -4,11 +4,13 @@
             <fieldset>
                 <legend>Users</legend>
                 <nav class="navbar navbar-default">
-                    <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit">Edit</button>
-                    <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit">Save</button>
-                    <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit">Cancel</button>
+                    <div class="collapse navbar-collapse">
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit">Edit</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit">Save</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit">Cancel</button>
+                    </div>
                 </nav>
-                <table ng-table="editableUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover table-striped">
+                <table ng-table="editableUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
                     <tr ng-repeat="line in $data" ng-click="clickLine(line)">
                         <td data-title="'First Name'" sortable="'firstName'" filter="{'firstName':'text'}">
                             {{line.firstName}}

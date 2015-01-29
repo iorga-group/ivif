@@ -82,13 +82,17 @@ public class EntityBaseServiceTargetFile extends JavaTargetFile<ServiceTargetFil
         OutputStreamWriter out = new OutputStreamWriter(bodyStream);
         // Then each body parts
         for (RenderPart renderPart : renderParts) {
-            template = context.getTemplate(renderPart.getFreemarkerTemplateName());
-            SimpleHash partContext = context.createSimpleHash();
-            partContext.put("baseModel", getFreemarkerModel());
-            partContext.put("model", renderPart.getModel());
-            partContext.put("util", util);
-            partContext.put("context", context);
-            template.process(partContext, out);
+            try {
+                template = context.getTemplate(renderPart.getFreemarkerTemplateName());
+                SimpleHash partContext = context.createSimpleHash();
+                partContext.put("baseModel", getFreemarkerModel());
+                partContext.put("model", renderPart.getModel());
+                partContext.put("util", util);
+                partContext.put("context", context);
+                template.process(partContext, out);
+            } catch (Exception e) {
+                throw new IllegalStateException("Problem while rendering "+getId()+"["+renderPart.getSource()+"]", e);
+            }
         }
         // Then body end
         template = context.getTemplate("entities/EntityBaseService_bodyEnd.java.ftl");

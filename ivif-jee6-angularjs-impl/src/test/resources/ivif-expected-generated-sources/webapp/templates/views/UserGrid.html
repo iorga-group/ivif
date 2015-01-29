@@ -3,7 +3,7 @@
         <div class="col-md-12">
             <fieldset>
                 <legend>Users</legend>
-                <table ng-table="userGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover table-striped">
+                <table ng-table="userGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
                     <tr ng-repeat="line in $data" ng-click="clickLine(line)">
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
                             {{line.name}}

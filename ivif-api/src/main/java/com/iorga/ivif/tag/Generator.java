@@ -110,9 +110,13 @@ public abstract class Generator<C extends GeneratorContext<C>> {
         }
     }
 
-    public void renderPreparedTargetFiles(C context) throws Exception {
+    public void renderPreparedTargetFiles(C context) {
         for (TargetFile<?, C> targetFile : context.iterateOnPreparedTargetFilesToRenderThem()) {
-            targetFile.render(context);
+            try {
+                targetFile.render(context);
+            } catch (Exception e) {
+                LOG.error("Problem while rendering " + targetFile.getPath(context), e);
+            }
         }
     }
 

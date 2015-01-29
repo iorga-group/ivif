@@ -3,12 +3,14 @@ package com.iorga.ivif.ja.tag;
 public class RenderPart {
     protected String freemarkerTemplateName;
     protected Object model;
+    protected Object source;
 
     public RenderPart() {}
 
-    public RenderPart(String freemarkerTemplateName, Object model) {
+    public RenderPart(String freemarkerTemplateName, Object model, Object source) {
         this.freemarkerTemplateName = freemarkerTemplateName;
         this.model = model;
+        this.source = source;
     }
 
     public String getFreemarkerTemplateName() {
@@ -25,5 +27,9 @@ public class RenderPart {
 
     public void setModel(Object model) {
         this.model = model;
+    }
+
+    public Object getSource() {
+        return source;
     }
 }

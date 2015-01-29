@@ -3,7 +3,7 @@
         <div class="col-md-12">
             <fieldset>
                 <legend>Sessions</legend>
-                <table ng-table="desktopSessionGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover table-striped">
+                <table ng-table="desktopSessionGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
                     <tr ng-repeat="line in $data">
                         <td data-title="'Computer Id'" sortable="'computerId'" filter="{'computerId':'text'}">
                             {{line.computerId}}
