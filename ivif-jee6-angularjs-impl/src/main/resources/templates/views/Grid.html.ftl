@@ -15,7 +15,7 @@
                         <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit">Cancel</button>
     </#if>
     <#list grid.toolbarButtons as toolbarButton>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton${toolbarButton_index}()">${toolbarButton.element.title}</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton${toolbarButton_index}()"<#if toolbarButton.jsExpression.lineRefs?size &gt; 0> ng-disabled="!selectedLine"</#if>>${toolbarButton.element.title}</button>
     </#list>
                     </div>
                 </nav>
