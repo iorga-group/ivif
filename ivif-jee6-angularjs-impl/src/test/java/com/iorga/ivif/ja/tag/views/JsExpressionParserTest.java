@@ -9,21 +9,29 @@ public class JsExpressionParserTest {
     
     @Test
     public void dollarInjectTest() {
-        final JsExpression expression = JsExpressionParser.parse("$inject(monAction)({id: $line.une.ref, id2: $line.autre})", "selectedLine");
-        assertThat(expression.getExpression()).isEqualTo("monAction({id:selectedLine.une_ref,id2:selectedLine.autre})");
-        assertThat(expression.getInjections()).containsExactly("monAction");
+        final JsExpression expression = JsExpressionParser.parse("$inject(myAction)({id: $line.a.ref, id2: $line.other})", "selectedLine");
+        assertThat(expression.getExpression()).isEqualTo("myAction({id:selectedLine.a_ref,id2:selectedLine.other})");
+        assertThat(expression.getInjections()).containsExactly("myAction");
     }
 
     @Test
     public void injectionWithoutDollarInjectTest() {
-        final JsExpression expression = JsExpressionParser.parse("monAction({id: $line.une.ref, id2: $line.autre})", "myLine");
-        assertThat(expression.getExpression()).isEqualTo("monActionAction({id:myLine.une_ref,id2:myLine.autre})");
-        assertThat(expression.getInjections()).containsExactly("monActionAction");
+        final JsExpression expression = JsExpressionParser.parse("myAction({id: $line.a.ref, id2: $line.other})", "myLine");
+        assertThat(expression.getExpression()).isEqualTo("myActionAction({id:myLine.a_ref,id2:myLine.other})");
+        assertThat(expression.getInjections()).containsExactly("myActionAction");
     }
 
     @Test
     public void lineRefsTest() {
-        final JsExpression expression = JsExpressionParser.parse("monAction({id: $line.une.ref, id2: $line.autre}) + $line.autre", "myLine");
+        final JsExpression expression = JsExpressionParser.parse("myAction({id: $line.a.ref, id2: $line.other}) + $line.other", "myLine");
         assertThat(expression.getLineRefs()).hasSize(2);
+    }
+
+    @Test
+    public void actionThenTest() {
+        JsExpression expression = JsExpressionParser.parse("$action(myAction)().then($action(secondAction)())", "line");
+        assertThat(expression.getExpression()).isEqualTo("myActionAction().then(secondActionAction())");
+        expression = JsExpressionParser.parse("myAction().then(secondAction())", "line");
+        assertThat(expression.getExpression()).isEqualTo("myActionAction().then(secondActionAction())");
     }
 }

@@ -2,7 +2,9 @@
 
 angular.module('test', [
         'ngRoute',
-        'ngTable'
+        'ngTable',
+        'angularMoment',
+        'ui.bootstrap'
     ])
     .value('locationUtils', {
         fromObjectToSearch: function(object) {
