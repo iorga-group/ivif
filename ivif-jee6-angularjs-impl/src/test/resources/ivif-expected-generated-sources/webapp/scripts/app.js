@@ -96,4 +96,9 @@ angular.module('test', [
     .controller('BreadcrumbsCtrl', ['$scope', 'locationService', function($scope, locationService) {
         $scope.locationService = locationService;
     }])
+    .filter('interpolate', ['$interpolate', function($interpolate) {
+        return function(str, scope) {
+            return $interpolate(str)(scope);
+        }
+    }]);
 ;
