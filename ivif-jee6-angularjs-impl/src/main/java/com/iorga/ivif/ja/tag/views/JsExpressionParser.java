@@ -12,12 +12,14 @@ import static com.antlr.v4.grammars.ECMAScriptParser.*;
 
 public class JsExpressionParser {
 
+    public static final String LINE_NAME = "$line";
+
     public static class LineRef {
         private final String ref;
         private final String refVariableName;
 
         public LineRef(String fullLineRef) {
-            ref = StringUtils.substringAfter(fullLineRef, "$line.");
+            ref = StringUtils.substringAfter(fullLineRef, LINE_NAME + ".");
             refVariableName = ref.replaceAll("\\.", "_");
         }
 
@@ -65,7 +67,7 @@ public class JsExpressionParser {
         }
     }
 
-    public static JsExpression parse(String jsExpression, final String $lineReplacement) {
+    public static JsExpression parse(String jsExpression, final String lineReplacement) {
         final ECMAScriptParser parser = new ECMAScriptParser(new CommonTokenStream(new ECMAScriptLexer(new ANTLRInputStream(jsExpression))));
         final ExpressionSequenceContext tree = parser.expressionSequence();
 
@@ -108,13 +110,25 @@ public class JsExpressionParser {
             @Override
             public Void visitMemberDotExpression(MemberDotExpressionContext ctx) {
                 String ref = parser.getTokenStream().getText(ctx);
-                if (ref.startsWith("$line.")) {
+                if (ref.startsWith(LINE_NAME + ".")) {
                     final LineRef lineRef = new LineRef(ref);
                     expression.lineRefs.add(lineRef);
-                    // must change $line.field.subfield to $lineReplacement.field_subfield
-                    expressionBuilder.append($lineReplacement + "." + lineRef.refVariableName);
+                    // must change $line.field.subfield to lineReplacement.field_subfield
+                    expressionBuilder.append(lineReplacement + "." + lineRef.refVariableName);
                 } else {
                     super.visitMemberDotExpression(ctx);
+                }
+                return null;
+            }
+
+            @Override
+            public Void visitIdentifierExpression(IdentifierExpressionContext ctx) {
+                // catch lonely $line references
+                if (ctx.getChildCount() == 1 && LINE_NAME.equals(ctx.getChild(0).getText())) {
+                    // Catch and stop the visit by replacing the $line with its replacement
+                    expressionBuilder.append(lineReplacement);
+                } else {
+                    return super.visitIdentifierExpression(ctx);
                 }
                 return null;
             }

@@ -34,4 +34,10 @@ public class JsExpressionParserTest {
         expression = JsExpressionParser.parse("myAction().then(secondAction())", "line");
         assertThat(expression.getExpression()).isEqualTo("myActionAction().then(secondActionAction())");
     }
+
+    @Test
+    public void lineWithoutFieldTest() {
+        final JsExpression expression = JsExpressionParser.parse("$inject(anAction)($line)", "line");
+        assertThat(expression.getExpression()).isEqualTo("anAction(line)");
+    }
 }
