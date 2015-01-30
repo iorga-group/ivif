@@ -49,6 +49,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected JsExpression onOpen;
     protected List<ToolbarButton> toolbarButtons;
     protected String title;
+    protected JsExpression onSelect;
 
     public static class GridColumn {
         protected String refVariableName;
@@ -172,6 +173,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
                 // Add columns selected by actions
                 onOpen = addSelectColumnForActionIfNecessary(element.getOnOpen(), "selectedLine", configuration, context);
+                onSelect = addSelectColumnForActionIfNecessary(element.getOnSelect(), "selectedLine", configuration, context);
                 Toolbar toolbar = element.getToolbar();
                 if (toolbar != null) {
                     for (Button button : toolbar.getButton()) {
@@ -367,5 +369,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public String getTitle() {
         return title;
+    }
+
+    public JsExpression getOnSelect() {
+        return onSelect;
     }
 }

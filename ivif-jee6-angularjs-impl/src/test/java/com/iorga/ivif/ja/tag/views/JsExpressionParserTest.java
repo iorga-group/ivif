@@ -40,4 +40,11 @@ public class JsExpressionParserTest {
         final JsExpression expression = JsExpressionParser.parse("$inject(anAction)($line)", "line");
         assertThat(expression.getExpression()).isEqualTo("anAction(line)");
     }
+
+    @Test
+    public void methodWithDirectLineRefsTest() {
+        final JsExpression expression = JsExpressionParser.parse("$inject(anAction)($line.test, $line.field.b)", "line");
+        assertThat(expression.getExpression()).isEqualTo("anAction(line.test,line.field_b)");
+        assertThat(expression.getInjections()).containsExactly("anAction");
+    }
 }

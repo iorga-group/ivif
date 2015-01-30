@@ -38,6 +38,10 @@ angular.module('${model.configuration.angularModuleName}')
             $scope.selectedLine = selectedLine;
             $scope.selectedLineId = getIdForLine(selectedLine);
             selectedLine.$selected = true;
+    <#if grid.onSelect?exists>
+            // on-select call
+            ${grid.onSelect.expression};
+    </#if>
         };
 </#if>
 <#list grid.toolbarButtons as toolbarButton>

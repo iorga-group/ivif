@@ -6,12 +6,14 @@ import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
 import com.iorga.ivif.ja.tag.util.RenderUtils;
 import com.iorga.ivif.ja.tag.views.GridModel.ToolbarButton;
+import com.iorga.ivif.ja.tag.views.JsExpressionParser.JsExpression;
 import com.iorga.ivif.tag.TargetPreparedWaiter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,11 +42,9 @@ public class GridCtrlJsTargetFile extends JsTargetFile<String> {
                 GridCtrlJsTargetFile.this.gridModel = gridModel;
 
                 // Compute injections
-                injections = new HashSet<>();
-                final JsExpressionParser.JsExpression onOpen = gridModel.getOnOpen();
-                if (onOpen != null) {
-                    injections.addAll(onOpen.getInjections());
-                }
+                injections = new LinkedHashSet<>();
+                addInjectionsIfExpressionExists(gridModel.getOnOpen());
+                addInjectionsIfExpressionExists(gridModel.getOnSelect());
                 for (ToolbarButton toolbarButton : gridModel.getToolbarButtons()) {
                     injections.addAll(toolbarButton.getJsExpression().getInjections());
                 }
@@ -57,6 +57,12 @@ public class GridCtrlJsTargetFile extends JsTargetFile<String> {
                 GridCtrlJsTargetFile.this.configuration = configuration;
             }
         });
+    }
+
+    private void addInjectionsIfExpressionExists(JsExpression expression) {
+        if (expression != null) {
+            injections.addAll(expression.getInjections());
+        }
     }
 
 
