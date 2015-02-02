@@ -4,24 +4,13 @@ import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.WSTargetFileId;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
-import com.iorga.ivif.ja.tag.entities.EntityAttribute;
-import com.iorga.ivif.ja.tag.entities.EntityAttributePreparedWaiter;
-import com.iorga.ivif.ja.tag.entities.EntityTargetFile;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 import com.iorga.ivif.tag.JAXBSourceTagHandler;
 import com.iorga.ivif.tag.TargetFactory;
 import com.iorga.ivif.tag.TargetPreparedWaiter;
 import com.iorga.ivif.tag.bean.ActionOpenView;
-import org.apache.commons.lang3.BooleanUtils;
-import org.datanucleus.query.compiler.JPQLParser;
-import org.datanucleus.query.compiler.Node;
 
 import javax.xml.bind.JAXBException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
 
 public class ActionOpenViewSourceTagHandler extends JAXBSourceTagHandler<ActionOpenView, JAGeneratorContext> {
 
