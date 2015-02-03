@@ -134,6 +134,7 @@ public class ComputerBaseService {
         if (filter.user_id != null) {
             jpaQuery.where($record.user.id.eq(filter.user_id));
         }
+        // Applying action filters
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
@@ -165,6 +166,7 @@ public class ComputerBaseService {
         if (filter.name != null) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
+        // Applying action filters
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
@@ -190,6 +192,7 @@ public class ComputerBaseService {
         if (filter.name != null) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
+        // Applying action filters
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;

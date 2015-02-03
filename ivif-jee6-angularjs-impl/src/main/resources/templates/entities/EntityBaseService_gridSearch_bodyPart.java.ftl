@@ -16,9 +16,13 @@
             jpaQuery.where($record.${column.ref}.${model.getSearchRelationMethodForGridColumn(column)}(filter.${column.refVariableName}));
         }
 </#list>
-<#list model.openViewActions as openViewAction>
         // Applying action filters
+<#list model.openViewActions as openViewAction>
         if (filter.${openViewAction.variableName} != null) {
+    <#if openViewAction.rolesAllowed?size &gt; 0>
+            // Check additionnal rights for that action
+            ${util.useInject("com.iorga.ivif.ja.SecurityService")}.check(<#list openViewAction.rolesAllowed as roleAllowed>"${roleAllowed}"<#if roleAllowed_has_next>, </#if></#list>);
+    </#if>
             ${util.useClass(openViewAction.className)} parameters = filter.${openViewAction.variableName};
             jpaQuery.where(<@openViewAction.queryModel.queryDslCode?interpret/>);
         }

@@ -11,11 +11,15 @@ import com.iorga.ivif.tag.TargetPreparedWaiter;
 import com.iorga.ivif.tag.bean.ActionOpenView;
 
 import javax.xml.bind.JAXBException;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class ActionOpenViewSourceTagHandler extends JAXBSourceTagHandler<ActionOpenView, JAGeneratorContext> {
 
     private String queryModelId;
     private QueryModel queryModel;
+    private Set<String> rolesAllowed;
 
     public ActionOpenViewSourceTagHandler() throws JAXBException {
         super(ActionOpenView.class);
@@ -53,6 +57,10 @@ public class ActionOpenViewSourceTagHandler extends JAXBSourceTagHandler<ActionO
                             }
                         });
 
+                        // Compute the allowed roles
+                        rolesAllowed = new LinkedHashSet<>(element.getRolesAllowed());
+                        rolesAllowed.removeAll(gridBaseWSTargetFile.getGrid().getElement().getRolesAllowed());
+
                         // Finaly set add the action to the grid WS
                         gridBaseWSTargetFile.addActionOpenView(ActionOpenViewSourceTagHandler.this);
                         // And tell its controller
@@ -70,5 +78,9 @@ public class ActionOpenViewSourceTagHandler extends JAXBSourceTagHandler<ActionO
 
     public QueryModel getQueryModel() {
         return queryModel;
+    }
+
+    public Set<String> getRolesAllowed() {
+        return rolesAllowed;
     }
 }

@@ -1,6 +1,7 @@
 package com.iorga.ivif.test.service;
 
 import com.iorga.ivif.ja.Generated;
+import com.iorga.ivif.ja.SecurityService;
 import com.iorga.ivif.ja.Sorting;
 import com.iorga.ivif.ja.SortingType;
 import com.iorga.ivif.test.entity.Profile;
@@ -18,6 +19,7 @@ import java.lang.Integer;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -26,6 +28,9 @@ import javax.persistence.PersistenceContext;
 public class ProfileBaseService {
     @PersistenceContext
     protected EntityManager entityManager;
+
+    @Inject
+    protected SecurityService securityService;
 
 
 
@@ -79,6 +84,8 @@ public class ProfileBaseService {
         }
         // Applying action filters
         if (filter.openProfileGridFromUser != null) {
+            // Check additionnal rights for that action
+            securityService.check("admin");
             OpenProfileGridFromUser parameters = filter.openProfileGridFromUser;
             jpaQuery.where($record.id.eq(parameters.profileId));
         }

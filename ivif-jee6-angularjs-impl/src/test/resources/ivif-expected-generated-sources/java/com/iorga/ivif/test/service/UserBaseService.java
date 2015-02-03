@@ -123,6 +123,7 @@ public class UserBaseService {
         if (filter.name != null) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
+        // Applying action filters
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
@@ -150,6 +151,7 @@ public class UserBaseService {
         if (filter.name != null) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
+        // Applying action filters
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;

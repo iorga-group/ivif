@@ -57,6 +57,7 @@
             </xs:choice>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="grid-name" type="xs:string" use="required"/>
+            <xs:attribute name="roles-allowed" type="stringListType"/>
         </xs:complexType>
     </xs:element>
 

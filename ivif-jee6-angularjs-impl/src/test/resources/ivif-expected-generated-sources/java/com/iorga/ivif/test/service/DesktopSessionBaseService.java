@@ -96,7 +96,6 @@ public class DesktopSessionBaseService {
             OpenDesktopSessionGridFromComputer parameters = filter.openDesktopSessionGridFromComputer;
             jpaQuery.where($record.userId.eq(parameters.userId).and($record.computerId.eq(parameters.computerId)));
         }
-        // Applying action filters
         if (filter.openCurrentUserDesktopSessionGridFromComputer != null) {
             OpenCurrentUserDesktopSessionGridFromComputer parameters = filter.openCurrentUserDesktopSessionGridFromComputer;
             jpaQuery.where($record.userId.eq(connectedUser.getUserId()).and($record.computerId.eq(parameters.computerId)));

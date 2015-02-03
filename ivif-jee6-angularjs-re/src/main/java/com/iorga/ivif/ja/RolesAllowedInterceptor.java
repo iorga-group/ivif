@@ -1,7 +1,5 @@
 package com.iorga.ivif.ja;
 
-import org.jboss.resteasy.spi.UnauthorizedException;
-
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
@@ -15,8 +13,8 @@ import java.util.*;
 public class RolesAllowedInterceptor implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Inject @CurrentRoles
-    private Collection<String> currentRoles;
+    @Inject
+    private SecurityService securityService;
 
     @AroundInvoke
     public Object interceptRolesAllowed(InvocationContext context) throws Exception {
@@ -30,13 +28,9 @@ public class RolesAllowedInterceptor implements Serializable {
         recursiveAddClassAndInterfaceRolesAllowed(targetClass, method, rolesAllowed, new HashSet<Class<?>>());
 
         // Now we have all allowed roles, we must check if we have at least one common role
-        rolesAllowed.retainAll(currentRoles);
+        securityService.checkRolesAllowed(rolesAllowed);
 
-        if (rolesAllowed.isEmpty()) {
-            throw new UnauthorizedException();
-        } else {
-            return context.proceed();
-        }
+        return context.proceed();
     }
 
     private void recursiveAddClassAndInterfaceRolesAllowed(Class<?> klass, Method method, Set<String> rolesAllowed, HashSet<Class<?>> alreadyInspectedInterfaces) {

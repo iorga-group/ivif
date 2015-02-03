@@ -25,7 +25,7 @@
         <field ref="name"/>
     </form>
 
-    <action-open-view name="openProfileGridFromUser" grid-name="ProfileGrid">
+    <action-open-view name="openProfileGridFromUser" grid-name="ProfileGrid" roles-allowed="admin">
         <query>
             <where>$record.id = :profileId</where>
         </query>

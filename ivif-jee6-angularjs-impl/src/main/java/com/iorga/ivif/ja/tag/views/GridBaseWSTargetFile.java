@@ -31,12 +31,14 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
         private final String simpleClassName;
         private final String className;
         private final String variableName;
+        private final List<String> rolesAllowed;
 
         public OpenViewAction(ActionOpenViewSourceTagHandler action) {
             this.action = action;
             this.variableName = action.getElement().getName();
             this.simpleClassName = StringUtils.capitalize(this.variableName);
             this.className = GridBaseWSTargetFile.this.getClassName() + "." + simpleClassName;
+            this.rolesAllowed = new ArrayList<>(action.getRolesAllowed());
         }
 
         public ActionOpenViewSourceTagHandler getAction() {
@@ -57,6 +59,10 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
 
         public String getVariableName() {
             return variableName;
+        }
+
+        public List<String> getRolesAllowed() {
+            return rolesAllowed;
         }
     }
 
