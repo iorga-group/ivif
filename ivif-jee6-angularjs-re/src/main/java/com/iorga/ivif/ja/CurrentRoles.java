@@ -10,5 +10,5 @@ import static java.lang.annotation.ElementType.*;
 @Target({TYPE, METHOD, PARAMETER, FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
-public @interface Generated {
+public @interface CurrentRoles {
 }
