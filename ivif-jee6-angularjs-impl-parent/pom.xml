@@ -44,6 +44,14 @@
                 <artifactId>eclipselink</artifactId>
                 <version>2.6.0-M3</version>
             </dependency>
+            <!-- scope provided -->
+            <dependency>
+                <!-- needed because of that bug: http://stackoverflow.com/q/28296047/535203 -->
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-xjc</artifactId>
+                <version>2.2.11</version>
+                <scope>provided</scope>
+            </dependency>
             <!-- scope test -->
             <dependency>
                 <groupId>junit</groupId>

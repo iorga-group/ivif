@@ -35,6 +35,12 @@
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
         </dependency>
+        <!-- scope provided -->
+        <dependency>
+            <!-- needed because of that bug: http://stackoverflow.com/q/28296047/535203 -->
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-xjc</artifactId>
+        </dependency>
         <!-- scope test -->
         <dependency>
             <groupId>junit</groupId>
