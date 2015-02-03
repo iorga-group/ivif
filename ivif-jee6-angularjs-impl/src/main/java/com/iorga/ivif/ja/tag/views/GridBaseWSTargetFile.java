@@ -27,21 +27,21 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
     private List<OpenViewAction> openViewActions = new ArrayList<>();
 
     public class OpenViewAction {
-        private final ActionOpenViewSourceTagHandler action;
+        private final ActionOpenViewModel action;
         private final String simpleClassName;
         private final String className;
         private final String variableName;
         private final List<String> rolesAllowed;
 
-        public OpenViewAction(ActionOpenViewSourceTagHandler action) {
+        public OpenViewAction(ActionOpenViewModel action) {
             this.action = action;
             this.variableName = action.getElement().getName();
             this.simpleClassName = StringUtils.capitalize(this.variableName);
             this.className = GridBaseWSTargetFile.this.getClassName() + "." + simpleClassName;
-            this.rolesAllowed = new ArrayList<>(action.getRolesAllowed());
+            this.rolesAllowed = new ArrayList<>(action.getElement().getRolesAllowed());
         }
 
-        public ActionOpenViewSourceTagHandler getAction() {
+        public ActionOpenViewModel getAction() {
             return action;
         }
 
@@ -108,7 +108,7 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
         return "views/GridBaseWS_body.java.ftl";
     }
 
-    public void addActionOpenView(ActionOpenViewSourceTagHandler action) {
+    public void addActionOpenView(ActionOpenViewModel action) {
         openViewActions.add(new OpenViewAction(action));
     }
 

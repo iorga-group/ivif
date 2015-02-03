@@ -57,4 +57,8 @@ public class ActionOpenViewServiceJsTargetFile extends JsTargetFile<String> {
     public JAConfiguration getConfiguration() {
         return configuration;
     }
+
+    public String getGridName() {
+        return gridName;
+    }
 }

@@ -51,6 +51,7 @@ public class JsExpressionParser {
 
     public static class JsExpression {
         private Set<String> injections = new LinkedHashSet<>();
+        private Set<String> actions = new LinkedHashSet<>();
         private String expression;
         private Set<LineRef> lineRefs = new LinkedHashSet<>();
 
@@ -64,6 +65,10 @@ public class JsExpressionParser {
 
         public Set<LineRef> getLineRefs() {
             return lineRefs;
+        }
+
+        public Set<String> getActions() {
+            return actions;
         }
     }
 
@@ -89,6 +94,7 @@ public class JsExpressionParser {
                         if (isDollarAction) {
                             // this is an action, must append "Action" to the action name
                             injection += "Action";
+                            addAction(injection, expression);
                         }
                         expression.injections.add(injection);
                         // replace the "$inject(serviceName)" with "serviceName" or "$action(actionName)" with "actionNameAction" directly
@@ -96,6 +102,7 @@ public class JsExpressionParser {
                     } else {
                         // we are in a single method name call, register the method name as an injection, treat it like if it was an action
                         String actionName = methodName + "Action";
+                        addAction(actionName, expression);
                         expression.injections.add(actionName);
                         expressionBuilder.append(actionName);
 
@@ -143,5 +150,9 @@ public class JsExpressionParser {
         expression.expression = expressionBuilder.toString();
 
         return expression;
+    }
+
+    protected static void addAction(String action, JsExpression expression) {
+        expression.actions.add(StringUtils.substringBeforeLast(action, "Action"));
     }
 }

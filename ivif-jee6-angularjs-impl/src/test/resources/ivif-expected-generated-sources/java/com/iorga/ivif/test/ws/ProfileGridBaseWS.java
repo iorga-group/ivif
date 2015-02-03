@@ -2,6 +2,7 @@ package com.iorga.ivif.test.ws;
 
 import com.iorga.ivif.ja.Generated;
 import com.iorga.ivif.ja.GridSearchParam;
+import com.iorga.ivif.ja.RolesAllowed;
 import com.iorga.ivif.test.service.ProfileBaseService;
 import com.iorga.ivif.test.ws.ProfileGridBaseWS.OpenProfileGridFromUser;
 import com.iorga.ivif.test.ws.ProfileGridBaseWS.ProfileGridSearchFilter;
@@ -20,6 +21,7 @@ import javax.ws.rs.Produces;
 @Path("/profileGrid")
 @Generated
 @Stateless
+@RolesAllowed("manager")
 public class ProfileGridBaseWS {
     @Inject @Generated
     private ProfileBaseService profileBaseService;

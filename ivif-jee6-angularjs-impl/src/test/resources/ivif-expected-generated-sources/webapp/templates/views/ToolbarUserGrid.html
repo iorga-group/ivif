@@ -5,7 +5,7 @@
                 <legend>Toolbar User Grid</legend>
                 <nav class="navbar navbar-default">
                     <div class="collapse navbar-collapse">
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton0()" ng-disabled="!selectedLine">Open profile</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton0()" ng-disabled="!selectedLine" ng-if="hasRoleAllowed('admin') && hasRoleAllowed('manager')">Open profile</button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton1()" ng-disabled="!selectedLine">Open computer</button>
                     </div>
                 </nav>

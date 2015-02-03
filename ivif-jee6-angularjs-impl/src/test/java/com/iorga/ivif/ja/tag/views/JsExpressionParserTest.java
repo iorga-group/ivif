@@ -47,4 +47,14 @@ public class JsExpressionParserTest {
         assertThat(expression.getExpression()).isEqualTo("anAction(line.test,line.field_b)");
         assertThat(expression.getInjections()).containsExactly("anAction");
     }
+
+    @Test
+    public void actionsTest() {
+        JsExpression expression = JsExpressionParser.parse("$inject(anAction)($line)", "line");
+        assertThat(expression.getActions()).isEmpty();
+        expression = JsExpressionParser.parse("$action(anAction)($line)", "line");
+        assertThat(expression.getActions()).containsExactly("anAction");
+        expression = JsExpressionParser.parse("anAction($line)", "line");
+        assertThat(expression.getActions()).containsExactly("anAction");
+    }
 }

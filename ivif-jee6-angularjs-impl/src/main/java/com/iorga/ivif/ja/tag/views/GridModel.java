@@ -116,10 +116,12 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     public static class ToolbarButton {
         private final Button element;
         private final JsExpression jsExpression;
+        public List<List<String>> rolesAllowed;
 
         public ToolbarButton(Button element, JsExpression jsExpression) {
             this.element = element;
             this.jsExpression = jsExpression;
+            rolesAllowed = new ArrayList<>();
         }
 
         public Button getElement() {
@@ -128,6 +130,10 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
         public JsExpression getJsExpression() {
             return jsExpression;
+        }
+
+        public List<List<String>> getRolesAllowed() {
+            return rolesAllowed;
         }
     }
 
@@ -174,11 +180,28 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 // Add columns selected by actions
                 onOpen = addSelectColumnForActionIfNecessary(element.getOnOpen(), "selectedLine", configuration, context);
                 onSelect = addSelectColumnForActionIfNecessary(element.getOnSelect(), "selectedLine", configuration, context);
-                Toolbar toolbar = element.getToolbar();
+                final Toolbar toolbar = element.getToolbar();
                 if (toolbar != null) {
                     for (Button button : toolbar.getButton()) {
                         final JsExpression expression = addSelectColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", configuration, context);
-                        toolbarButtons.add(new ToolbarButton(button, expression));
+                        final ToolbarButton toolbarButton = new ToolbarButton(button, expression);
+                        toolbarButtons.add(toolbarButton);
+                        // Now compute the roles allowed if any
+                        for (String action : expression.getActions()) {
+                            context.waitForEvent(new TargetPreparedWaiter<ActionOpenViewModel, String, JAGeneratorContext>(ActionOpenViewModel.class, action, GridModel.this) {
+                                @Override
+                                protected void onTargetPrepared(ActionOpenViewModel actionOpenViewModel) throws Exception {
+                                    addRolesAllowedIfNotEmpty(actionOpenViewModel.getElement().getRolesAllowed());
+                                    addRolesAllowedIfNotEmpty(actionOpenViewModel.getGridBaseWSTargetFile().getGrid().getElement().getRolesAllowed());
+                                }
+
+                                private void addRolesAllowedIfNotEmpty(List<String> rolesAllowed) {
+                                    if (rolesAllowed != null && !rolesAllowed.isEmpty()) {
+                                        toolbarButton.rolesAllowed.add(rolesAllowed);
+                                    }
+                                }
+                            });
+                        }
                     }
                 }
 

@@ -3,7 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-views">
 
-    <grid name="ProfileGrid" title="Profiles" entity="Profile">
+    <grid name="ProfileGrid" title="Profiles" entity="Profile" roles-allowed="manager">
         <column ref="name"/>
     </grid>
 

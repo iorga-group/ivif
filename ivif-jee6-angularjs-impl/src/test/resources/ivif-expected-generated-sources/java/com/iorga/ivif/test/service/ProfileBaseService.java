@@ -1,6 +1,7 @@
 package com.iorga.ivif.test.service;
 
 import com.iorga.ivif.ja.Generated;
+import com.iorga.ivif.ja.RolesAllowed;
 import com.iorga.ivif.ja.SecurityService;
 import com.iorga.ivif.ja.Sorting;
 import com.iorga.ivif.ja.SortingType;
@@ -73,6 +74,7 @@ public class ProfileBaseService {
         entityManager.detach(entity);
     }
 
+    @RolesAllowed("manager")
     public SearchResults<ProfileGridSearchResult> search(ProfileGridSearchParam searchParam) {
         JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
         QProfile $record = new QProfile("profile");
