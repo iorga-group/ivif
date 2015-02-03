@@ -1,3 +1,4 @@
+<#include "../utils/rolesAllowedMacro.java.ftl"/>
 <#assign grid=model.grid>
 <#assign editable=grid.element.editable>
 <#assign serviceVariableName=model.baseService.variableName>
@@ -5,6 +6,7 @@
 @${util.useClass("javax.ws.rs.Path")}("/${grid.variableName}")
 @${util.useClass("com.iorga.ivif.ja.Generated")}
 @${util.useClass("javax.ejb.Stateless")}
+<@rolesAllowed rolesAllowed=grid.element.rolesAllowed util=util/>
 public class ${grid.element.name}BaseWS {
     @${util.useClass("javax.inject.Inject")} @${util.useClass("com.iorga.ivif.ja.Generated")}
     private ${util.useClass(model.baseService.className)} ${serviceVariableName};

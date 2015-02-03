@@ -16,6 +16,10 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:simpleType name="stringListType">
+        <xs:list itemType="xs:string"/>
+    </xs:simpleType>
+
     <xs:element name="grid">
         <xs:complexType>
             <xs:sequence>
@@ -30,6 +34,7 @@
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="entity" type="xs:string" use="required"/>
             <xs:attribute name="selection" type="selectionType" default="none"/>
+            <xs:attribute name="roles-allowed" type="stringListType"/>
         </xs:complexType>
     </xs:element>
 

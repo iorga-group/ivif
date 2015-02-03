@@ -1,6 +1,7 @@
 package com.iorga.ivif.test.service;
 
 import com.iorga.ivif.ja.Generated;
+import com.iorga.ivif.ja.RolesAllowed;
 import com.iorga.ivif.ja.Sorting;
 import com.iorga.ivif.ja.SortingType;
 import com.iorga.ivif.test.entity.QUser;
@@ -109,6 +110,7 @@ public class UserBaseService {
         return jpaQuery.listResults(ConstructorExpression.create(UserGridSearchResult.class, $record.name, $record.profile.id));
     }
 
+    @RolesAllowed({"admin", "manager"})
     public SearchResults<EditableUserGridSearchResult> search(EditableUserGridSearchParam searchParam) {
         JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
         QUser $record = new QUser("user");

@@ -24,7 +24,7 @@
                     <tr ng-repeat="line in $data"<#if grid.element.onOpen?has_content || grid.singleSelection> ng-click="clickLine(line)"</#if><#if grid.singleSelection> ng-class="{'active': line.$selected}"</#if>>
 <#list grid.displayedColumns as column>
                         <td data-title="'${column.title}'" sortable="'${column.refVariableName}'" filter="{'${column.refVariableName}':'text'}">
-<@fieldEditor model="line."+column.refVariableName ivifType=column.entityAttribute.element.name.localPart nbTabs=6 editable=(editable && column.element.editable) editSwitch="$edit"/>
+<@fieldEditor model="line."+column.refVariableName ivifType=column.entityAttribute.element.name.localPart nbTabs=7 editable=(editable && column.element.editable) editSwitch="$edit"/>
                         </td>
 </#list>
                     </tr>
