@@ -20,6 +20,7 @@ import javax.ws.rs.Produces;
 @Generated
 @Stateless
 public class ToolbarUserGridBaseWS {
+
     @Inject @Generated
     private UserBaseService userBaseService;
 
@@ -47,4 +48,3 @@ public class ToolbarUserGridBaseWS {
         return userBaseService.search(searchParam);
     }
 }
-

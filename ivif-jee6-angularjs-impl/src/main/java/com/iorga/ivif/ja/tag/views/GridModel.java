@@ -51,6 +51,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected String title;
     protected JsExpression onSelect;
 
+    protected String serviceSaveClassname;
+    protected String serviceSaveMethod;
+
     public static class GridColumn {
         protected String refVariableName;
         protected String ref;
@@ -162,6 +165,12 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         singleSelection = SelectionType.SINGLE.equals(element.getSelection());
 
         toolbarButtons = new ArrayList<>();
+
+        final String serviceSaveMethod = StringUtils.trim(element.getServiceSaveMethod());
+        if (StringUtils.isNotBlank(serviceSaveMethod)) {
+            this.serviceSaveClassname = StringUtils.substringBeforeLast(serviceSaveMethod, ".");
+            this.serviceSaveMethod = StringUtils.substringAfterLast(serviceSaveMethod, ".");
+        }
 
         context.waitForEvent(new JAConfigurationPreparedWaiter(this) {
             @Override
@@ -396,5 +405,13 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public JsExpression getOnSelect() {
         return onSelect;
+    }
+
+    public String getServiceSaveClassname() {
+        return serviceSaveClassname;
+    }
+
+    public String getServiceSaveMethod() {
+        return serviceSaveMethod;
     }
 }

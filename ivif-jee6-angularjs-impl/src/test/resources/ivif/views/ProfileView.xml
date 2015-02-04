@@ -7,6 +7,10 @@
         <column ref="name"/>
     </grid>
 
+    <grid name="EditableProfileGrid" title="Profiles" entity="Profile" editable="true" service-save-method="com.iorga.ivif.ja.test.ProfileService.save">
+        <column ref="name" editable="true"/>
+    </grid>
+
     <form name="ProfileForm" title="Profile" entity="Profile">
         <field ref="name"/>
     </form>

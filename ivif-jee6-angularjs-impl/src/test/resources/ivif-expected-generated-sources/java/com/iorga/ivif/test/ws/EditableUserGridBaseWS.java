@@ -26,8 +26,10 @@ import javax.ws.rs.Produces;
 @Stateless
 @RolesAllowed({"admin", "manager"})
 public class EditableUserGridBaseWS {
+
     @Inject @Generated
     private UserBaseService userBaseService;
+
 
     public static class EditableUserGridSaveParam {
         public String name;
@@ -81,4 +83,3 @@ public class EditableUserGridBaseWS {
         return userBaseService.search(searchParam);
     }
 }
-

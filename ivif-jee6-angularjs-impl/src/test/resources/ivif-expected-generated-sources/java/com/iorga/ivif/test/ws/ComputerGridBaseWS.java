@@ -21,6 +21,7 @@ import javax.ws.rs.Produces;
 @Generated
 @Stateless
 public class ComputerGridBaseWS {
+
     @Inject @Generated
     private ComputerBaseService computerBaseService;
 
@@ -52,4 +53,3 @@ public class ComputerGridBaseWS {
         return computerBaseService.search(searchParam);
     }
 }
-

@@ -29,6 +29,7 @@
             </xs:sequence>
             <xs:attribute name="on-open" type="xs:string"/>
             <xs:attribute name="on-select" type="xs:string"/>
+            <xs:attribute name="service-save-method" type="xs:string"/>
             <xs:attribute name="editable" type="xs:boolean" default="false"/>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="title" type="xs:string"/>

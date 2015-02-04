@@ -23,6 +23,7 @@ import javax.ws.rs.Produces;
 @Stateless
 @RolesAllowed("manager")
 public class ProfileGridBaseWS {
+
     @Inject @Generated
     private ProfileBaseService profileBaseService;
 
@@ -50,4 +51,3 @@ public class ProfileGridBaseWS {
         return profileBaseService.search(searchParam);
     }
 }
-

@@ -8,8 +8,15 @@
 @${util.useClass("javax.ejb.Stateless")}
 <@rolesAllowed rolesAllowed=grid.element.rolesAllowed util=util/>
 public class ${grid.element.name}BaseWS {
+
     @${util.useClass("javax.inject.Inject")} @${util.useClass("com.iorga.ivif.ja.Generated")}
     private ${util.useClass(model.baseService.className)} ${serviceVariableName};
+
+<#if grid.serviceSaveClassname?has_content>
+    @${util.useClass("javax.inject.Inject")}
+    private ${util.useClass(grid.serviceSaveClassname)} saveService;
+
+</#if>
 
 <#if editable>
     public static class ${model.saveParamSimpleClassName} {
@@ -41,11 +48,15 @@ public class ${grid.element.name}BaseWS {
     </#if>
 
             // Ask for save
+    <#if grid.serviceSaveMethod?has_content>
+            saveService.${grid.serviceSaveMethod}(entityToSave);
+    <#else>
             ${serviceVariableName}.save(entityToSave);
+    </#if>
         }
     }
-</#if>
 
+</#if>
 <#-- SearchResult class -->
     public static class ${model.searchResultSimpleClassName} <#if editable>extends ${model.saveParamSimpleClassName} </#if>{
 <#list grid.selectedWithoutSaveColumns as column>
@@ -85,4 +96,3 @@ public class ${grid.element.name}BaseWS {
         return ${serviceVariableName}.search(searchParam);
     }
 }
-

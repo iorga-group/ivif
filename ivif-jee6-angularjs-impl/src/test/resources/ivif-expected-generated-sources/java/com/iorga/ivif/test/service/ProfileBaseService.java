@@ -7,6 +7,9 @@ import com.iorga.ivif.ja.Sorting;
 import com.iorga.ivif.ja.SortingType;
 import com.iorga.ivif.test.entity.Profile;
 import com.iorga.ivif.test.entity.QProfile;
+import com.iorga.ivif.test.ws.EditableProfileGridBaseWS.EditableProfileGridSearchFilter;
+import com.iorga.ivif.test.ws.EditableProfileGridBaseWS.EditableProfileGridSearchParam;
+import com.iorga.ivif.test.ws.EditableProfileGridBaseWS.EditableProfileGridSearchResult;
 import com.iorga.ivif.test.ws.ProfileGridBaseWS.OpenProfileGridFromUser;
 import com.iorga.ivif.test.ws.ProfileGridBaseWS.ProfileGridSearchFilter;
 import com.iorga.ivif.test.ws.ProfileGridBaseWS.ProfileGridSearchParam;
@@ -105,6 +108,32 @@ public class ProfileBaseService {
         jpaQuery.offset(searchParam.offset);
         // Returning projection
         return jpaQuery.listResults(ConstructorExpression.create(ProfileGridSearchResult.class, $record.name));
+    }
+
+    public SearchResults<EditableProfileGridSearchResult> search(EditableProfileGridSearchParam searchParam) {
+        JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        QProfile $record = new QProfile("profile");
+        jpaQuery.from($record);
+        // Applying filter
+        EditableProfileGridSearchFilter filter = searchParam.filter;
+        if (filter.name != null) {
+            jpaQuery.where($record.name.containsIgnoreCase(filter.name));
+        }
+        // Applying action filters
+        // Applying sorting
+        Sorting sorting = searchParam.sorting;
+        ComparableExpressionBase sortingExpression = null;
+        if ("name".equals(sorting.ref)) {
+            sortingExpression = $record.name;
+        }
+        if (sortingExpression != null) {
+            jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
+        }
+        // Applying limit & offset
+        jpaQuery.limit(searchParam.limit);
+        jpaQuery.offset(searchParam.offset);
+        // Returning projection
+        return jpaQuery.listResults(ConstructorExpression.create(EditableProfileGridSearchResult.class, $record.name, $record.id));
     }
 
 

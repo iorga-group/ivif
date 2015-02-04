@@ -19,6 +19,7 @@ import javax.ws.rs.Produces;
 @Generated
 @Stateless
 public class ComputerForConnectedUserGridBaseWS {
+
     @Inject @Generated
     private ComputerBaseService computerBaseService;
 
@@ -42,4 +43,3 @@ public class ComputerForConnectedUserGridBaseWS {
         return computerBaseService.search(searchParam);
     }
 }
-

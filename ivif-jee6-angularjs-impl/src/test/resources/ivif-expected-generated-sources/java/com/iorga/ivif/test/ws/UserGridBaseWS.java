@@ -21,6 +21,7 @@ import javax.ws.rs.Produces;
 @Generated
 @Stateless
 public class UserGridBaseWS {
+
     @Inject @Generated
     private UserBaseService userBaseService;
 
@@ -50,4 +51,3 @@ public class UserGridBaseWS {
         return userBaseService.search(searchParam);
     }
 }
-

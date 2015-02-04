@@ -22,6 +22,7 @@ import javax.ws.rs.Produces;
 @Generated
 @Stateless
 public class DesktopSessionGridBaseWS {
+
     @Inject @Generated
     private DesktopSessionBaseService desktopSessionBaseService;
 
@@ -56,4 +57,3 @@ public class DesktopSessionGridBaseWS {
         return desktopSessionBaseService.search(searchParam);
     }
 }
-

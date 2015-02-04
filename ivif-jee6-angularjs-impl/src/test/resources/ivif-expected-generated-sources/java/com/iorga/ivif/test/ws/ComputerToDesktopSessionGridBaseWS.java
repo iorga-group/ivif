@@ -20,6 +20,7 @@ import javax.ws.rs.Produces;
 @Generated
 @Stateless
 public class ComputerToDesktopSessionGridBaseWS {
+
     @Inject @Generated
     private ComputerBaseService computerBaseService;
 
@@ -47,4 +48,3 @@ public class ComputerToDesktopSessionGridBaseWS {
         return computerBaseService.search(searchParam);
     }
 }
-
