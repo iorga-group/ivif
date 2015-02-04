@@ -44,6 +44,13 @@ public class ${entity.name} {
     <#if element.version!false>
     @${util.useClass("javax.persistence.Version")}
     </#if>
+    <#if element.sequence?has_content>
+        <#assign sequenceName>
+            <@escapeJavaString str=element.sequence.name/><#t>
+        </#assign>
+    @${util.useClass("javax.persistence.SequenceGenerator")}(name = "${sequenceName}", sequenceName = "${sequenceName}"<#if element.sequence.allocationSize?has_content>, allocationSize = ${element.sequence.allocationSize}</#if>)
+    @${util.useClass("javax.persistence.GeneratedValue")}(strategy = ${util.useClass("javax.persistence.GenerationType")}.SEQUENCE, generator="${sequenceName}")
+    </#if>
     private ${util.useClass(attribute.type)} ${element.name};
 
 </#list>

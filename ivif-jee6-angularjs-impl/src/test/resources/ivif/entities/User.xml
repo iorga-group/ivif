@@ -4,7 +4,9 @@
           xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-entities">
 
     <entity name="User" table="TEST_USER">
-        <integer name="id" id="true"/>
+        <integer name="id" id="true">
+            <sequence name="USER_ID_SEQ"/>
+        </integer>
         <string name="name" column="LAST_NAME" required="true" name-column="true"/>
         <string name="firstName" column="FIRST_NAME" required="true" name-column="true"/>
         <many-to-one name="profile" column="PROFILE_ID" ref="Profile"/>

@@ -12,6 +12,7 @@
         <xs:sequence>
             <xs:element ref="default-editor" minOccurs="0" maxOccurs="1"/>
             <xs:element ref="join-column" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="sequence" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string" use="required"/>
         <xs:attribute name="column" type="xs:string"/>
@@ -38,13 +39,20 @@
             <xs:attribute name="show" type="xs:boolean" default="true"/>
         </xs:complexType>
     </xs:element>
-    
-        <xs:element name="join-column">
+
+    <xs:element name="join-column">
         <xs:complexType>
             <xs:attribute name="ref-column" type="xs:string" default="field"/>
             <xs:attribute name="column" type="xs:string" default="true"/>
             <xs:attribute name="insertable" type="xs:boolean" default="false"/>
             <xs:attribute name="updatable" type="xs:boolean" default="false"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="sequence">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="allocation-size" type="xs:integer"/>
         </xs:complexType>
     </xs:element>
 

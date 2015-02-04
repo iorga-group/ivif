@@ -8,9 +8,12 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
@@ -22,6 +25,8 @@ public class User {
 
     @Id
     @NotNull
+    @SequenceGenerator(name = "USER_ID_SEQ", sequenceName = "USER_ID_SEQ")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="USER_ID_SEQ")
     private Integer id;
 
     @Column(name = "LAST_NAME")
@@ -38,6 +43,9 @@ public class User {
 
     @Version
     private Long version;
+
+    @Column(name = "\"COMMENT\"")
+    private String comment;
 
 
     /// Getters & Setters
@@ -79,6 +87,14 @@ public class User {
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
 }
