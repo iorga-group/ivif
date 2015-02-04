@@ -9,5 +9,6 @@
         <string name="firstName" column="FIRST_NAME" required="true" name-column="true"/>
         <many-to-one name="profile" column="PROFILE_ID" ref="Profile"/>
         <long name="version" version="true"/>
+        <string name="comment" column="&quot;COMMENT&quot;"/>
     </entity>
 </entities>

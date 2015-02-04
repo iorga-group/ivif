@@ -1,6 +1,7 @@
 package com.iorga.ivif.ja.tag.entities;
 
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
+import com.iorga.ivif.ja.tag.ServiceTargetFileId;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
@@ -29,6 +30,9 @@ public class EntitySourceTagHandler extends JAXBSourceTagHandler<Entity, JAGener
                         return new EntityTargetFile(entityTargetFileId, context, element);
                     }
                 });
+
+                // Create Java Entity Base Service
+                context.getOrCreateTarget(EntityBaseServiceTargetFile.class, new ServiceTargetFileId(element.getName() + "BaseService", null, configuration));
             }
         });
     }

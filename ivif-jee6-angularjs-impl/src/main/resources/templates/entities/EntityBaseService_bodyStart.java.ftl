@@ -43,14 +43,25 @@ public class ${model.simpleClassName} {
     @${util.useClass("javax.ejb.TransactionAttribute")}
     protected <@useEntityClass/> save(<@useEntityClass/> entityToSave, boolean flush) {
         if (isNew(entityToSave)) {
-            entityManager.persist(entityToSave);
+            entityToSave = create(entityToSave);
         } else {
-            entityManager.merge(entityToSave);
+            entityToSave = update(entityToSave);
         }
         if (flush) {
             entityManager.flush();
         }
         return entityToSave;
+    }
+
+    @${util.useClass("javax.ejb.TransactionAttribute")}
+    protected <@useEntityClass/> create(<@useEntityClass/> entity) {
+        entityManager.persist(entity);
+        return entity;
+    }
+
+    @${util.useClass("javax.ejb.TransactionAttribute")}
+    protected <@useEntityClass/> update(<@useEntityClass/> entity) {
+        return entityManager.merge(entity);
     }
 
     @${util.useClass("javax.ejb.TransactionAttribute")}

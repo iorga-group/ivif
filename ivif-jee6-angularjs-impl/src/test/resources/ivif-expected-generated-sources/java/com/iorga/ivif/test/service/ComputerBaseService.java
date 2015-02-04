@@ -59,14 +59,25 @@ public class ComputerBaseService {
     @TransactionAttribute
     protected Computer save(Computer entityToSave, boolean flush) {
         if (isNew(entityToSave)) {
-            entityManager.persist(entityToSave);
+            entityToSave = create(entityToSave);
         } else {
-            entityManager.merge(entityToSave);
+            entityToSave = update(entityToSave);
         }
         if (flush) {
             entityManager.flush();
         }
         return entityToSave;
+    }
+
+    @TransactionAttribute
+    protected Computer create(Computer entity) {
+        entityManager.persist(entity);
+        return entity;
+    }
+
+    @TransactionAttribute
+    protected Computer update(Computer entity) {
+        return entityManager.merge(entity);
     }
 
     @TransactionAttribute

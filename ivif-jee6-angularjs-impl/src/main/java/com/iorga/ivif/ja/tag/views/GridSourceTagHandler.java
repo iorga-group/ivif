@@ -37,9 +37,6 @@ public class GridSourceTagHandler extends JAXBSourceTagHandler<Grid, JAGenerator
                     }
                 });
 
-                // Create Java Entity Base Service
-                context.getOrCreateTarget(EntityBaseServiceTargetFile.class, new ServiceTargetFileId(element.getEntity() + "BaseService", null, configuration));
-
                 // Create Java WS
                 final WSTargetFileId wsTargetFileId = new WSTargetFileId(gridName + "BaseWS", null, configuration);
                 context.getOrCreateTarget(GridBaseWSTargetFile.class, wsTargetFileId, new TargetFactory<GridBaseWSTargetFile, WSTargetFileId, JAGeneratorContext>() {

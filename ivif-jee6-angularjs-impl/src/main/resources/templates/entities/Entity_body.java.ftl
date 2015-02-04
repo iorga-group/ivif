@@ -1,3 +1,4 @@
+<#include "../utils/utils.ftl"/>
 <#assign entity=model.entity>
 @${util.useClass("javax.persistence.Entity")}
 <#if model.hasMultipleIds()>
@@ -22,15 +23,15 @@ public class ${entity.name} {
     </#if>
     <#if element.column?has_content>
         <#if attribute.manyToOne>
-    @${util.useClass("javax.persistence.JoinColumn")}(name = "${element.column}"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
+    @${util.useClass("javax.persistence.JoinColumn")}(name = "<@escapeJavaString str=element.column/>"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
         <#else>
-    @${util.useClass("javax.persistence.Column")}(name = "${element.column}"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
+    @${util.useClass("javax.persistence.Column")}(name = "<@escapeJavaString str=element.column/>"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
         </#if>
     </#if>
     <#if element.joinColumn?size &gt; 0>
     @${util.useClass("javax.persistence.JoinColumns")}({
         <#list element.joinColumn as joinColumn>
-        @${util.useClass("javax.persistence.JoinColumn")}(name = "${joinColumn.column}", referencedColumnName="${joinColumn.refColumn}"<#if !joinColumn.insertable>, insertable = false</#if><#if !joinColumn.updatable>, updatable = false</#if>)<#if joinColumn_has_next>,</#if>
+        @${util.useClass("javax.persistence.JoinColumn")}(name = "<@escapeJavaString str=joinColumn.column/>", referencedColumnName="<@escapeJavaString str=joinColumn.refColumn/>"<#if !joinColumn.insertable>, insertable = false</#if><#if !joinColumn.updatable>, updatable = false</#if>)<#if joinColumn_has_next>,</#if>
         </#list>
     })
     </#if>

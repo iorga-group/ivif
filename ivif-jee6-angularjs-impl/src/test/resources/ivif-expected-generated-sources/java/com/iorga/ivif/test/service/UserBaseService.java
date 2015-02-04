@@ -52,14 +52,25 @@ public class UserBaseService {
     @TransactionAttribute
     protected User save(User entityToSave, boolean flush) {
         if (isNew(entityToSave)) {
-            entityManager.persist(entityToSave);
+            entityToSave = create(entityToSave);
         } else {
-            entityManager.merge(entityToSave);
+            entityToSave = update(entityToSave);
         }
         if (flush) {
             entityManager.flush();
         }
         return entityToSave;
+    }
+
+    @TransactionAttribute
+    protected User create(User entity) {
+        entityManager.persist(entity);
+        return entity;
+    }
+
+    @TransactionAttribute
+    protected User update(User entity) {
+        return entityManager.merge(entity);
     }
 
     @TransactionAttribute

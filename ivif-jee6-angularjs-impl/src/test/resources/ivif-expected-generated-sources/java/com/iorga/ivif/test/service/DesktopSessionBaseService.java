@@ -56,14 +56,25 @@ public class DesktopSessionBaseService {
     @TransactionAttribute
     protected DesktopSession save(DesktopSession entityToSave, boolean flush) {
         if (isNew(entityToSave)) {
-            entityManager.persist(entityToSave);
+            entityToSave = create(entityToSave);
         } else {
-            entityManager.merge(entityToSave);
+            entityToSave = update(entityToSave);
         }
         if (flush) {
             entityManager.flush();
         }
         return entityToSave;
+    }
+
+    @TransactionAttribute
+    protected DesktopSession create(DesktopSession entity) {
+        entityManager.persist(entity);
+        return entity;
+    }
+
+    @TransactionAttribute
+    protected DesktopSession update(DesktopSession entity) {
+        return entityManager.merge(entity);
     }
 
     @TransactionAttribute

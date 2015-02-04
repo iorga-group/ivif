@@ -54,14 +54,25 @@ public class ProfileBaseService {
     @TransactionAttribute
     protected Profile save(Profile entityToSave, boolean flush) {
         if (isNew(entityToSave)) {
-            entityManager.persist(entityToSave);
+            entityToSave = create(entityToSave);
         } else {
-            entityManager.merge(entityToSave);
+            entityToSave = update(entityToSave);
         }
         if (flush) {
             entityManager.flush();
         }
         return entityToSave;
+    }
+
+    @TransactionAttribute
+    protected Profile create(Profile entity) {
+        entityManager.persist(entity);
+        return entity;
+    }
+
+    @TransactionAttribute
+    protected Profile update(Profile entity) {
+        return entityManager.merge(entity);
     }
 
     @TransactionAttribute
