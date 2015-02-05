@@ -2,8 +2,8 @@
 ${util.useClass(model.entityClassName)}<#rt>
 </#macro>
 <#assign entity=model.entityTargetFile>
-@${util.useClass("com.iorga.ivif.ja.Generated")}
-@${util.useClass("javax.ejb.Stateless")}
+@${util.useClass("com.iorga.ivif.ja.Generated", false)}
+@${util.useClass("javax.ejb.Stateless", false)}
 public class ${model.simpleClassName} {
     @${util.useClass("javax.persistence.PersistenceContext")}
     protected ${util.useClass("javax.persistence.EntityManager")} entityManager;

@@ -11,9 +11,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 public class JavaClassGeneratorUtil {
+    private final String currentPackage;
+    private final String currentClassName;
+
     private Set<String> imports = Sets.newHashSet();
-    private Set<String> importedSimpleNames = Sets.newHashSet();
-    private Map<String, String> importsBySimpleName = Maps.newHashMap();
+
+    private Set<String> usedClassNames = Sets.newHashSet();
+    private Set<String> usedClassSimpleNames = Sets.newHashSet();
 
     private Map<String, String> injectionsByClassName = Maps.newLinkedHashMap();
 
@@ -22,21 +26,32 @@ public class JavaClassGeneratorUtil {
         public String getVariableName();
     }
 
-    public String useClass(String fullyQualifiedJavaClassName) {
+
+    public JavaClassGeneratorUtil(String currentClassName) {
+        this.currentClassName = currentClassName;
+        this.currentPackage = StringUtils.substringBeforeLast(currentClassName, ".");
+    }
+
+
+    public String useClass(String fullyQualifiedJavaClassName, boolean inCurrentClass) {
         String simpleName = getSimpleName(fullyQualifiedJavaClassName);
-        if (imports.contains(fullyQualifiedJavaClassName)) {
+        if (usedClassNames.contains(fullyQualifiedJavaClassName)) {
             // the class is already imported, can use its simple name
             return simpleName;
         } else {
-            if (importedSimpleNames.contains(simpleName)) {
+            if (usedClassSimpleNames.contains(simpleName)) {
                 // that class is not imported, but a simple name already exists for that type, let's return its fully qualified name
                 return fullyQualifiedJavaClassName;
             } else {
                 // import the class
-                importClass(fullyQualifiedJavaClassName, simpleName);
+                importClass(fullyQualifiedJavaClassName, simpleName, inCurrentClass);
                 return simpleName;
             }
         }
+    }
+
+    public String useClass(String fullyQualifiedJavaClassName) {
+        return useClass(fullyQualifiedJavaClassName, true);
     }
 
     public String useInject(String fullyQualifiedJavaClassName) {
@@ -57,9 +72,16 @@ public class JavaClassGeneratorUtil {
         return StringUtils.substringAfterLast(fullyQualifiedJavaClassName, ".");
     }
 
-    protected void importClass(String fullyQualifiedJavaClassName, String simpleName) {
-        imports.add(fullyQualifiedJavaClassName);
-        importedSimpleNames.add(simpleName);
+    protected void importClass(String fullyQualifiedJavaClassName, String simpleName, boolean inCurrentClass) {
+        usedClassNames.add(fullyQualifiedJavaClassName);
+        usedClassSimpleNames.add(simpleName);
+
+        final String ownerElement = StringUtils.substringBeforeLast(fullyQualifiedJavaClassName, ".");
+        if (currentPackage.equals(ownerElement) || (inCurrentClass && currentClassName.equals(ownerElement))) {
+            // no need to add this import, it's implicit
+        } else {
+            imports.add(fullyQualifiedJavaClassName);
+        }
     }
 
     public Iterable<String> getOrderedImports() {

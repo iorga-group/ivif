@@ -1,11 +1,11 @@
 <#include "../utils/utils.ftl"/>
 <#assign entity=model.entity>
-@${util.useClass("javax.persistence.Entity")}
+@${util.useClass("javax.persistence.Entity", false)}
 <#if model.hasMultipleIds()>
-@${util.useClass("javax.persistence.IdClass")}(${util.useClass(model.idClassName)}.class)
+@${util.useClass("javax.persistence.IdClass", false)}(${util.useClass(model.idClassName, false)}.class)
 </#if>
 <#if entity.table?has_content>
-@${util.useClass("javax.persistence.Table")}(name = "${entity.table}")
+@${util.useClass("javax.persistence.Table", false)}(name = "${entity.table}")
 </#if>
 public class ${entity.name} {
 

@@ -3,10 +3,10 @@
 <#assign editable=grid.element.editable>
 <#assign serviceVariableName=model.baseService.variableName>
 <#assign entityClassName=model.baseService.entityClassName>
-@${util.useClass("javax.ws.rs.Path")}("/${grid.variableName}")
-@${util.useClass("com.iorga.ivif.ja.Generated")}
-@${util.useClass("javax.ejb.Stateless")}
-<@rolesAllowed rolesAllowed=grid.element.rolesAllowed util=util/>
+@${util.useClass("javax.ws.rs.Path", false)}("/${grid.variableName}")
+@${util.useClass("com.iorga.ivif.ja.Generated", false)}
+@${util.useClass("javax.ejb.Stateless", false)}
+<@rolesAllowed rolesAllowed=grid.element.rolesAllowed util=util inCurrentClass=false/>
 public class ${grid.element.name}BaseWS {
 
     @${util.useClass("javax.inject.Inject")} @${util.useClass("com.iorga.ivif.ja.Generated")}

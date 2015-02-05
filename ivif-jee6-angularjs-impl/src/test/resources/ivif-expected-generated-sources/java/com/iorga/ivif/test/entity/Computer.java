@@ -1,7 +1,5 @@
 package com.iorga.ivif.test.entity;
 
-import com.iorga.ivif.test.entity.Profile;
-import com.iorga.ivif.test.entity.User;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.String;

@@ -88,7 +88,7 @@ public abstract class JavaTargetFile<I extends JavaTargetFileId> extends TargetF
 
     @Override
     public void render(JAGeneratorContext context) throws Exception {
-        util = new JavaClassGeneratorUtil();
+        util = new JavaClassGeneratorUtil(getId().getClassName());
         ByteArrayOutputStream bodyStream = renderBody(context);
         // Now render header in case there are injections
         ByteArrayOutputStream headerStream = renderHeader(context);
