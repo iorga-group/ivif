@@ -1,5 +1,6 @@
 package com.iorga.ivif.test.service;
 
+import com.iorga.ivif.ja.EntityBaseService;
 import com.iorga.ivif.ja.Generated;
 import com.iorga.ivif.ja.Sorting;
 import com.iorga.ivif.ja.SortingType;
@@ -18,16 +19,16 @@ import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
 import java.lang.Integer;
-import java.util.List;
+import java.lang.Override;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 @Generated
 @Stateless
-public class DesktopSessionBaseService {
+public class DesktopSessionBaseService extends EntityBaseService<DesktopSession, DesktopSessionId> {
+
     @PersistenceContext
     protected EntityManager entityManager;
 
@@ -35,59 +36,33 @@ public class DesktopSessionBaseService {
     protected ConnectedUser connectedUser;
 
 
+    @Override
+    protected DesktopSessionId getId(DesktopSession entity) {
+        if (entity.getUserId() == null && entity.getComputerId() == null) {
+            return null;
+        } else {
+            return new DesktopSessionId(entity.getUserId(), entity.getComputerId());
+        }
+    }
+
+    @Override
+    protected void setId(DesktopSession entity, DesktopSessionId id) {
+        if (id == null) {
+            entity.setUserId(null);
+            entity.setComputerId(null);
+        } else {
+            entity.setUserId(id.getUserId);
+            entity.setComputerId(id.getComputerId);
+        }
+    }
 
     public DesktopSession find(Integer userId, Integer computerId) {
         return find(new DesktopSessionId(userId, computerId));
     }
 
-    public DesktopSession find(DesktopSessionId id) {
-        return entityManager.find(DesktopSession.class, id);
-    }
-
+    @Override
     public boolean isNew(DesktopSession entity) {
-        return entity.getUserId() == null || entity.getComputerId() == null;
-    }
-
-    @TransactionAttribute
-    public DesktopSession save(DesktopSession entityToSave) {
-        return save(entityToSave, true);
-    }
-
-    @TransactionAttribute
-    protected DesktopSession save(DesktopSession entityToSave, boolean flush) {
-        if (isNew(entityToSave)) {
-            entityToSave = create(entityToSave);
-        } else {
-            entityToSave = update(entityToSave);
-        }
-        if (flush) {
-            entityManager.flush();
-        }
-        return entityToSave;
-    }
-
-    @TransactionAttribute
-    protected DesktopSession create(DesktopSession entity) {
-        entityManager.persist(entity);
-        return entity;
-    }
-
-    @TransactionAttribute
-    protected DesktopSession update(DesktopSession entity) {
-        return entityManager.merge(entity);
-    }
-
-    @TransactionAttribute
-    public List<DesktopSession> save(List<DesktopSession> entitiesToSave) {
-        for (DesktopSession entityToSave : entitiesToSave) {
-            save(entityToSave, false);
-        }
-        entityManager.flush();
-        return entitiesToSave;
-    }
-
-    public void detach(DesktopSession entity) {
-        entityManager.detach(entity);
+        return entity.getUserId() == null && entity.getComputerId() == null;
     }
 
     public SearchResults<DesktopSessionGridSearchResult> search(DesktopSessionGridSearchParam searchParam) {

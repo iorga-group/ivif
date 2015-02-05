@@ -1,5 +1,6 @@
 package com.iorga.ivif.test.service;
 
+import com.iorga.ivif.ja.EntityBaseService;
 import com.iorga.ivif.ja.Generated;
 import com.iorga.ivif.ja.RolesAllowed;
 import com.iorga.ivif.ja.Sorting;
@@ -22,68 +23,27 @@ import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
 import java.lang.Integer;
-import java.util.List;
+import java.lang.Override;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 @Generated
 @Stateless
-public class UserBaseService {
+public class UserBaseService extends EntityBaseService<User, Integer> {
+
     @PersistenceContext
     protected EntityManager entityManager;
 
 
-
-    public User find(Integer id) {
-        return entityManager.find(User.class, id);
+    @Override
+    protected Integer getId(User entity) {
+        return entity.getId();
     }
 
-    public boolean isNew(User entity) {
-        return entity.getId() == null;
-    }
-
-    @TransactionAttribute
-    public User save(User entityToSave) {
-        return save(entityToSave, true);
-    }
-
-    @TransactionAttribute
-    protected User save(User entityToSave, boolean flush) {
-        if (isNew(entityToSave)) {
-            entityToSave = create(entityToSave);
-        } else {
-            entityToSave = update(entityToSave);
-        }
-        if (flush) {
-            entityManager.flush();
-        }
-        return entityToSave;
-    }
-
-    @TransactionAttribute
-    protected User create(User entity) {
-        entityManager.persist(entity);
-        return entity;
-    }
-
-    @TransactionAttribute
-    protected User update(User entity) {
-        return entityManager.merge(entity);
-    }
-
-    @TransactionAttribute
-    public List<User> save(List<User> entitiesToSave) {
-        for (User entityToSave : entitiesToSave) {
-            save(entityToSave, false);
-        }
-        entityManager.flush();
-        return entitiesToSave;
-    }
-
-    public void detach(User entity) {
-        entityManager.detach(entity);
+    @Override
+    protected void setId(User entity, Integer id) {
+        entity.setId(id);
     }
 
     public SearchResults<UserGridSearchResult> search(UserGridSearchParam searchParam) {

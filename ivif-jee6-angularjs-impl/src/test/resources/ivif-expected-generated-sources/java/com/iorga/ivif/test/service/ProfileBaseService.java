@@ -1,5 +1,6 @@
 package com.iorga.ivif.test.service;
 
+import com.iorga.ivif.ja.EntityBaseService;
 import com.iorga.ivif.ja.Generated;
 import com.iorga.ivif.ja.RolesAllowed;
 import com.iorga.ivif.ja.SecurityService;
@@ -20,16 +21,16 @@ import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
 import java.lang.Integer;
-import java.util.List;
+import java.lang.Override;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 @Generated
 @Stateless
-public class ProfileBaseService {
+public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
+
     @PersistenceContext
     protected EntityManager entityManager;
 
@@ -37,55 +38,14 @@ public class ProfileBaseService {
     protected SecurityService securityService;
 
 
-
-    public Profile find(Integer id) {
-        return entityManager.find(Profile.class, id);
+    @Override
+    protected Integer getId(Profile entity) {
+        return entity.getId();
     }
 
-    public boolean isNew(Profile entity) {
-        return entity.getId() == null;
-    }
-
-    @TransactionAttribute
-    public Profile save(Profile entityToSave) {
-        return save(entityToSave, true);
-    }
-
-    @TransactionAttribute
-    protected Profile save(Profile entityToSave, boolean flush) {
-        if (isNew(entityToSave)) {
-            entityToSave = create(entityToSave);
-        } else {
-            entityToSave = update(entityToSave);
-        }
-        if (flush) {
-            entityManager.flush();
-        }
-        return entityToSave;
-    }
-
-    @TransactionAttribute
-    protected Profile create(Profile entity) {
-        entityManager.persist(entity);
-        return entity;
-    }
-
-    @TransactionAttribute
-    protected Profile update(Profile entity) {
-        return entityManager.merge(entity);
-    }
-
-    @TransactionAttribute
-    public List<Profile> save(List<Profile> entitiesToSave) {
-        for (Profile entityToSave : entitiesToSave) {
-            save(entityToSave, false);
-        }
-        entityManager.flush();
-        return entitiesToSave;
-    }
-
-    public void detach(Profile entity) {
-        entityManager.detach(entity);
+    @Override
+    protected void setId(Profile entity, Integer id) {
+        entity.setId(id);
     }
 
     @RolesAllowed("manager")

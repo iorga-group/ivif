@@ -144,8 +144,9 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
             idClassName = getClassName() + "." + entity.getName() + "Id";
             idSimpleClassName = entity.getName() + "Id";
         } else {
-            idClassName = null;
-            idSimpleClassName = null;
+            final EntityAttribute idAttribute = idAttributes.get(0);
+            idClassName = idAttribute.getType();
+            idSimpleClassName = StringUtils.substringAfterLast(idClassName, ".");
         }
     }
 
@@ -175,6 +176,10 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
 
     public Collection<EntityAttribute> getAttributes() {
         return attributes.values();
+    }
+
+    public EntityAttribute getIdAttribute() {
+        return idAttributes.get(0);
     }
 
     /// Getters & setters

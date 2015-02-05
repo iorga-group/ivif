@@ -1,5 +1,6 @@
 package com.iorga.ivif.test.service;
 
+import com.iorga.ivif.ja.EntityBaseService;
 import com.iorga.ivif.ja.Generated;
 import com.iorga.ivif.ja.Sorting;
 import com.iorga.ivif.ja.SortingType;
@@ -25,16 +26,16 @@ import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
 import java.lang.Integer;
-import java.util.List;
+import java.lang.Override;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 @Generated
 @Stateless
-public class ComputerBaseService {
+public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
+
     @PersistenceContext
     protected EntityManager entityManager;
 
@@ -42,55 +43,14 @@ public class ComputerBaseService {
     protected ConnectedUser connectedUser;
 
 
-
-    public Computer find(Integer id) {
-        return entityManager.find(Computer.class, id);
+    @Override
+    protected Integer getId(Computer entity) {
+        return entity.getId();
     }
 
-    public boolean isNew(Computer entity) {
-        return entity.getId() == null;
-    }
-
-    @TransactionAttribute
-    public Computer save(Computer entityToSave) {
-        return save(entityToSave, true);
-    }
-
-    @TransactionAttribute
-    protected Computer save(Computer entityToSave, boolean flush) {
-        if (isNew(entityToSave)) {
-            entityToSave = create(entityToSave);
-        } else {
-            entityToSave = update(entityToSave);
-        }
-        if (flush) {
-            entityManager.flush();
-        }
-        return entityToSave;
-    }
-
-    @TransactionAttribute
-    protected Computer create(Computer entity) {
-        entityManager.persist(entity);
-        return entity;
-    }
-
-    @TransactionAttribute
-    protected Computer update(Computer entity) {
-        return entityManager.merge(entity);
-    }
-
-    @TransactionAttribute
-    public List<Computer> save(List<Computer> entitiesToSave) {
-        for (Computer entityToSave : entitiesToSave) {
-            save(entityToSave, false);
-        }
-        entityManager.flush();
-        return entitiesToSave;
-    }
-
-    public void detach(Computer entity) {
-        entityManager.detach(entity);
+    @Override
+    protected void setId(Computer entity, Integer id) {
+        entity.setId(id);
     }
 
     public SearchResults<ComputerGridSearchResult> search(ComputerGridSearchParam searchParam) {

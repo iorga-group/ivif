@@ -29,6 +29,11 @@
             <version>2.3.5.Final</version> <!-- JBoss EAP 6.2 version -->
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
     </dependencies>
 
     <build>
