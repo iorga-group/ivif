@@ -7,12 +7,14 @@
 <#if entity.table?has_content>
 @${util.useClass("javax.persistence.Table", false)}(name = "${entity.table}")
 </#if>
-public class ${entity.name} <#if model.implementsCode?has_content>implements <@model.implementsCode?interpret/> </#if>{
+public class ${entity.name} implements ${util.useClass("java.io.Serializable", false)}<#if model.implementsCode?has_content>, <@model.implementsCode?interpret/></#if> {
 
-<#list model.staticFields as staticField>
+<#if model.staticFields?size &gt; 0>
+    <#list model.staticFields as staticField>
     public static ${util.useClass(staticField.type)} ${staticField.name} = <#if staticField.type == "java.lang.Character">new ${util.useClass("java.lang.Character")}('${staticField.value}')<#elseif staticField.type == "java.lang.String">"${staticField.value}"<#else>new ${util.useClass(staticField.type)}("${staticField.value}")</#if>;
-</#list>
+    </#list>
 
+</#if>
 <#list model.attributes as attribute>
     <#assign element=attribute.element.value>
     <#if attribute.manyToOne>

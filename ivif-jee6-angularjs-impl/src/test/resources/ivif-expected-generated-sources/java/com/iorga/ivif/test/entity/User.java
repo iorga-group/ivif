@@ -1,6 +1,7 @@
 package com.iorga.ivif.test.entity;
 
 import com.iorga.ivif.test.Versionable;
+import java.io.Serializable;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.String;
@@ -20,8 +21,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "TEST_USER")
-public class User implements Versionable<Long> {
-
+public class User implements Serializable, Versionable<Long> {
 
     @Id
     @NotNull

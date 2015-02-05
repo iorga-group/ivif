@@ -1,5 +1,6 @@
 package com.iorga.ivif.test.entity;
 
+import java.io.Serializable;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.String;
@@ -15,8 +16,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "TEST_COMPUTER")
-public class Computer {
-
+public class Computer implements Serializable {
 
     @Id
     @NotNull

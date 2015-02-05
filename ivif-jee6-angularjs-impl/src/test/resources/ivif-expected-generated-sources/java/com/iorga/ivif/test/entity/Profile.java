@@ -1,5 +1,6 @@
 package com.iorga.ivif.test.entity;
 
+import java.io.Serializable;
 import java.lang.Integer;
 import java.lang.String;
 import javax.persistence.Column;
@@ -10,8 +11,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "TEST_PROFILE")
-public class Profile {
-
+public class Profile implements Serializable {
 
     @Id
     @NotNull

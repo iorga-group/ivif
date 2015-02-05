@@ -13,8 +13,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @IdClass(DesktopSessionId.class)
 @Table(name = "TEST_DESKTOP_SESSION")
-public class DesktopSession {
-
+public class DesktopSession implements Serializable {
 
     @Id
     @NotNull
