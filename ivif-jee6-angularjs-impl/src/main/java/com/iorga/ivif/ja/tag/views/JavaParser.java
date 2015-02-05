@@ -1,18 +1,22 @@
 package com.iorga.ivif.ja.tag.views;
 
 import com.antlr.v4.grammars.JavaBaseListener;
+import com.antlr.v4.grammars.JavaBaseVisitor;
 import com.antlr.v4.grammars.JavaLexer;
-import com.antlr.v4.grammars.JavaParser;
+import com.antlr.v4.grammars.JavaParser.ClassOrInterfaceTypeContext;
 import com.antlr.v4.grammars.JavaParser.ExpressionContext;
+import com.antlr.v4.grammars.JavaParser.TypeArgumentsContext;
+import com.antlr.v4.grammars.JavaParser.TypeListContext;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import sun.reflect.generics.tree.TypeArgument;
 
 import java.util.LinkedList;
 
-public class ExpressionParser {
+public class JavaParser {
     private static class MethodContext {
         private final ExpressionContext baseMethodContext;
         private final StringBuilder injectionClassNameBuilder = new StringBuilder();
@@ -28,9 +32,54 @@ public class ExpressionParser {
         }
     }
 
+    public static String parseImplements(String implementsExpression) {
 
-    public static String parse(String expression) {
-        final JavaParser parser = new JavaParser(new CommonTokenStream(new JavaLexer(new ANTLRInputStream(expression))));
+        final com.antlr.v4.grammars.JavaParser parser = new com.antlr.v4.grammars.JavaParser(new CommonTokenStream(new JavaLexer(new ANTLRInputStream(implementsExpression))));
+        final TypeListContext tree = parser.typeList();
+        final StringBuilder parsedImplements = new StringBuilder();
+
+        new JavaBaseVisitor<Void>() {
+            @Override
+            public Void visitClassOrInterfaceType(ClassOrInterfaceTypeContext ctx) {
+                parsedImplements.append("${util.useClass(\"");
+                boolean identifierEnded = false;
+                for (ParseTree child : ctx.children) {
+                    if (!(child instanceof TerminalNode)) {
+                        if (identifierEnded) {
+                            throw new IllegalStateException("Identifier already ended @"+child.getSourceInterval());
+                        } else {
+                            identifierEnded = true;
+                            // end of terminal nodes which indicates identifier for that class or interface
+                            endUseClass();
+                        }
+                    }
+                    child.accept(this);
+                }
+                if (!identifierEnded) {
+                    // the children contained only an identifier, so we couldn't end it correctly
+                    endUseClass();
+                }
+                return null;
+            }
+
+            protected void endUseClass() {
+                parsedImplements.append("\", false)}");
+            }
+
+            @Override
+            public Void visitTerminal(TerminalNode node) {
+                parsedImplements.append(node.getText());
+                return null;
+            }
+        }.visit(tree);
+
+        //tree.inspect(parser); // way to view it graphically
+
+        return parsedImplements.toString();
+    }
+
+    public static String parseExpression(String expression) {
+        final com.antlr.v4.grammars.JavaParser parser = new com.antlr.v4.grammars.JavaParser(new CommonTokenStream(new JavaLexer(new ANTLRInputStream(expression))));
         final ExpressionContext tree = parser.expression();
         final StringBuilder compiledJavaExpression = new StringBuilder();
 

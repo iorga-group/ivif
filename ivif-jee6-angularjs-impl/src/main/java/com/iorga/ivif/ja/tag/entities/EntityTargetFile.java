@@ -5,6 +5,7 @@ import com.iorga.ivif.ja.tag.JavaStaticField;
 import com.iorga.ivif.ja.tag.JavaTargetFile;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
+import com.iorga.ivif.ja.tag.views.JavaParser;
 import com.iorga.ivif.tag.TargetPartPreparedEvent;
 import com.iorga.ivif.tag.bean.AttributeType;
 import com.iorga.ivif.tag.bean.Entity;
@@ -27,6 +28,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
     private Map<String, EntityAttribute> attributes = new LinkedHashMap<>();
     private List<JavaStaticField> staticFields;
     private EntityAttribute versionAttribute;
+    private String implementsCode;
 
     // Declare attribute tag names to Class mapping
     private final static Map<String, Class<?>> attributeTypesToClass = new HashMap<>();
@@ -39,6 +41,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
         attributeTypesToClass.put("integer", Integer.class);
         attributeTypesToClass.put("character", Character.class);
     }
+
 
     public static class EntityTargetFileId extends JavaTargetFileId {
         public EntityTargetFileId(String simpleOrFullClassName, String packageNameOrNull, JAConfiguration configuration) {
@@ -148,6 +151,14 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
             idClassName = idAttribute.getType();
             idSimpleClassName = StringUtils.substringAfterLast(idClassName, ".");
         }
+
+        // Handle implements
+        final String entityImplements = entity.getImplements();
+        if (StringUtils.isNotBlank(entityImplements)) {
+            implementsCode = JavaParser.parseImplements(entityImplements);
+        } else {
+            implementsCode = null;
+        }
     }
 
     protected Class<? extends AttributeType> getAttributeTypeClassFromElementType(String elementType) {
@@ -209,5 +220,9 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
 
     public EntityAttribute getVersionAttribute() {
         return versionAttribute;
+    }
+
+    public String getImplementsCode() {
+        return implementsCode;
     }
 }

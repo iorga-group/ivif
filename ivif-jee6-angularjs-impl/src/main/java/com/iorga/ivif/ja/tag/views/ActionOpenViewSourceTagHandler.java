@@ -42,10 +42,10 @@ public class ActionOpenViewSourceTagHandler extends JAXBSourceTagHandler<ActionO
 
                     @Override
                     public void onTargetPrepared(final GridBaseWSTargetFile gridBaseWSTargetFile) throws Exception {
-                        // We will parse the query, and generate the corresponding QueryDSL code, and if an identifier is detected, register it and compute its type
+                        // We will parseExpression the query, and generate the corresponding QueryDSL code, and if an identifier is detected, register it and compute its type
                         // First we must retrieve the Grid=>Entity because it is the base types reference
                         final EntityTargetFileId baseEntityId = gridBaseWSTargetFile.getGrid().getEntityTargetFileId();
-                        // Then we parse the query and will visit it to find parameters and resolve its type
+                        // Then we parseExpression the query and will visit it to find parameters and resolve its type
                         final QueryModel queryModel = context.getOrCreateTarget(QueryModel.class, queryModelId, new TargetFactory<QueryModel, String, JAGeneratorContext>() {
                             @Override
                             public QueryModel createTarget() throws Exception {

@@ -3,7 +3,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-entities">
 
-    <entity name="User" table="TEST_USER">
+    <entity name="User" table="TEST_USER" implements="com.iorga.ivif.test.Versionable&lt;java.lang.Long&gt;">
         <integer name="id" id="true">
             <sequence name="USER_ID_SEQ"/>
         </integer>

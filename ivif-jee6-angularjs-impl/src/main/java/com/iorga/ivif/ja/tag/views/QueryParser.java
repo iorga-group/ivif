@@ -305,7 +305,7 @@ public class QueryParser {
             // Parsing parameter values
             for (Parameter parameter : element.getParameter()) {
                 final String parameterName = parameter.getName();
-                parametersValueByName.put(parameterName, ExpressionParser.parse(parameter.getValue()));
+                parametersValueByName.put(parameterName, JavaParser.parseExpression(parameter.getValue()));
             }
 
             // Now visit the query
@@ -313,7 +313,7 @@ public class QueryParser {
             final String queryInfo = parser.getQueryInfo();
             final NodeFactoryImpl factory = new NodeFactoryImpl(queryInfo);
             parser.setNodeFactory(factory);
-            //final JPQLParseTree tree = parser.parse();
+            //final JPQLParseTree tree = parser.parseExpression();
             final Node tree = (Node) parser.conditionalExpression();
             final NodeVisitor nodeVisitor = new NodeVisitor(parametersValueByName);
             nodeVisitor.visit(tree);
@@ -379,11 +379,11 @@ public class QueryParser {
         final String queryInfo = parser.getQueryInfo();
         final NodeFactoryImpl factory = new NodeFactoryImpl(queryInfo);
         parser.setNodeFactory(factory);
-        //final JPQLParseTree tree = parser.parse();
+        //final JPQLParseTree tree = parser.parseExpression();
         final Node tree = (Node) parser.conditionalExpression();
 
         //final org.eclipse.persistence.internal.jpa.parsing.jpql.JPQLParser parser = new JPQLParserFactory().buildParserFor("SELECT * FROM Record $record WHERE $record.test = :param AND $record.test2 IN (:param2)");
-        //final JPQLParseTree tree = parser.parse();
+        //final JPQLParseTree tree = parser.parseExpression();
 
         /*
         new AnonymousExpressionVisitor() {

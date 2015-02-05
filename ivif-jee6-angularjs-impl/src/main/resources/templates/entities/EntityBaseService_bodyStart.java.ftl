@@ -38,7 +38,7 @@ public class ${model.simpleClassName} extends ${util.useClass("com.iorga.ivif.ja
     </#list>
         } else {
     <#list entity.idAttributes as idAttribute>
-            entity.${idAttribute.setterName}(id.${idAttribute.getterName});
+            entity.${idAttribute.setterName}(id.${idAttribute.getterName}());
     </#list>
         }
 <#else>

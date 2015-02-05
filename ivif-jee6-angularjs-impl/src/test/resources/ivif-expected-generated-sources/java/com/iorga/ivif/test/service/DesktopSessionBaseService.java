@@ -51,8 +51,8 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
             entity.setUserId(null);
             entity.setComputerId(null);
         } else {
-            entity.setUserId(id.getUserId);
-            entity.setComputerId(id.getComputerId);
+            entity.setUserId(id.getUserId());
+            entity.setComputerId(id.getComputerId());
         }
     }
 

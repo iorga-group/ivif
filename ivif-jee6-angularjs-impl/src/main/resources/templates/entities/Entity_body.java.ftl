@@ -7,7 +7,7 @@
 <#if entity.table?has_content>
 @${util.useClass("javax.persistence.Table", false)}(name = "${entity.table}")
 </#if>
-public class ${entity.name} {
+public class ${entity.name} <#if model.implementsCode?has_content>implements <@model.implementsCode?interpret/> </#if>{
 
 <#list model.staticFields as staticField>
     public static ${util.useClass(staticField.type)} ${staticField.name} = <#if staticField.type == "java.lang.Character">new ${util.useClass("java.lang.Character")}('${staticField.value}')<#elseif staticField.type == "java.lang.String">"${staticField.value}"<#else>new ${util.useClass(staticField.type)}("${staticField.value}")</#if>;
