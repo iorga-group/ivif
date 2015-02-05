@@ -22,7 +22,7 @@ angular.module('test', [
             return object;
         }
     })
-    .factory('locationService', ['$location', function($location) {
+    .factory('locationService', ['$location', '$filter', function($location, $filter) {
         var newLocationToBePushed = false,
             locationContexts = [],
             locationLoading = false,
@@ -30,6 +30,7 @@ angular.module('test', [
                 controllerInitialized: function(title, scope, scopeAttributesToSave) {
                     var locationContext = {
                         title: title,
+                        originalTitle: title,
                         scope: scope,
                         scopeAttributesToSave: scopeAttributesToSave,
                         path: $location.path(),
@@ -55,6 +56,8 @@ angular.module('test', [
                     angular.forEach(locationContext.scopeAttributesToSave, function(scopeAttributeToSave) {
                         savedScopeAttributes[scopeAttributeToSave] = scope[scopeAttributeToSave];
                     });
+                    // Freeze the title
+                    locationContext.title = $filter('interpolate')(locationContext.originalTitle, scope);
                     // Go to asked new location
                     $location.path(path).search(search);
                 },
@@ -65,6 +68,8 @@ angular.module('test', [
                     }
                     var locationContext = locationService.getCurrentLocationContext();
                     locationLoading = true;
+                    // Recover original title
+                    locationContext.title = locationContext.originalTitle;
                     // Go to asked location
                     $location.path(locationContext.path).search(locationContext.search);
                 },
