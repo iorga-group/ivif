@@ -1,0 +1,27 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <fieldset>
+                <legend>Select Editable And Button User Grid</legend>
+                <nav class="navbar navbar-default">
+                    <div class="collapse navbar-collapse">
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit">Edit</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit">Save</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit">Cancel</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton0()" ng-disabled="!selectedLine">Test service</button>
+                    </div>
+                </nav>
+                <table ng-table="selectEditableAndButtonUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
+                    <tr ng-repeat="line in $data" ng-click="clickLine(line)" ng-class="{'active': line.$selected}">
+                        <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
+                            {{line.name}}
+                        </td>
+                        <td data-title="'Id'" sortable="'id'" filter="{'id':'text'}">
+                            {{line.id}}
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+        </div>
+    </div>
+</div>

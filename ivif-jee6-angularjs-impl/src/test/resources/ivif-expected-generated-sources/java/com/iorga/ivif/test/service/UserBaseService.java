@@ -10,6 +10,9 @@ import com.iorga.ivif.test.entity.User;
 import com.iorga.ivif.test.ws.EditableUserGridBaseWS.EditableUserGridSearchFilter;
 import com.iorga.ivif.test.ws.EditableUserGridBaseWS.EditableUserGridSearchParam;
 import com.iorga.ivif.test.ws.EditableUserGridBaseWS.EditableUserGridSearchResult;
+import com.iorga.ivif.test.ws.SelectEditableAndButtonUserGridBaseWS.SelectEditableAndButtonUserGridSearchFilter;
+import com.iorga.ivif.test.ws.SelectEditableAndButtonUserGridBaseWS.SelectEditableAndButtonUserGridSearchParam;
+import com.iorga.ivif.test.ws.SelectEditableAndButtonUserGridBaseWS.SelectEditableAndButtonUserGridSearchResult;
 import com.iorga.ivif.test.ws.ToolbarUserGridBaseWS.ToolbarUserGridSearchFilter;
 import com.iorga.ivif.test.ws.ToolbarUserGridBaseWS.ToolbarUserGridSearchParam;
 import com.iorga.ivif.test.ws.ToolbarUserGridBaseWS.ToolbarUserGridSearchResult;
@@ -111,6 +114,37 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         jpaQuery.offset(searchParam.offset);
         // Returning projection
         return jpaQuery.listResults(ConstructorExpression.create(EditableUserGridSearchResult.class, $record.firstName, $record.name, $record.profile.id, $record.id, $record.version));
+    }
+
+    public SearchResults<SelectEditableAndButtonUserGridSearchResult> search(SelectEditableAndButtonUserGridSearchParam searchParam) {
+        JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        QUser $record = new QUser("user");
+        jpaQuery.from($record);
+        // Applying filter
+        SelectEditableAndButtonUserGridSearchFilter filter = searchParam.filter;
+        if (filter.name != null) {
+            jpaQuery.where($record.name.containsIgnoreCase(filter.name));
+        }
+        if (filter.id != null) {
+            jpaQuery.where($record.id.eq(filter.id));
+        }
+        // Applying action filters
+        // Applying sorting
+        Sorting sorting = searchParam.sorting;
+        ComparableExpressionBase sortingExpression = null;
+        if ("name".equals(sorting.ref)) {
+            sortingExpression = $record.name;
+        } else if ("id".equals(sorting.ref)) {
+            sortingExpression = $record.id;
+        }
+        if (sortingExpression != null) {
+            jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
+        }
+        // Applying limit & offset
+        jpaQuery.limit(searchParam.limit);
+        jpaQuery.offset(searchParam.offset);
+        // Returning projection
+        return jpaQuery.listResults(ConstructorExpression.create(SelectEditableAndButtonUserGridSearchResult.class, $record.name, $record.id, $record.version));
     }
 
     public SearchResults<ToolbarUserGridSearchResult> search(ToolbarUserGridSearchParam searchParam) {

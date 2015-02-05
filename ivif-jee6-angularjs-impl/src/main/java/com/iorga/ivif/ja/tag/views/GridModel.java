@@ -32,7 +32,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected EntityTargetFileId entityTargetFileId;
     protected ServiceTargetFileId serviceTargetFileId;
     protected Map<String, GridColumn> selectedColumnsByRef;
-    protected List<GridColumn> idColumns;
+    protected LinkedHashSet<GridColumn> idColumns;
     /**
      * Editable columns are all columns which are editable = true
      */
@@ -158,7 +158,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         selectedColumns = new ArrayList<>();
         displayedColumns = new ArrayList<>();
         selectedColumnsByRef = new HashMap<>();
-        idColumns = new ArrayList<>();
+        idColumns = new LinkedHashSet<>();
         editableColumns = new LinkedHashSet<>();
 
         // Handle selection
@@ -363,7 +363,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         return element;
     }
 
-    public List<GridColumn> getIdColumns() {
+    public LinkedHashSet<GridColumn> getIdColumns() {
         return idColumns;
     }
 

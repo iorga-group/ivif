@@ -21,9 +21,13 @@
         <column ref="name"/>
     </grid>
 
-    <form name="UserForm" title="User" entity="User">
-        <field ref="name"/>
-    </form>
+    <grid name="SelectEditableAndButtonUserGrid" entity="User" selection="single" on-select="$inject(aService)($line.id)" editable="true">
+        <toolbar>
+            <button title="Test service" action="$inject(aService2)($line.id)"/>
+        </toolbar>
+        <column ref="name"/>
+        <column ref="id"/>
+    </grid>
 
     <action-open-view name="openProfileGridFromUser" grid-name="ProfileGrid" roles-allowed="admin">
         <query>
