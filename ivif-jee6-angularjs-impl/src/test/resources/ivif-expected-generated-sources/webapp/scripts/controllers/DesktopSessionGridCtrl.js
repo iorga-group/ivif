@@ -52,6 +52,6 @@ angular.module('test')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('Sessions', $scope, ['desktopSessionGridTableParams']);
+        locationService.controllerInitialized('Sess.', $scope, ['desktopSessionGridTableParams']);
     }])
 ;
