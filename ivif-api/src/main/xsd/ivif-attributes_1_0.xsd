@@ -28,7 +28,17 @@
     <xs:element name="date" type="attributeType" substitutionGroup="entityAttribute"/>
     <xs:element name="datetime" type="versionableAttributeType" substitutionGroup="entityAttribute"/>
     <xs:element name="integer" type="versionableAttributeType" substitutionGroup="entityAttribute"/>
-    
+
+    <xs:element name="enum" substitutionGroup="entityAttribute">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="attributeType">
+                    <xs:attribute name="ref" type="xs:string" use="required"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="many-to-one" substitutionGroup="entityAttribute">
         <xs:complexType>
             <xs:complexContent>
@@ -38,8 +48,9 @@
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-   
-      <xs:element name="one-to-many" substitutionGroup="entityAttribute">
+
+    <!--
+    <xs:element name="one-to-many" substitutionGroup="entityAttribute">
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="attributeType">
@@ -48,5 +59,6 @@
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    
+    -->
+
 </xs:schema>

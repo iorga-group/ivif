@@ -12,5 +12,12 @@
         <many-to-one name="profile" column="PROFILE_ID" ref="Profile"/>
         <long name="version" version="true"/>
         <string name="comment" column="&quot;COMMENT&quot;"/>
+        <enum name="status" ref="UserStatusType"/>
     </entity>
+
+    <selection name="UserStatusType" from-type="string">
+        <option name="ACTIVE"/>
+        <option name="DISABLED" value="DIS"/>
+        <option name="UNKNOWN" value="?" title="Not known"/>
+    </selection>
 </entities>

@@ -53,6 +53,9 @@ public class ${entity.name} implements ${util.useClass("java.io.Serializable", f
     @${util.useClass("javax.persistence.SequenceGenerator")}(name = "${sequenceName}", sequenceName = "${sequenceName}"<#if element.sequence.allocationSize?has_content>, allocationSize = ${element.sequence.allocationSize}</#if>)
     @${util.useClass("javax.persistence.GeneratedValue")}(strategy = ${util.useClass("javax.persistence.GenerationType")}.SEQUENCE, generator="${sequenceName}")
     </#if>
+    <#if attribute.enum>
+    @${util.useClass("org.hibernate.annotations.Type")}(type = "${attribute.type}$UserType")
+    </#if>
     private ${util.useClass(attribute.type)} ${element.name};
 
 </#list>

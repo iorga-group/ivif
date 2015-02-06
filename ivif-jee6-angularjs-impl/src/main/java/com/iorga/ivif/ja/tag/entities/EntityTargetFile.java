@@ -4,17 +4,18 @@ import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.JavaStaticField;
 import com.iorga.ivif.ja.tag.JavaTargetFile;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
+import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
+import com.iorga.ivif.ja.tag.entities.EnumSelectionTargetFile.EnumSelectionTargetFileId;
 import com.iorga.ivif.ja.tag.views.JavaParser;
 import com.iorga.ivif.tag.TargetPartPreparedEvent;
-import com.iorga.ivif.tag.bean.AttributeType;
-import com.iorga.ivif.tag.bean.Entity;
-import com.iorga.ivif.tag.bean.ManyToOne;
-import com.iorga.ivif.tag.bean.VersionableAttributeType;
+import com.iorga.ivif.tag.bean.*;
+import com.iorga.ivif.tag.bean.Enum;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import java.lang.Boolean;
 import java.util.*;
 
 import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
@@ -66,9 +67,9 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
         idAttributes = new ArrayList<>();
         staticFields = new ArrayList<>();
         for (JAXBElement<? extends AttributeType> attributeElement : entity.getEntityAttribute()) {
-            EntityAttribute entityAttribute = new EntityAttribute(attributeElement, this);
+            final EntityAttribute entityAttribute = new EntityAttribute(attributeElement, this);
 
-            AttributeType attribute = attributeElement.getValue();
+            final AttributeType attribute = attributeElement.getValue();
             String attributeName = attribute.getName();
 
             if (attribute instanceof ManyToOne) {
@@ -83,6 +84,16 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
                     String packageName = getPackageName();
                     entityAttribute.setType(StringUtils.isNotBlank(packageName) ? packageName + "." + ref : ref);
                 }
+            } else if (attribute instanceof com.iorga.ivif.tag.bean.Enum) {
+                // this is an enum, we will resolve its type after the enum will be resolved
+
+                context.waitForEvent(new JAConfigurationPreparedWaiter(this) {
+                    @Override
+                    protected void onConfigurationPrepared(final JAConfiguration configuration) throws Exception {
+
+                        entityAttribute.setType(new EnumSelectionTargetFileId(((Enum) attribute).getRef(), configuration).getClassName());
+                    }
+                });
             } else {
                 // This is a simple attribute, let's set its type and declare as resolved
                 String attributeType = attributeElement.getName().getLocalPart();

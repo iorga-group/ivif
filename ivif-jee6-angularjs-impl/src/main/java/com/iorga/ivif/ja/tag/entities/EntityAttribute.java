@@ -16,6 +16,7 @@ public class EntityAttribute extends AbstractTargetPart<String, EntityTargetFile
     private String type;
     private final String capitalizedName;
     private final boolean manyToOne;
+    private final boolean _enum;
     private final String title;
     private String fromType;
     private JavaStaticField trueValueStaticField;
@@ -31,7 +32,9 @@ public class EntityAttribute extends AbstractTargetPart<String, EntityTargetFile
         capitalizedName = StringUtils.capitalize(elementValue.getName());
         getterName = "get" + capitalizedName;
         setterName = "set" + capitalizedName;
-        manyToOne = "many-to-one".equals(element.getName().getLocalPart());
+        final String nameLocalPart = element.getName().getLocalPart();
+        manyToOne = "many-to-one".equals(nameLocalPart);
+        _enum = "enum".equals(nameLocalPart);
         String elementTitle = elementValue.getTitle();
         if (StringUtils.isNotBlank(elementTitle)) {
             title = elementTitle;
@@ -97,5 +100,9 @@ public class EntityAttribute extends AbstractTargetPart<String, EntityTargetFile
 
     public String getSetterName() {
         return setterName;
+    }
+
+    public boolean isEnum() {
+        return _enum;
     }
 }

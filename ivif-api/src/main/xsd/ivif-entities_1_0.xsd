@@ -12,8 +12,9 @@
 
     <xs:element name="entities">
         <xs:complexType>
-            <xs:sequence minOccurs="1" maxOccurs="unbounded">
-                <xs:element ref="entity"/>
+            <xs:sequence>
+                <xs:element ref="entity" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="selection" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -27,6 +28,24 @@
             <xs:attribute name="package" type="xs:string"/>
             <xs:attribute name="table" type="xs:string"/>
             <xs:attribute name="implements" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="selection">
+        <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="unbounded">
+                <xs:element ref="option"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="from-type" type="xs:string" default="integer"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="option">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string"/>
+            <xs:attribute name="title" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 

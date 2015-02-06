@@ -1,6 +1,7 @@
 package com.iorga.ivif.test.entity;
 
 import com.iorga.ivif.test.Versionable;
+import com.iorga.ivif.test.entity.select.UserStatusType;
 import java.io.Serializable;
 import java.lang.Integer;
 import java.lang.Long;
@@ -18,6 +19,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "TEST_USER")
@@ -46,6 +48,9 @@ public class User implements Serializable, Versionable<Long> {
 
     @Column(name = "\"COMMENT\"")
     private String comment;
+
+    @Type(type = "com.iorga.ivif.test.entity.select.UserStatusType$UserType")
+    private UserStatusType status;
 
 
     /// Getters & Setters
@@ -95,6 +100,14 @@ public class User implements Serializable, Versionable<Long> {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public UserStatusType getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatusType status) {
+        this.status = status;
     }
 
 }
