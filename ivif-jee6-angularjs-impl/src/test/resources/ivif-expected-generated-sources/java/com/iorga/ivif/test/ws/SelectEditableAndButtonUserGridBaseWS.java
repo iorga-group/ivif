@@ -54,11 +54,13 @@ public class SelectEditableAndButtonUserGridBaseWS {
 
     public static class SelectEditableAndButtonUserGridSearchResult extends SelectEditableAndButtonUserGridSaveParam {
         public String name;
+        public String profile_name;
 
         public SelectEditableAndButtonUserGridSearchResult() {}
-        public SelectEditableAndButtonUserGridSearchResult(String name, Integer id, Long version) {
+        public SelectEditableAndButtonUserGridSearchResult(String name, Integer id, String profile_name, Long version) {
             this.name = name;
             this.id = id;
+            this.profile_name = profile_name;
             this.version = version;
         }
     }

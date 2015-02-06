@@ -144,7 +144,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
         // Returning projection
-        return jpaQuery.listResults(ConstructorExpression.create(SelectEditableAndButtonUserGridSearchResult.class, $record.name, $record.id, $record.version));
+        return jpaQuery.listResults(ConstructorExpression.create(SelectEditableAndButtonUserGridSearchResult.class, $record.name, $record.id, $record.profile.name, $record.version));
     }
 
     public SearchResults<ToolbarUserGridSearchResult> search(ToolbarUserGridSearchParam searchParam) {

@@ -12,7 +12,7 @@
                     </div>
                 </nav>
                 <table ng-table="selectEditableAndButtonUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
-                    <tr ng-repeat="line in $data" ng-click="clickLine(line)" ng-class="{'active': line.$selected}">
+                    <tr ng-repeat="line in $data" ng-click="clickLine(line)" ng-class="{'warning': line.profile_name==='admin', 'active': line.$selected}">
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
                             {{line.name}}
                         </td>
