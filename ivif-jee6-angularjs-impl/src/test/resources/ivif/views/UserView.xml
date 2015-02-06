@@ -25,6 +25,7 @@
         <toolbar>
             <button title="Test service" action="$inject(aService2)($line.id)"/>
         </toolbar>
+        <highlight color-class="warning" if="$line.profile.name === 'admin'"/>
         <column ref="name"/>
         <column ref="id"/>
     </grid>

@@ -16,6 +16,7 @@ import com.iorga.ivif.tag.TargetPreparedWaiter;
 
 import org.apache.commons.lang3.StringUtils;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -54,6 +55,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected String serviceSaveClassname;
     protected String serviceSaveMethod;
     protected String tabTitle;
+
+    protected List<GridHighlight> highlights;
 
     public static class GridColumn {
         protected String refVariableName;
@@ -141,6 +144,24 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         }
     }
 
+    public static class GridHighlight {
+        private final String colorClass;
+        private final String _if;
+
+        public GridHighlight(String colorClass, String _if) {
+            this.colorClass = colorClass;
+            this._if = _if;
+        }
+
+        public String getColorClass() {
+            return colorClass;
+        }
+
+        public String getIf() {
+            return _if;
+        }
+    }
+
     public GridModel(String id, Grid element) {
         super(id);
         this.element = element;
@@ -168,6 +189,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         singleSelection = SelectionType.SINGLE.equals(element.getSelection());
 
         toolbarButtons = new ArrayList<>();
+
+        highlights = new ArrayList<>();
 
         final String serviceSaveMethod = StringUtils.trim(element.getServiceSaveMethod());
         if (StringUtils.isNotBlank(serviceSaveMethod)) {
@@ -215,6 +238,16 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                             });
                         }
                     }
+                }
+
+                // Compute highlights
+                for (Highlight highlight : element.getHighlight()) {
+                    final JsExpression expression = addSelectColumnForActionIfNecessary(highlight.getIf(), "line", configuration, context);
+                    highlights.add(new GridHighlight(highlight.getColorClass(), expression.getExpression()));
+                }
+                // handle single selection as a highlight
+                if (singleSelection) {
+                    highlights.add(new GridHighlight("active", "line.$selected"));
                 }
 
                 selectedWithoutSaveColumns = new LinkedHashSet<>(selectedColumns);
@@ -420,5 +453,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public String getTabTitle() {
         return tabTitle;
+    }
+
+    public List<GridHighlight> getHighlights() {
+        return highlights;
     }
 }

@@ -24,7 +24,8 @@
                 </nav>
 </#if>
                 <table ng-table="${grid.variableName}TableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
-                    <tr ng-repeat="line in $data"<#if grid.element.onOpen?has_content || grid.singleSelection> ng-click="clickLine(line)"</#if><#if grid.singleSelection> ng-class="{'active': line.$selected}"</#if>>
+                    <tr ng-repeat="line in $data"<#if grid.element.onOpen?has_content || grid.singleSelection> ng-click="clickLine(line)"</#if><#rt>
+                        <#if grid.highlights?size &gt; 0> ng-class="{<#list grid.highlights as highlight>'${highlight.colorClass}': ${highlight.if}<#if highlight_has_next>, </#if></#list>}"</#if>><#lt>
 <#list grid.displayedColumns as column>
                         <td data-title="'${column.title}'" sortable="'${column.refVariableName}'" filter="{'${column.refVariableName}':'text'}">
 <@fieldEditor model="line."+column.refVariableName ivifType=column.entityAttribute.element.name.localPart nbTabs=7 editable=(editable && column.element.editable) editSwitch="$edit"/>

@@ -24,6 +24,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="toolbar" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="highlight" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="column" minOccurs="1" maxOccurs="unbounded"/>
                 <xs:element ref="query" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
@@ -75,6 +76,13 @@
         <xs:complexType>
             <xs:attribute name="title" type="xs:string" use="required"/>
             <xs:attribute name="action" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="highlight">
+        <xs:complexType>
+            <xs:attribute name="color-class" type="xs:string" use="required"/>
+            <xs:attribute name="if" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 
