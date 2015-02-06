@@ -3,7 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-views">
 
-    <grid name="DesktopSessionGrid" title="Sessions" entity="DesktopSession">
+    <grid name="DesktopSessionGrid" tab-title="Sess." entity="DesktopSession">
         <column ref="computerId"/>
         <column ref="name"/>
     </grid>

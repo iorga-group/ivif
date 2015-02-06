@@ -53,6 +53,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     protected String serviceSaveClassname;
     protected String serviceSaveMethod;
+    protected String tabTitle;
 
     public static class GridColumn {
         protected String refVariableName;
@@ -151,6 +152,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
         final String elementTitle = element.getTitle();
         title = StringUtils.isNotBlank(elementTitle) ? elementTitle : TargetFileUtils.getTitleFromCamelCasedName(element.getName());
+        final String elementTabTitle = element.getTabTitle();
+        tabTitle = StringUtils.isNotBlank(elementTabTitle) ? elementTabTitle : title;
 
         variableName = TargetFileUtils.getVariableNameFromCamelCasedName(element.getName());
 
@@ -413,5 +416,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public String getServiceSaveMethod() {
         return serviceSaveMethod;
+    }
+
+    public String getTabTitle() {
+        return tabTitle;
     }
 }

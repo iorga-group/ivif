@@ -154,6 +154,6 @@ angular.module('${model.configuration.angularModuleName}')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('${grid.title}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById'</#if><#if grid.singleSelection>, 'selectedLineId'</#if>]);
+        locationService.controllerInitialized('${grid.tabTitle}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById'</#if><#if grid.singleSelection>, 'selectedLineId'</#if>]);
     }])
 ;
