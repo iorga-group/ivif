@@ -20,7 +20,9 @@ public class SelectionSourceTagHandler extends JAXBSourceTagHandler<Selection, J
     public void declareTargets(final JAGeneratorContext context) throws Exception {
         super.declareTargets(context);
 
-        final SelectionModel selectionModel = context.getOrCreateTarget(SelectionModel.class, element.getName(), new TargetFactory<SelectionModel, String, JAGeneratorContext>() {
+        final String selectionName = element.getName();
+
+        final SelectionModel selectionModel = context.getOrCreateTarget(SelectionModel.class, selectionName, new TargetFactory<SelectionModel, String, JAGeneratorContext>() {
             @Override
             public SelectionModel createTarget() throws Exception {
                 return new SelectionModel(element, context);
@@ -31,11 +33,17 @@ public class SelectionSourceTagHandler extends JAXBSourceTagHandler<Selection, J
             @Override
             protected void onConfigurationPrepared(final JAConfiguration configuration) throws Exception {
 
-                final EnumSelectionTargetFileId id = new EnumSelectionTargetFileId(element.getName(), configuration);
+                final EnumSelectionTargetFileId id = new EnumSelectionTargetFileId(selectionName, configuration);
                 context.getOrCreateTarget(EnumSelectionTargetFile.class, id, new TargetFactory<EnumSelectionTargetFile, EnumSelectionTargetFileId, JAGeneratorContext>() {
                     @Override
                     public EnumSelectionTargetFile createTarget() throws Exception {
                         return new EnumSelectionTargetFile(id, selectionModel, context);
+                    }
+                });
+                context.getOrCreateTarget(SelectionServiceJsTargetFile.class, selectionName, new TargetFactory<SelectionServiceJsTargetFile, String, JAGeneratorContext>() {
+                    @Override
+                    public SelectionServiceJsTargetFile createTarget() throws Exception {
+                        return new SelectionServiceJsTargetFile(selectionName, selectionModel, configuration, context);
                     }
                 });
             }

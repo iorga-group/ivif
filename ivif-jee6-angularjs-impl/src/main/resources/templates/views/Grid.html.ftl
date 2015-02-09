@@ -27,8 +27,19 @@
                     <tr ng-repeat="line in $data"<#if grid.element.onOpen?has_content || grid.singleSelection> ng-click="clickLine(line)"</#if><#rt>
                         <#if grid.highlights?size &gt; 0> ng-class="{<#list grid.highlights as highlight>'${highlight.colorClass}': ${highlight.if}<#if highlight_has_next>, </#if></#list>}"</#if>><#lt>
 <#list grid.displayedColumns as column>
-                        <td data-title="'${column.title}'" sortable="'${column.refVariableName}'" filter="{'${column.refVariableName}':'text'}">
-<@fieldEditor model="line."+column.refVariableName ivifType=column.entityAttribute.element.name.localPart nbTabs=7 editable=(editable && column.element.editable) editSwitch="$edit"/>
+    <#assign ivifType=column.entityAttribute.element.name.localPart>
+                        <td data-title="'${column.title}'" sortable="'${column.refVariableName}'" <#rt>
+    <#switch ivifType>
+        <#case "string">
+        <#case "integer">
+            filter="{'${column.refVariableName}':'text'}"<#t>
+            <#break>
+        <#case "enum">
+            filter="{'${column.refVariableName}':'select'}" filter-data="${column.entityAttribute.element.value.ref}.optionListDeferred"<#t>
+            <#break>
+    </#switch>
+                            ><#lt>
+<@fieldEditor model="line."+column.refVariableName ivifType=ivifType nbTabs=7 editable=(editable && column.element.editable) editSwitch="$edit" entityAttribute=column.entityAttribute/>
                         </td>
 </#list>
                     </tr>

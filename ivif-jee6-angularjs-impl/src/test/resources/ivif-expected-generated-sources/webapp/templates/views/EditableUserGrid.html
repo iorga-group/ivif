@@ -19,6 +19,13 @@
                             <span ng-if="!$edit">{{line.name}}</span>
                             <span ng-if="$edit"><input type="text" class="form-control" ng-model="line.name"/></span>
                         </td>
+                        <td data-title="'Status'" sortable="'status'" filter="{'status':'select'}" filter-data="UserStatusType.optionListDeferred">
+                            <span ng-if="!$edit">{{UserStatusType.titlesByValue[line.status]}}</span>
+                            <select ng-options="option.id as option.title for option in UserStatusType.optionList" ng-model="line.status" ng-if="$edit"></select>
+                        </td>
+                        <td data-title="'Enabled'" sortable="'enabled'" >
+                            <input type="checkbox" class="form-control" ng-model="line.enabled" ng-disabled="!$edit" />
+                        </td>
                     </tr>
                 </table>
             </fieldset>

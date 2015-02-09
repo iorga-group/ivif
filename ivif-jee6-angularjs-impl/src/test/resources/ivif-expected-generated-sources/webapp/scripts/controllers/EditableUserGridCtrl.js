@@ -30,6 +30,8 @@ angular.module('test')
                 if (!angular.equals(editedLine, editedLine.$original)) {
                     linesToSave.push({
                         name: editedLine.name,
+                        status: editedLine.status,
+                        enabled: editedLine.enabled,
                         id: editedLine.id,
                         version: editedLine.version
                     });

@@ -72,7 +72,7 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
         // Applying filter
         DesktopSessionGridSearchFilter filter = searchParam.filter;
         if (filter.computerId != null) {
-            jpaQuery.where($record.computerId.eq(filter.computerId));
+            jpaQuery.where($record.computerId.like("%" + filter.computerId + "%"));
         }
         if (filter.name != null) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));

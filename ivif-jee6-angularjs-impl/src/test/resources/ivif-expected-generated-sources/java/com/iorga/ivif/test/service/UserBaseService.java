@@ -59,7 +59,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         if (filter.profile_id != null) {
-            jpaQuery.where($record.profile.id.eq(filter.profile_id));
+            jpaQuery.where($record.profile.id.like("%" + filter.profile_id + "%"));
         }
         // Applying action filters
         if (filter.openUserGridFromComputer != null) {
@@ -97,6 +97,12 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (filter.name != null) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
+        if (filter.status != null) {
+            jpaQuery.where($record.status.eq(filter.status));
+        }
+        if (filter.enabled != null) {
+            jpaQuery.where($record.enabled.eq(filter.enabled));
+        }
         // Applying action filters
         // Applying sorting
         Sorting sorting = searchParam.sorting;
@@ -105,6 +111,10 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
             sortingExpression = $record.firstName;
         } else if ("name".equals(sorting.ref)) {
             sortingExpression = $record.name;
+        } else if ("status".equals(sorting.ref)) {
+            sortingExpression = $record.status;
+        } else if ("enabled".equals(sorting.ref)) {
+            sortingExpression = $record.enabled;
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
@@ -113,7 +123,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
         // Returning projection
-        return jpaQuery.listResults(ConstructorExpression.create(EditableUserGridSearchResult.class, $record.firstName, $record.name, $record.profile.id, $record.id, $record.version));
+        return jpaQuery.listResults(ConstructorExpression.create(EditableUserGridSearchResult.class, $record.firstName, $record.name, $record.status, $record.enabled, $record.profile.id, $record.id, $record.version));
     }
 
     public SearchResults<SelectEditableAndButtonUserGridSearchResult> search(SelectEditableAndButtonUserGridSearchParam searchParam) {
@@ -126,7 +136,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         if (filter.id != null) {
-            jpaQuery.where($record.id.eq(filter.id));
+            jpaQuery.where($record.id.like("%" + filter.id + "%"));
         }
         // Applying action filters
         // Applying sorting

@@ -11,6 +11,8 @@
     <grid name="EditableUserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: $line.profile.id})" editable="true" roles-allowed="admin manager">
         <column ref="firstName"/>
         <column ref="name" editable="true"/>
+        <column ref="status" editable="true"/>
+        <column ref="enabled" editable="true"/>
     </grid>
 
     <grid name="ToolbarUserGrid" entity="User" selection="single">

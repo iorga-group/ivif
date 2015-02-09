@@ -97,13 +97,13 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         // Applying filter
         ComputerToDesktopSessionGridSearchFilter filter = searchParam.filter;
         if (filter.id != null) {
-            jpaQuery.where($record.id.eq(filter.id));
+            jpaQuery.where($record.id.like("%" + filter.id + "%"));
         }
         if (filter.name != null) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         if (filter.user_id != null) {
-            jpaQuery.where($record.user.id.eq(filter.user_id));
+            jpaQuery.where($record.user.id.like("%" + filter.user_id + "%"));
         }
         // Applying action filters
         // Applying sorting

@@ -13,7 +13,18 @@
         ${util.useClass(model.searchFilterClassName)} filter = searchParam.filter;
 <#list grid.displayedColumns as column>
         if (filter.${column.refVariableName} != null) {
-            jpaQuery.where($record.${column.ref}.${model.getSearchRelationMethodForGridColumn(column)}(filter.${column.refVariableName}));
+            jpaQuery.where($record.${column.ref}.<#rt>
+    <#switch column.entityAttribute.element.name.localPart>
+        <#case "string">
+            containsIgnoreCase(filter.${column.refVariableName})<#t>
+            <#break>
+        <#case "integer">
+            like("%" + filter.${column.refVariableName} + "%")<#t>
+            <#break>
+        <#default>
+            eq(filter.${column.refVariableName})<#t>
+    </#switch>
+            );<#lt>
         }
 </#list>
         // Applying action filters

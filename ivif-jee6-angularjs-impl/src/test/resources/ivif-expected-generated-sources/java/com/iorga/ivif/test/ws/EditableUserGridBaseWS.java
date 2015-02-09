@@ -4,8 +4,10 @@ import com.iorga.ivif.ja.Generated;
 import com.iorga.ivif.ja.GridSearchParam;
 import com.iorga.ivif.ja.RolesAllowed;
 import com.iorga.ivif.test.entity.User;
+import com.iorga.ivif.test.entity.select.UserStatusType;
 import com.iorga.ivif.test.service.UserBaseService;
 import com.mysema.query.SearchResults;
+import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.String;
@@ -30,6 +32,8 @@ public class EditableUserGridBaseWS {
 
     public static class EditableUserGridSaveParam {
         public String name;
+        public UserStatusType status;
+        public Boolean enabled;
         public Integer id;
         public Long version;
     }
@@ -47,6 +51,8 @@ public class EditableUserGridBaseWS {
             }
             // Apply modifications
             entityToSave.setName(saveParam.name);
+            entityToSave.setStatus(saveParam.status);
+            entityToSave.setEnabled(saveParam.enabled);
             // Set version for optimistic lock
             userBaseService.detach(entityToSave);
             entityToSave.setVersion(saveParam.version);
@@ -61,9 +67,11 @@ public class EditableUserGridBaseWS {
         public Integer profile_id;
 
         public EditableUserGridSearchResult() {}
-        public EditableUserGridSearchResult(String firstName, String name, Integer profile_id, Integer id, Long version) {
+        public EditableUserGridSearchResult(String firstName, String name, UserStatusType status, Boolean enabled, Integer profile_id, Integer id, Long version) {
             this.firstName = firstName;
             this.name = name;
+            this.status = status;
+            this.enabled = enabled;
             this.profile_id = profile_id;
             this.id = id;
             this.version = version;

@@ -119,15 +119,6 @@ public class GridBaseWSTargetFile extends JavaTargetFile<WSTargetFileId> {
     }
 
 
-    public String getSearchRelationMethodForGridColumn(GridColumn column) {
-        switch (column.getEntityAttribute().getType()) {
-            case "java.lang.String":
-                return "containsIgnoreCase";
-            default:
-                return "eq";
-        }
-    }
-
     /// Getters & Setters
 
     public EntityBaseServiceTargetFile getBaseService() {
