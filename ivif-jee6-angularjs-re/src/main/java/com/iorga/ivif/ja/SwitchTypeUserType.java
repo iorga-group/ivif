@@ -11,22 +11,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 
-public abstract class AbstractEnumUserType<E extends Enum<E> & Valuable<T>, T> implements UserType {
+public abstract class SwitchTypeUserType<T, J> implements UserType {
 
-    abstract protected T getFromResultSet(ResultSet rs, String columnName) throws SQLException;
+    abstract protected J getFromResultSet(ResultSet rs, String columnName) throws SQLException;
 
-    abstract protected E getByValue(T value);
+    abstract protected T getSwitchValue(J value);
+
+    protected abstract J getJdbcValue(T value);
 
     abstract protected int getSqlType();
 
-    protected Class<E> enumClass;
+    protected Class<T> switchType;
 
 
-    protected Class<E> getEnumClass() {
-        if (enumClass == null) {
-            enumClass = (Class<E>) new TypeToken<E>(getClass()){}.getRawType();
+    protected Class<T> getEnumClass() {
+        if (switchType == null) {
+            switchType = (Class<T>) new TypeToken<T>(getClass()){}.getRawType();
         }
-        return enumClass;
+        return switchType;
     }
 
     @Override
@@ -36,17 +38,17 @@ public abstract class AbstractEnumUserType<E extends Enum<E> & Valuable<T>, T> i
 
     @Override
     public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object owner) throws HibernateException, SQLException {
-        T value = getFromResultSet(rs, names[0]);
+        J value = getFromResultSet(rs, names[0]);
         if (rs.wasNull()) {
             return null;
         }
 
-        return getByValue(value);
+        return getSwitchValue(value);
     }
 
     @Override
     public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor session) throws HibernateException, SQLException {
-        final T jdbcValue = value == null ? null : ((E) value).value();
+        final J jdbcValue = value == null ? null : getJdbcValue((T) value);
 
         if (jdbcValue == null) {
             st.setNull(index, getSqlType());

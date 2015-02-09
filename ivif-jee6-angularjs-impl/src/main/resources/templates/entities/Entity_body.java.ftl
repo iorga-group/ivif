@@ -17,6 +17,15 @@ public class ${entity.name} implements ${util.useClass("java.io.Serializable", f
 </#if>
 <#list model.attributes as attribute>
     <#assign element=attribute.element.value>
+    <#if element.fromType?has_content>
+    <#-- TODO support other "from-type" types than String or Character -->
+    public static class ${attribute.capitalizedName}UserType extends ${util.useClass("com.iorga.ivif.ja.BooleanUserType")}<${util.useClass("java.lang.String")}> {
+        public ${attribute.capitalizedName}UserType() {
+            super("${element.trueValue}", "${element.falseValue}");
+        }
+    }
+    @${util.useClass("org.hibernate.annotations.Type")}(type = "${model.id.className}$${attribute.capitalizedName}UserType")
+    </#if>
     <#if attribute.manyToOne>
     @${util.useClass("javax.persistence.ManyToOne")}(fetch = ${util.useClass("javax.persistence.FetchType")}.LAZY, cascade = {${util.useClass("javax.persistence.CascadeType")}.PERSIST, ${util.useClass("javax.persistence.CascadeType")}.MERGE})
     </#if>
@@ -97,17 +106,6 @@ public class ${entity.name} implements ${util.useClass("java.io.Serializable", f
 
     public void ${attribute.setterName}(${util.useClass(attribute.type)} ${element.name}) {
         this.${element.name} = ${element.name};
-    <#if element.fromType?has_content>
-        <#-- this is a boolean attribute with a "from-type" defined, that is to say, we must set the original _value attribute -->
-        // set the original value
-        if (${util.useClass("java.lang.Boolean")}.TRUE.equals(${element.name})) {
-            ${attribute.setterName}_value(${attribute.trueValueStaticField.name});
-        } else if (${util.useClass("java.lang.Boolean")}.FALSE.equals(${element.name})) {
-            ${attribute.setterName}_value(${attribute.falseValueStaticField.name});
-        } else {
-            ${attribute.setterName}_value(null);
-        }
-    </#if>
     }
 
 </#list>

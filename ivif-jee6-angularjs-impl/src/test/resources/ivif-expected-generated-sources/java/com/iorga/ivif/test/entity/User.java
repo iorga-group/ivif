@@ -1,8 +1,10 @@
 package com.iorga.ivif.test.entity;
 
+import com.iorga.ivif.ja.BooleanUserType;
 import com.iorga.ivif.test.Versionable;
 import com.iorga.ivif.test.entity.select.UserStatusType;
 import java.io.Serializable;
+import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.String;
@@ -51,6 +53,14 @@ public class User implements Serializable, Versionable<Long> {
 
     @Type(type = "com.iorga.ivif.test.entity.select.UserStatusType$UserType")
     private UserStatusType status;
+
+    public static class EnabledUserType extends BooleanUserType<String> {
+        public EnabledUserType() {
+            super("OK", "KO");
+        }
+    }
+    @Type(type = "com.iorga.ivif.test.entity.User$EnabledUserType")
+    private Boolean enabled;
 
 
     /// Getters & Setters
@@ -108,6 +118,14 @@ public class User implements Serializable, Versionable<Long> {
 
     public void setStatus(UserStatusType status) {
         this.status = status;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
 }

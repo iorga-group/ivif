@@ -98,47 +98,6 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
                 // This is a simple attribute, let's set its type and declare as resolved
                 String attributeType = attributeElement.getName().getLocalPart();
                 entityAttribute.setType(attributeTypesToClass.get(attributeType).getName());
-                if (attribute instanceof com.iorga.ivif.tag.bean.Boolean) {
-                    com.iorga.ivif.tag.bean.Boolean booleanAttribute = (com.iorga.ivif.tag.bean.Boolean) attribute;
-                    String fromType = booleanAttribute.getFromType();
-                    if (StringUtils.isNotBlank(fromType)) {
-                        // this is a <boolean> attribute define with a "fromType", we must add a convert logic
-                        Class<?> fromTypeClass = attributeTypesToClass.get(fromType);
-                        String fromTypeClassName = fromTypeClass.getName();
-                        entityAttribute.setFromType(fromTypeClassName);
-                        // create an attribute named "<attributeName>_value" which will be mapped to the real value
-                        Class<? extends AttributeType> valueAttributeClass = getAttributeTypeClassFromElementType(fromType);
-                        AttributeType valueAttribute = valueAttributeClass.newInstance();
-                        // copy fields
-                        String attributeColumn = attribute.getColumn();
-                        valueAttribute.setColumn(attributeColumn);
-                        attribute.setColumn(null);
-                        valueAttribute.setRequired(attribute.isRequired());
-                        attribute.setRequired(false);
-                        valueAttribute.setName(attributeName +"_value");
-                        EntityAttribute valueEntityAttribute = new EntityAttribute(new JAXBElement(new QName(null, fromType), valueAttributeClass, valueAttribute), this);
-                        valueEntityAttribute.setType(fromTypeClassName);
-                        addEntityAttribute(valueEntityAttribute, context);
-
-                        // add a static field
-                        JavaStaticField trueValueStaticField = JavaStaticField.createFromVariableName(attributeName + "TrueValue", fromTypeClassName, booleanAttribute.getTrueValue());
-                        staticFields.add(trueValueStaticField);
-                        JavaStaticField falseValueStaticField = JavaStaticField.createFromVariableName(attributeName + "FalseValue", fromTypeClassName, booleanAttribute.getFalseValue());
-                        staticFields.add(falseValueStaticField);
-                        entityAttribute.setTrueValueStaticField(trueValueStaticField);
-                        entityAttribute.setFalseValueStaticField(falseValueStaticField);
-                        // define the formula
-                        boolean stringOrChar = String.class.isAssignableFrom(fromTypeClass) || Character.class.isAssignableFrom(fromTypeClass);
-                        String quote = (stringOrChar ? "'" : "");
-                        if (attributeColumn == null) {
-                            attributeColumn = attributeName;
-                        }
-                        attribute.setFormula("CASE " +
-                                "WHEN " + attributeColumn + " = " + quote + booleanAttribute.getTrueValue() + quote + " THEN 1 " +
-                                "WHEN " + attributeColumn + " = " + quote + booleanAttribute.getFalseValue() + quote + " THEN 0 " +
-                                "ELSE NULL END");
-                    }
-                }
             }
             addEntityAttribute(entityAttribute, context);
             // group id attributes

@@ -18,9 +18,6 @@ public class EntityAttribute extends AbstractTargetPart<String, EntityTargetFile
     private final boolean manyToOne;
     private final boolean _enum;
     private final String title;
-    private String fromType;
-    private JavaStaticField trueValueStaticField;
-    private JavaStaticField falseValueStaticField;
     private String getterName;
     private String setterName;
 
@@ -67,31 +64,6 @@ public class EntityAttribute extends AbstractTargetPart<String, EntityTargetFile
 
     public String getTitle() {
         return title;
-    }
-
-
-    public void setFromType(String fromType) {
-        this.fromType = fromType;
-    }
-
-    public String getFromType() {
-        return fromType;
-    }
-
-    public void setTrueValueStaticField(JavaStaticField trueValueStaticField) {
-        this.trueValueStaticField = trueValueStaticField;
-    }
-
-    public JavaStaticField getTrueValueStaticField() {
-        return trueValueStaticField;
-    }
-
-    public void setFalseValueStaticField(JavaStaticField falseValueStaticField) {
-        this.falseValueStaticField = falseValueStaticField;
-    }
-
-    public JavaStaticField getFalseValueStaticField() {
-        return falseValueStaticField;
     }
 
     public String getGetterName() {

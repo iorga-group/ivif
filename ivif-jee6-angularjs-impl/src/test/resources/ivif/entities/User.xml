@@ -13,6 +13,7 @@
         <long name="version" version="true"/>
         <string name="comment" column="&quot;COMMENT&quot;"/>
         <enum name="status" ref="UserStatusType"/>
+        <boolean name="enabled" from-type="string" true-value="OK" false-value="KO"/>
     </entity>
 
     <selection name="UserStatusType" from-type="string">
