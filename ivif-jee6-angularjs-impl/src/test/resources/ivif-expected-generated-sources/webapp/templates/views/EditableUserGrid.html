@@ -21,7 +21,7 @@
                         </td>
                         <td data-title="'Status'" sortable="'status'" filter="{'status':'select'}" filter-data="UserStatusType.optionListDeferred">
                             <span ng-if="!$edit">{{UserStatusType.titlesByValue[line.status]}}</span>
-                            <select ng-options="option.id as option.title for option in UserStatusType.optionList" ng-model="line.status" ng-if="$edit"></select>
+                            <select ng-options="option.id as option.title for (name, option) in UserStatusType.optionsByName" ng-model="line.status" ng-if="$edit" class="form-control"></select>
                         </td>
                         <td data-title="'Enabled'" sortable="'enabled'" >
                             <input type="checkbox" class="form-control" ng-model="line.enabled" ng-disabled="!$edit" />

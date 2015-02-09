@@ -14,7 +14,7 @@
             <#assign selectionName=entityAttribute.element.value.ref>
             <#if editable>
 <@tabulate nbTabs=nbTabs/><span ng-if="!${editSwitch}">{{${selectionName}.titlesByValue[${model}]}}</span>
-<@tabulate nbTabs=nbTabs/><select ng-options="option.id as option.title for option in ${selectionName}.optionList" ng-model="${model}" ng-if="${editSwitch}"></select>
+<@tabulate nbTabs=nbTabs/><select ng-options="option.id as option.title for (name, option) in ${selectionName}.optionsByName" ng-model="${model}" ng-if="${editSwitch}" class="form-control"></select>
             <#else>
 <@tabulate nbTabs=nbTabs/>{{${selectionName}.titlesByValue[${model}]}}
             </#if>
