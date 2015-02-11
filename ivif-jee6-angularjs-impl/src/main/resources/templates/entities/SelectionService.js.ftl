@@ -10,7 +10,6 @@ angular.module('${model.configuration.angularModuleName}')
             },
             optionsByName = {},
             optionList = [],
-            optionListDeferred = $q.defer(),
             titlesByValue = {};
 
         angular.forEach(selection, function(item, itemName) {
@@ -20,11 +19,14 @@ angular.module('${model.configuration.angularModuleName}')
             titlesByValue[item.value] = item.title;
         });
 
-        optionListDeferred.resolve(optionList);
         return angular.extend({}, optionsByName, {
             optionsByName: optionsByName,
             optionList: optionList,
-            optionListDeferred: optionListDeferred,
+            deferOptionList: function() {
+                var deferred = $q.defer();
+                deferred.resolve(angular.copy(optionList));
+                return deferred;
+            },
             titlesByValue: titlesByValue
         });
     }])

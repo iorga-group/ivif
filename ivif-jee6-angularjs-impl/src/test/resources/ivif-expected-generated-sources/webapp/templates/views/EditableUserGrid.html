@@ -19,7 +19,7 @@
                             <span ng-if="!($edit && (line.$original.profile_name==='editableName'))">{{line.name}}</span>
                             <span ng-if="$edit && (line.$original.profile_name==='editableName')"><input type="text" class="form-control" ng-model="line.name"/></span>
                         </td>
-                        <td data-title="'Status'" sortable="'status'" filter="{'status':'select'}" filter-data="UserStatusType.optionListDeferred">
+                        <td data-title="'Status'" sortable="'status'" filter="{'status':'select'}" filter-data="UserStatusType.deferOptionList()">
                             <span ng-if="!($edit)">{{UserStatusType.titlesByValue[line.status]}}</span>
                             <select ng-options="option.id as option.title for (name, option) in UserStatusType.optionsByName" ng-model="line.status" ng-if="$edit" class="form-control"></select>
                         </td>

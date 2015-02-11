@@ -35,7 +35,7 @@
             filter="{'${column.refVariableName}':'text'}"<#t>
             <#break>
         <#case "enum">
-            filter="{'${column.refVariableName}':'select'}" filter-data="${column.entityAttribute.element.value.ref}.optionListDeferred"<#t>
+            filter="{'${column.refVariableName}':'select'}" filter-data="${column.entityAttribute.element.value.ref}.deferOptionList()"<#t>
             <#break>
     </#switch>
                             ><#lt>
