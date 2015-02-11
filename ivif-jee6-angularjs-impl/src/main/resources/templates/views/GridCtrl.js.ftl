@@ -26,7 +26,13 @@ angular.module('${model.configuration.angularModuleName}')
         // Declare actions
 <#if onOpenCode?exists>
         $scope.clickLine = function(selectedLine) {
+    <#if editable>
+            if (!$scope.$edit) {
+                ${onOpenCode};
+            }
+    <#else>
             ${onOpenCode};
+    </#if>
         };
 </#if>
 <#if grid.singleSelection>

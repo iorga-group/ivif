@@ -16,7 +16,9 @@ angular.module('test')
         }
         // Declare actions
         $scope.clickLine = function(selectedLine) {
-            openProfileGridFromUserAction({profileId:selectedLine.profile_id});
+            if (!$scope.$edit) {
+                openProfileGridFromUserAction({profileId:selectedLine.profile_id});
+            }
         };
         $scope.edit = function() {
             $scope.$edit = true;
