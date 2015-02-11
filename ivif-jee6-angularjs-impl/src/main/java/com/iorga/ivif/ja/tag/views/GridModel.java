@@ -14,9 +14,10 @@ import com.iorga.ivif.tag.AbstractTarget;
 import com.iorga.ivif.tag.TargetFactory;
 import com.iorga.ivif.tag.TargetPreparedWaiter;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.xml.bind.annotation.XmlAttribute;
+import java.lang.Boolean;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -63,6 +64,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         protected String ref;
         private EntityAttribute entityAttribute;
         private List<EntityAttribute> refEntityAttributes = new ArrayList<>();
+        private boolean editable;
 
         public GridColumn(EntityAttribute entityAttribute) {
             this(entityAttribute.getElement().getValue().getName());
@@ -73,6 +75,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
             this.ref = ref;
             this.refVariableName = ref.replaceAll("\\.", "_");
         }
+
 
         public void setEntityAttribute(EntityAttribute entityAttribute) {
             this.entityAttribute = entityAttribute;
@@ -98,10 +101,14 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     public static class DisplayedGridColumn extends GridColumn {
         private final Column column;
         protected String title;
+        private final boolean editable;
+        private JsExpression editableIfExpression;
+        private String editSwitch = "$edit";
 
         public DisplayedGridColumn(Column column) {
             super(column.getRef());
             this.column = column;
+            editable = column.isEditable() || (StringUtils.isNotBlank(column.getEditableIf()) && BooleanUtils.toBooleanObject(column.getEditableIf()) != Boolean.FALSE);
         }
 
         @Override
@@ -111,12 +118,29 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
             this.title = StringUtils.isNotBlank(columnTitle) ? columnTitle : entityAttribute.getTitle();
         }
 
+        public void setEditableIfExpression(JsExpression editableIfExpression) {
+            this.editableIfExpression = editableIfExpression;
+            if (editableIfExpression != null) {
+                editSwitch = "$edit && (" + editableIfExpression.getExpression() + ")";
+            } else {
+                editSwitch = "$edit";
+            }
+        }
+
         public String getTitle() {
             return title;
         }
 
         public Column getElement() {
             return column;
+        }
+
+        public boolean isEditable() {
+            return editable;
+        }
+
+        public String getEditSwitch() {
+            return editSwitch;
         }
     }
 
@@ -205,20 +229,22 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 entityTargetFileId = new EntityTargetFileId(element.getEntity(), configuration);
                 for (Column column : element.getColumn()) {
                     DisplayedGridColumn displayedGridColumn = new DisplayedGridColumn(column);
+
                     displayedColumns.add(displayedGridColumn);
-                    if (column.isEditable()) {
+                    if (displayedGridColumn.isEditable()) {
                         editableColumns.add(displayedGridColumn);
                     }
+
                     prepareSelectedColumn(displayedGridColumn, context, configuration);
                 }
 
                 // Add columns selected by actions
-                onOpen = addSelectColumnForActionIfNecessary(element.getOnOpen(), "selectedLine", configuration, context);
-                onSelect = addSelectColumnForActionIfNecessary(element.getOnSelect(), "selectedLine", configuration, context);
+                onOpen = addSelectColumnForActionIfNecessary(element.getOnOpen(), "selectedLine", "selectedLine.$original", configuration, context);
+                onSelect = addSelectColumnForActionIfNecessary(element.getOnSelect(), "selectedLine", "selectedLine.$original", configuration, context);
                 final Toolbar toolbar = element.getToolbar();
                 if (toolbar != null) {
                     for (Button button : toolbar.getButton()) {
-                        final JsExpression expression = addSelectColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", configuration, context);
+                        final JsExpression expression = addSelectColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", "$scope.selectedLine.$original", configuration, context);
                         final ToolbarButton toolbarButton = new ToolbarButton(button, expression);
                         toolbarButtons.add(toolbarButton);
                         // Now compute the roles allowed if any
@@ -242,7 +268,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
                 // Compute highlights
                 for (Highlight highlight : element.getHighlight()) {
-                    final JsExpression expression = addSelectColumnForActionIfNecessary(highlight.getIf(), "line", configuration, context);
+                    final JsExpression expression = addSelectColumnForExpressionIfNecessary(highlight.getIf(), "line", "line.$record", configuration, context);
                     highlights.add(new GridHighlight(highlight.getColorClass(), expression.getExpression()));
                 }
                 // handle single selection as a highlight
@@ -250,13 +276,17 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     highlights.add(new GridHighlight("active", "line.$selected"));
                 }
 
-                selectedWithoutSaveColumns = new LinkedHashSet<>(selectedColumns);
-
-                // Now if the grid is editable, we must be sure that id columns & verion columns of the entity is selected
                 if (element.isEditable()) {
+                    // Parse the potential editable-if expression of displayed columns
+                    for (DisplayedGridColumn displayedColumn : displayedColumns) {
+                        displayedColumn.setEditableIfExpression(addSelectColumnForExpressionIfNecessary(displayedColumn.getElement().getEditableIf(), "line", "line.$original", configuration, context));
+                    }
+                    selectedWithoutSaveColumns = new LinkedHashSet<>(selectedColumns);
+
                     context.waitForEvent(new TargetPreparedWaiter<EntityTargetFile, EntityTargetFileId, JAGeneratorContext>(EntityTargetFile.class, entityTargetFileId, GridModel.this) {
                         @Override
                         protected void onTargetPrepared(EntityTargetFile entityTargetFile) throws Exception {
+                            // If the grid is editable, we must be sure that id columns & version columns of the entity is selected
                             saveColumns = new LinkedHashSet<>(editableColumns);
 
                             // Add id columns if not specified on selected columns
@@ -273,6 +303,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                             selectedWithoutSaveColumns.removeAll(saveColumns);
                         }
                     });
+                } else {
+                    selectedWithoutSaveColumns = new LinkedHashSet<>(selectedColumns);
                 }
                 if (singleSelection) {
                     // We can select a line, must add the id attributes to the selected column in order to identify which line is selected
@@ -318,18 +350,33 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         return selectedColumnsByRef.get(attributeName);
     }
 
-    private JsExpression addSelectColumnForActionIfNecessary(String action, String dollarLineReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
-        if (StringUtils.isNotBlank(action)) {
-            final JsExpression jsExpression = JsExpressionParser.parse(action, dollarLineReplacement);
+    private JsExpression addSelectColumnForExpressionIfNecessary(String expression, String dollarLineReplacement, String dollarRecordReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+        if (StringUtils.isNotBlank(expression)) {
+            final JsExpression jsExpression = JsExpressionParser.parseExpression(expression, dollarLineReplacement, dollarRecordReplacement);
 
-            for (LineRef lineRef : jsExpression.getLineRefs()) {
-                final String ref = lineRef.getRef();
-                if (!selectedColumnsByRef.containsKey(ref)) {
-                    // Add this non already added id column
-                    GridColumn gridColumn = new GridColumn(ref);
-                    prepareSelectedColumn(gridColumn, context, configuration);
-                }
+            addColumnsToSelectForExpressionIfNecessary(jsExpression, configuration, context);
+            return jsExpression;
+        } else {
+            return null;
+        }
+    }
+
+    private void addColumnsToSelectForExpressionIfNecessary(JsExpression jsExpression, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+        for (LineRef lineRef : jsExpression.getLineRefs()) {
+            final String ref = lineRef.getRef();
+            if (!selectedColumnsByRef.containsKey(ref)) {
+                // Add this non already added id column
+                GridColumn gridColumn = new GridColumn(ref);
+                prepareSelectedColumn(gridColumn, context, configuration);
             }
+        }
+    }
+
+    private JsExpression addSelectColumnForActionIfNecessary(String expression, String dollarLineReplacement, String dollarRecordReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+        if (StringUtils.isNotBlank(expression)) {
+            final JsExpression jsExpression = JsExpressionParser.parseActions(expression, dollarLineReplacement, dollarRecordReplacement);
+
+            addColumnsToSelectForExpressionIfNecessary(jsExpression, configuration, context);
             return jsExpression;
         } else {
             return null;

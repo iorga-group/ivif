@@ -39,7 +39,7 @@
             <#break>
     </#switch>
                             ><#lt>
-<@fieldEditor model="line."+column.refVariableName ivifType=ivifType nbTabs=7 editable=(editable && column.element.editable) editSwitch="$edit" entityAttribute=column.entityAttribute/>
+<@fieldEditor model="line."+column.refVariableName ivifType=ivifType nbTabs=7 editable=(editable && column.editable) editSwitch=column.editSwitch entityAttribute=column.entityAttribute/>
                         </td>
 </#list>
                     </tr>

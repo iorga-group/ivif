@@ -13,7 +13,7 @@
                 <table ng-table="editableProfileGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
                     <tr ng-repeat="line in $data">
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
-                            <span ng-if="!$edit">{{line.name}}</span>
+                            <span ng-if="!($edit)">{{line.name}}</span>
                             <span ng-if="$edit"><input type="text" class="form-control" ng-model="line.name"/></span>
                         </td>
                     </tr>

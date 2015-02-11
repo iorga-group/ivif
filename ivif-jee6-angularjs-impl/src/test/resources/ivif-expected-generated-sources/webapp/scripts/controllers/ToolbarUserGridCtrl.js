@@ -9,7 +9,7 @@ angular.module('test')
                     controller: 'ToolbarUserGridCtrl'
                 });
         }])
-    .controller('ToolbarUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openProfileGridFromUserAction', 'openComputerGridFromUserAction', function($scope, ngTableParams, $timeout, $http, locationService, openProfileGridFromUserAction, openComputerGridFromUserAction) {
+    .controller('ToolbarUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'aService', 'anotherService', 'openProfileGridFromUserAction', 'openComputerGridFromUserAction', function($scope, ngTableParams, $timeout, $http, locationService, aService, anotherService, openProfileGridFromUserAction, openComputerGridFromUserAction) {
         // Utils
         function getIdForLine(line) {
             return line.id;
@@ -23,6 +23,8 @@ angular.module('test')
             $scope.selectedLine = selectedLine;
             $scope.selectedLineId = getIdForLine(selectedLine);
             selectedLine.$selected = true;
+            // on-select call
+            aService(selectedLine.id);anotherService(selectedLine.profile_name);;
         };
         $scope.clickOnButton0 = function() {
             openProfileGridFromUserAction({profileId:$scope.selectedLine.profile_id});

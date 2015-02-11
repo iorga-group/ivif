@@ -3,6 +3,7 @@ package com.iorga.ivif.ja.tag.views;
 import com.antlr.v4.grammars.*;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,13 +14,14 @@ import static com.antlr.v4.grammars.ECMAScriptParser.*;
 public class JsExpressionParser {
 
     public static final String LINE_NAME = "$line";
+    public static final String RECORD_NAME = "$record";
 
     public static class LineRef {
         private final String ref;
         private final String refVariableName;
 
-        public LineRef(String fullLineRef) {
-            ref = StringUtils.substringAfter(fullLineRef, LINE_NAME + ".");
+        public LineRef(String fullLineRef, String refPrefix) {
+            ref = StringUtils.substringAfter(fullLineRef, refPrefix);
             refVariableName = ref.replaceAll("\\.", "_");
         }
 
@@ -72,10 +74,21 @@ public class JsExpressionParser {
         }
     }
 
-    public static JsExpression parse(String jsExpression, final String lineReplacement) {
+    public static JsExpression parseExpression(String jsExpression, final String lineReplacement, final String recordReplacement) {
         final ECMAScriptParser parser = new ECMAScriptParser(new CommonTokenStream(new ECMAScriptLexer(new ANTLRInputStream(jsExpression))));
         final ExpressionSequenceContext tree = parser.expressionSequence();
 
+        return parse(lineReplacement, recordReplacement, parser, tree);
+    }
+
+    public static JsExpression parseActions(String jsExpression, final String lineReplacement, final String recordReplacement) {
+        final ECMAScriptParser parser = new ECMAScriptParser(new CommonTokenStream(new ECMAScriptLexer(new ANTLRInputStream(jsExpression))));
+        final StatementListContext tree = parser.statementList();
+
+        return parse(lineReplacement, recordReplacement, parser, tree);
+    }
+
+    protected static JsExpression parse(final String lineReplacement, final String recordReplacement, final ECMAScriptParser parser, ParseTree tree) {
         final StringBuilder expressionBuilder = new StringBuilder();
         final JsExpression expression = new JsExpression();
 
@@ -118,10 +131,15 @@ public class JsExpressionParser {
             public Void visitMemberDotExpression(MemberDotExpressionContext ctx) {
                 String ref = parser.getTokenStream().getText(ctx);
                 if (ref.startsWith(LINE_NAME + ".")) {
-                    final LineRef lineRef = new LineRef(ref);
+                    final LineRef lineRef = new LineRef(ref, LINE_NAME + ".");
                     expression.lineRefs.add(lineRef);
                     // must change $line.field.subfield to lineReplacement.field_subfield
                     expressionBuilder.append(lineReplacement + "." + lineRef.refVariableName);
+                } else if (ref.startsWith(RECORD_NAME + ".")) {
+                    final LineRef lineRef = new LineRef(ref, RECORD_NAME + ".");
+                    expression.lineRefs.add(lineRef);
+                    // must change $record.field.subfield to lineReplacement.field_subfield
+                    expressionBuilder.append(recordReplacement + "." + lineRef.refVariableName);
                 } else {
                     super.visitMemberDotExpression(ctx);
                 }
@@ -130,10 +148,18 @@ public class JsExpressionParser {
 
             @Override
             public Void visitIdentifierExpression(IdentifierExpressionContext ctx) {
-                // catch lonely $line references
-                if (ctx.getChildCount() == 1 && LINE_NAME.equals(ctx.getChild(0).getText())) {
-                    // Catch and stop the visit by replacing the $line with its replacement
-                    expressionBuilder.append(lineReplacement);
+                // catch lonely $line or $record references
+                if (ctx.getChildCount() == 1) {
+                    final String firstChildText = ctx.getChild(0).getText();
+                    if (LINE_NAME.equals(firstChildText)) {
+                        // Catch and stop the visit by replacing the $line with its replacement
+                        expressionBuilder.append(lineReplacement);
+                    } else if (RECORD_NAME.equals(firstChildText)) {
+                        // Catch and stop the visit by replacing the $record with its replacement
+                        expressionBuilder.append(recordReplacement);
+                    } else {
+                        return super.visitIdentifierExpression(ctx);
+                    }
                 } else {
                     return super.visitIdentifierExpression(ctx);
                 }

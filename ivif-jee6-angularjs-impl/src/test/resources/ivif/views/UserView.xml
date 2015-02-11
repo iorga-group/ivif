@@ -10,12 +10,12 @@
 
     <grid name="EditableUserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: $line.profile.id})" editable="true" roles-allowed="admin manager">
         <column ref="firstName"/>
-        <column ref="name" editable="true"/>
+        <column ref="name" editable-if="$record.profile.name === 'editableName'"/>
         <column ref="status" editable="true"/>
         <column ref="enabled" editable="true"/>
     </grid>
 
-    <grid name="ToolbarUserGrid" entity="User" selection="single">
+    <grid name="ToolbarUserGrid" entity="User" selection="single" on-select="$inject(aService)($line.id); $inject(anotherService)($line.profile.name);">
         <toolbar>
             <button title="Open profile" action="openProfileGridFromUser({profileId: $line.profile.id})"/>
             <button title="Open computer" action="openComputerGridFromUser({userId: $line.id})"/>

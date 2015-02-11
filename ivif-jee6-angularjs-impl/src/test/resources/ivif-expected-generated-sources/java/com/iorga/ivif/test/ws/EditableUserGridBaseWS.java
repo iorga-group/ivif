@@ -65,14 +65,16 @@ public class EditableUserGridBaseWS {
     public static class EditableUserGridSearchResult extends EditableUserGridSaveParam {
         public String firstName;
         public Integer profile_id;
+        public String profile_name;
 
         public EditableUserGridSearchResult() {}
-        public EditableUserGridSearchResult(String firstName, String name, UserStatusType status, Boolean enabled, Integer profile_id, Integer id, Long version) {
+        public EditableUserGridSearchResult(String firstName, String name, UserStatusType status, Boolean enabled, Integer profile_id, String profile_name, Integer id, Long version) {
             this.firstName = firstName;
             this.name = name;
             this.status = status;
             this.enabled = enabled;
             this.profile_id = profile_id;
+            this.profile_name = profile_name;
             this.id = id;
             this.version = version;
         }

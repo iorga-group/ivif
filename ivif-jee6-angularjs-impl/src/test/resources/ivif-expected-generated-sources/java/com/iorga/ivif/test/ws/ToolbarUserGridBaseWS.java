@@ -24,14 +24,16 @@ public class ToolbarUserGridBaseWS {
 
     public static class ToolbarUserGridSearchResult {
         public String name;
-        public Integer profile_id;
         public Integer id;
+        public String profile_name;
+        public Integer profile_id;
 
         public ToolbarUserGridSearchResult() {}
-        public ToolbarUserGridSearchResult(String name, Integer profile_id, Integer id) {
+        public ToolbarUserGridSearchResult(String name, Integer id, String profile_name, Integer profile_id) {
             this.name = name;
-            this.profile_id = profile_id;
             this.id = id;
+            this.profile_name = profile_name;
+            this.profile_id = profile_id;
         }
     }
     public static class ToolbarUserGridSearchFilter extends ToolbarUserGridSearchResult {

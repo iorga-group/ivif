@@ -38,6 +38,7 @@ public class ${grid.element.name}BaseWS {
             }
             // Apply modifications
     <#list grid.editableColumns as column>
+        <#-- TODO should check if one can edit this column, checking editable-if expression -->
             entityToSave.<#list column.refEntityAttributes as entityAttribute><#if entityAttribute_has_next>${entityAttribute.getterName}().<#else>${entityAttribute.setterName}(</#if></#list>saveParam.${column.refVariableName});
     </#list>
     <#if grid.versionColumn?exists>
