@@ -3,6 +3,7 @@ package com.iorga.ivif.ja;
 import com.google.common.reflect.TypeToken;
 
 import javax.ejb.TransactionAttribute;
+import javax.persistence.NonUniqueResultException;
 import java.util.List;
 
 public abstract class EntityBaseService<E, I> extends PersistenceService {
@@ -67,5 +68,16 @@ public abstract class EntityBaseService<E, I> extends PersistenceService {
 
     public void detach(E entity) {
         entityManager.detach(entity);
+    }
+
+    protected E toSingleResult(List<E> list) {
+        if (list != null) {
+            if (list.size() > 1) {
+                throw new NonUniqueResultException();
+            } else if (!list.isEmpty()) {
+                return list.get(0);
+            }
+        }
+        return null;
     }
 }

@@ -6,6 +6,5 @@ angular.module('${model.configuration.angularModuleName}')
         return function(parameters) {
             locationService.pushNewLocation('${model.gridPath}', locationUtils.fromObjectToSearch({${actionName}: parameters}));
         }
-    }]);
+    }])
 ;
-

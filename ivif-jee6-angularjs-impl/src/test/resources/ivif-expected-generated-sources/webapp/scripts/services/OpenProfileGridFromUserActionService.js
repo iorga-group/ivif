@@ -5,6 +5,5 @@ angular.module('test')
         return function(parameters) {
             locationService.pushNewLocation('/profileGrid', locationUtils.fromObjectToSearch({openProfileGridFromUser: parameters}));
         }
-    }]);
+    }])
 ;
-
