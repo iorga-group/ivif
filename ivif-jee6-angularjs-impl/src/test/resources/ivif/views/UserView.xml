@@ -25,7 +25,7 @@
 
     <grid name="SelectEditableAndButtonUserGrid" entity="User" selection="single" on-select="$inject(aService)($line.id)" editable="true">
         <toolbar>
-            <button title="Test service" action="$inject(aService2)($line.id)"/>
+            <button title="Test service" action="$inject(aService2)($line.id)" disabled-if="$record.name === 'test'"/>
         </toolbar>
         <highlight color-class="warning" if="$line.profile.name === 'admin'"/>
         <column ref="name"/>

@@ -76,6 +76,7 @@
         <xs:complexType>
             <xs:attribute name="title" type="xs:string" use="required"/>
             <xs:attribute name="action" type="xs:string"/>
+            <xs:attribute name="disabled-if" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 

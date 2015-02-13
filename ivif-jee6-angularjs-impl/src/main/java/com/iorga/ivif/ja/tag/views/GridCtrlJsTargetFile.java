@@ -4,18 +4,14 @@ import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.JsTargetFile;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
-import com.iorga.ivif.ja.tag.util.RenderUtils;
 import com.iorga.ivif.ja.tag.views.GridModel.ToolbarButton;
 import com.iorga.ivif.ja.tag.views.JsExpressionParser.JsExpression;
 import com.iorga.ivif.tag.TargetPreparedWaiter;
-import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GridCtrlJsTargetFile extends JsTargetFile<String> {
@@ -46,7 +42,7 @@ public class GridCtrlJsTargetFile extends JsTargetFile<String> {
                 addInjectionsIfExpressionExists(gridModel.getOnOpen());
                 addInjectionsIfExpressionExists(gridModel.getOnSelect());
                 for (ToolbarButton toolbarButton : gridModel.getToolbarButtons()) {
-                    injections.addAll(toolbarButton.getJsExpression().getInjections());
+                    injections.addAll(toolbarButton.getActionExpression().getInjections());
                 }
             }
         });

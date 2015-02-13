@@ -8,7 +8,7 @@
                         <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit">Edit</button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit">Save</button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit">Cancel</button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton0()" ng-disabled="!selectedLine">Test service</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton0()" ng-disabled="!selectedLine||(selectedLine&&(selectedLine.$original.name==='test'))">Test service</button>
                     </div>
                 </nav>
                 <table ng-table="selectEditableAndButtonUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">

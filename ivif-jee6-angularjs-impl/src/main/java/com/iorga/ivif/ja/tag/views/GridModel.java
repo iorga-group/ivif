@@ -146,12 +146,14 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public static class ToolbarButton {
         private final Button element;
-        private final JsExpression jsExpression;
+        private final JsExpression actionExpression;
+        private final JsExpression disabledIfExpression;
         public List<List<String>> rolesAllowed;
 
-        public ToolbarButton(Button element, JsExpression jsExpression) {
+        public ToolbarButton(Button element, JsExpression actionExpression, JsExpression disabledIfExpression) {
             this.element = element;
-            this.jsExpression = jsExpression;
+            this.actionExpression = actionExpression;
+            this.disabledIfExpression = disabledIfExpression;
             rolesAllowed = new ArrayList<>();
         }
 
@@ -159,12 +161,16 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
             return element;
         }
 
-        public JsExpression getJsExpression() {
-            return jsExpression;
+        public JsExpression getActionExpression() {
+            return actionExpression;
         }
 
         public List<List<String>> getRolesAllowed() {
             return rolesAllowed;
+        }
+
+        public JsExpression getDisabledIfExpression() {
+            return disabledIfExpression;
         }
     }
 
@@ -244,11 +250,17 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 final Toolbar toolbar = element.getToolbar();
                 if (toolbar != null) {
                     for (Button button : toolbar.getButton()) {
-                        final JsExpression expression = addSelectColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", "$scope.selectedLine.$original", configuration, context);
-                        final ToolbarButton toolbarButton = new ToolbarButton(button, expression);
+                        final JsExpression actionExpression = addSelectColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", "$scope.selectedLine.$original", configuration, context);
+                        String disabledIfStr = button.getDisabledIf();
+                        if (!actionExpression.getLineRefs().isEmpty()) {
+                            // Button will be disabled if no line is selected
+                            disabledIfStr = "!selectedLine" + (StringUtils.isNotBlank(disabledIfStr) ? " || (selectedLine && ("+disabledIfStr+"))" : "");
+                        }
+                        final JsExpression disabledIfExpression = addSelectColumnForExpressionIfNecessary(disabledIfStr, "selectedLine", "selectedLine.$original", configuration, context);
+                        final ToolbarButton toolbarButton = new ToolbarButton(button, actionExpression, disabledIfExpression);
                         toolbarButtons.add(toolbarButton);
                         // Now compute the roles allowed if any
-                        for (String action : expression.getActions()) {
+                        for (String action : actionExpression.getActions()) {
                             context.waitForEvent(new TargetPreparedWaiter<ActionOpenViewModel, String, JAGeneratorContext>(ActionOpenViewModel.class, action, GridModel.this) {
                                 @Override
                                 protected void onTargetPrepared(ActionOpenViewModel actionOpenViewModel) throws Exception {
@@ -274,6 +286,19 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 // handle single selection as a highlight
                 if (singleSelection) {
                     highlights.add(new GridHighlight("active", "line.$selected"));
+                }
+
+                if (singleSelection) {
+                    // We can select a line, must add the id attributes to the selected column in order to identify which line is selected
+                    context.waitForEvent(new TargetPreparedWaiter<EntityTargetFile, EntityTargetFileId, JAGeneratorContext>(EntityTargetFile.class, entityTargetFileId, GridModel.this) {
+                        @Override
+                        protected void onTargetPrepared(EntityTargetFile entityTargetFile) throws Exception {
+                            // Add id columns if not specified on selected columns
+                            for (EntityAttribute entityAttribute : entityTargetFile.getIdAttributes()) {
+                                addNewIdGridColumnIfNecessary(entityAttribute, context, configuration);
+                            }
+                        }
+                    });
                 }
 
                 if (element.isEditable()) {
@@ -305,18 +330,6 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     });
                 } else {
                     selectedWithoutSaveColumns = new LinkedHashSet<>(selectedColumns);
-                }
-                if (singleSelection) {
-                    // We can select a line, must add the id attributes to the selected column in order to identify which line is selected
-                    context.waitForEvent(new TargetPreparedWaiter<EntityTargetFile, EntityTargetFileId, JAGeneratorContext>(EntityTargetFile.class, entityTargetFileId, GridModel.this) {
-                        @Override
-                        protected void onTargetPrepared(EntityTargetFile entityTargetFile) throws Exception {
-                            // Add id columns if not specified on selected columns
-                            for (EntityAttribute entityAttribute : entityTargetFile.getIdAttributes()) {
-                                addNewIdGridColumnIfNecessary(entityAttribute, context, configuration);
-                            }
-                        }
-                    });
                 }
 
                 //TODO create main JAX-RS Application to set base WS path to '/api'
