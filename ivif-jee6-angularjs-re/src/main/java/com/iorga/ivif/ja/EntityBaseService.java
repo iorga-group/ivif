@@ -73,7 +73,7 @@ public abstract class EntityBaseService<E, I> extends PersistenceService {
     protected E toSingleResult(List<E> list) {
         if (list != null) {
             if (list.size() > 1) {
-              throw new NonUniqueResultException();
+              throw new NonUniqueResultException("Query produced " + list.size() + " results (expected 1)");
 //            	try{
 //            		list.
 //            	}catch (NonUniqueResultException ex){
