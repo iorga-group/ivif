@@ -60,13 +60,13 @@ public class ${grid.element.name}BaseWS {
 </#if>
 <#-- SearchResult class -->
     public static class ${model.searchResultSimpleClassName} <#if editable>extends ${model.saveParamSimpleClassName} </#if>{
-<#list grid.selectedWithoutSaveColumns as column>
+<#list grid.nonTransientSelectedWithoutSaveColumns as column>
         public ${util.useClass(column.entityAttribute.type)} ${column.refVariableName};
 </#list>
 
         public ${model.searchResultSimpleClassName}() {}
-        public ${model.searchResultSimpleClassName}(<#list grid.selectedColumns as column>${util.useClass(column.entityAttribute.type)} ${column.refVariableName}<#if column_has_next>, </#if></#list>) {
-<#list grid.selectedColumns as column>
+        public ${model.searchResultSimpleClassName}(<#list grid.nonTransientSelectedColumns as column>${util.useClass(column.entityAttribute.type)} ${column.refVariableName}<#if column_has_next>, </#if></#list>) {
+<#list grid.nonTransientSelectedColumns as column>
             this.${column.refVariableName} = ${column.refVariableName};
 </#list>
         }

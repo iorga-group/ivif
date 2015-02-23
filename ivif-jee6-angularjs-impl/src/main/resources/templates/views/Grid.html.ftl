@@ -31,16 +31,19 @@
         <#-- this is a DisplayedGridColumn -->
         <#assign column=columnOrCode>
         <#assign ivifType=column.entityAttribute.element.name.localPart>
-                        <td data-title="'${column.title}'" sortable="'${column.refVariableName}'" <#rt>
-        <#switch ivifType>
-            <#case "string">
-            <#case "integer">
+                        <td data-title="'${column.title}'"<#rt>
+        <#if !column.entityAttribute.element.value.transient>
+ sortable="'${column.refVariableName}'" <#rt>
+            <#switch ivifType>
+                <#case "string">
+                <#case "integer">
             filter="{'${column.refVariableName}':'text'}"<#t>
-                <#break>
-            <#case "enum">
+                    <#break>
+                <#case "enum">
             filter="{'${column.refVariableName}':'select'}" filter-data="${column.entityAttribute.element.value.ref}.deferOptionList()"<#t>
-                <#break>
-        </#switch>
+                    <#break>
+            </#switch>
+        </#if>
                             ><#lt>
 <@fieldEditor model="line."+column.refVariableName ivifType=ivifType nbTabs=7 editable=(editable && column.editable) editSwitch=column.editSwitch entityAttribute=column.entityAttribute/>
                         </td>

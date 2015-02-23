@@ -33,6 +33,7 @@ public class EditableUserGridBaseWS {
     public static class EditableUserGridSaveParam {
         public String name;
         public UserStatusType status;
+        public String commentTemp;
         public Boolean enabled;
         public Integer id;
         public Long version;
@@ -52,6 +53,7 @@ public class EditableUserGridBaseWS {
             // Apply modifications
             entityToSave.setName(saveParam.name);
             entityToSave.setStatus(saveParam.status);
+            entityToSave.setCommentTemp(saveParam.commentTemp);
             entityToSave.setEnabled(saveParam.enabled);
             // Set version for optimistic lock
             userBaseService.detach(entityToSave);

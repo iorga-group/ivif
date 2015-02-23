@@ -11,7 +11,8 @@
 </#if>
         // Applying filter
         ${util.useClass(model.searchFilterClassName)} filter = searchParam.filter;
-<#list grid.displayedColumns as column>
+<#list grid.nonTransientDisplayedColumns as column>
+    <#-- can filter only on non transient fields -->
         if (filter.${column.refVariableName} != null) {
             jpaQuery.where($record.${column.ref}.<#rt>
     <#switch column.entityAttribute.element.name.localPart>
@@ -41,20 +42,21 @@
         // Applying sorting
         ${util.useClass("com.iorga.ivif.ja.Sorting")} sorting = searchParam.sorting;
         ${util.useClass("com.mysema.query.types.expr.ComparableExpressionBase")} sortingExpression = null;
-<#list grid.displayedColumns as column>
+<#list grid.nonTransientDisplayedColumns as column>
+    <#-- can sort only on non transient fields -->
         <#if column_index != 0>} else </#if>if ("${column.refVariableName}".equals(sorting.ref)) {
             sortingExpression = $record.${column.ref};
-        <#if !column_has_next>
+    <#if !column_has_next>
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(${util.useClass("com.iorga.ivif.ja.SortingType")}.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
-        </#if>
+    </#if>
 </#list>
         // Applying limit & offset
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
         // Returning projection
-        return jpaQuery.listResults(${util.useClass("com.mysema.query.types.ConstructorExpression")}.create(${util.useClass(model.searchResultClassName)}.class, <#list grid.selectedColumns as column>$record.${column.ref}<#if column_has_next>, </#if></#list>));
+        return jpaQuery.listResults(${util.useClass("com.mysema.query.types.ConstructorExpression")}.create(${util.useClass(model.searchResultClassName)}.class, <#list grid.nonTransientSelectedColumns as column>$record.${column.ref}<#if column_has_next>, </#if></#list>));
     }
 

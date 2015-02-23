@@ -32,7 +32,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     protected String variableName;
     protected List<GridColumn> selectedColumns;
+    protected LinkedHashSet<GridColumn> nonTransientSelectedColumns;
     protected List<DisplayedGridColumn> displayedColumns;
+    protected LinkedHashSet<DisplayedGridColumn> nonTransientDisplayedColumns;
     protected EntityTargetFileId entityTargetFileId;
     protected ServiceTargetFileId serviceTargetFileId;
     protected Map<String, GridColumn> selectedColumnsByRef;
@@ -45,7 +47,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
      * Save columns are all editable columns + all id columns + version column if any
      */
     protected LinkedHashSet<GridColumn> saveColumns;
-    protected LinkedHashSet<GridColumn> selectedWithoutSaveColumns;
+    protected LinkedHashSet<GridColumn> nonTransientSelectedWithoutSaveColumns;
     protected List<Object> displayedColumnsOrCode;
     protected GridColumn versionColumn;
     protected QueryModel queryModel;
@@ -213,7 +215,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
         // Prepare displayed columns
         selectedColumns = new ArrayList<>();
+        nonTransientSelectedColumns = new LinkedHashSet<>();
         displayedColumns = new ArrayList<>();
+        nonTransientDisplayedColumns = new LinkedHashSet<>();
         selectedColumnsByRef = new HashMap<>();
         idColumns = new LinkedHashSet<>();
         editableColumns = new LinkedHashSet<>();
@@ -243,6 +247,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                         DisplayedGridColumn displayedGridColumn = new DisplayedGridColumn(column);
 
                         displayedColumns.add(displayedGridColumn);
+                        nonTransientDisplayedColumns.add(displayedGridColumn); // will remove if non transient when it will be resolved
                         displayedColumnsOrCode.add(displayedGridColumn);
                         if (displayedGridColumn.isEditable()) {
                             editableColumns.add(displayedGridColumn);
@@ -339,7 +344,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     for (DisplayedGridColumn displayedColumn : displayedColumns) {
                         displayedColumn.setEditableIfExpression(addSelectColumnForExpressionIfNecessary(displayedColumn.getElement().getEditableIf(), "line", "line.$original", configuration, context));
                     }
-                    selectedWithoutSaveColumns = new LinkedHashSet<>(selectedColumns);
+                    nonTransientSelectedWithoutSaveColumns = new LinkedHashSet<>(nonTransientSelectedColumns);
 
                     context.waitForEvent(new TargetPreparedWaiter<EntityTargetFile, EntityTargetFileId, JAGeneratorContext>(EntityTargetFile.class, entityTargetFileId, GridModel.this) {
                         @Override
@@ -358,11 +363,11 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                                 saveColumns.add(gridColumn);
                                 versionColumn = gridColumn;
                             }
-                            selectedWithoutSaveColumns.removeAll(saveColumns);
+                            nonTransientSelectedWithoutSaveColumns.removeAll(saveColumns);
                         }
                     });
                 } else {
-                    selectedWithoutSaveColumns = new LinkedHashSet<>(selectedColumns);
+                    nonTransientSelectedWithoutSaveColumns = new LinkedHashSet<>(nonTransientSelectedColumns);
                 }
 
                 //TODO create main JAX-RS Application to set base WS path to '/api'
@@ -438,8 +443,13 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         selectedColumns.add(gridColumn);
         selectedColumnsByRef.put(gridColumn.ref, gridColumn);
         if (gridColumn.entityAttribute == null) {
+            nonTransientSelectedColumns.add(gridColumn); // will remove if non transient when the entityAttribute will be resolved
             Deque<String> refPath = new LinkedList<>(Arrays.asList(ref.split("\\.")));
             waitToPrepareGridColumnRecursive(refPath, entityTargetFileId, gridColumn, context, configuration);
+        } else {
+            if (!gridColumn.entityAttribute.getElement().getValue().isTransient()) {
+                nonTransientSelectedColumns.add(gridColumn);
+            }
         }
     }
 
@@ -452,6 +462,14 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 if (refPath.isEmpty()) {
                     // that was the last part of the path, we can resolve the attribute
                     gridColumn.setEntityAttribute(entityAttribute);
+                    // And remove from the non transient column list if it is
+                    if (entityAttribute.getElement().getValue().isTransient()) {
+                        nonTransientSelectedColumns.remove(gridColumn);
+                        nonTransientDisplayedColumns.remove(gridColumn);
+                        if (nonTransientSelectedWithoutSaveColumns != null) {
+                            nonTransientSelectedWithoutSaveColumns.remove(gridColumn);
+                        }
+                    }
                 } else {
                     // this is not the last part of the path, let's wait on next part
                     EntityTargetFileId entityTargetFileId = new EntityTargetFileId(entityAttribute.getType(), configuration);
@@ -504,8 +522,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         return editableColumns;
     }
 
-    public LinkedHashSet<GridColumn> getSelectedWithoutSaveColumns() {
-        return selectedWithoutSaveColumns;
+    public LinkedHashSet<GridColumn> getNonTransientSelectedWithoutSaveColumns() {
+        return nonTransientSelectedWithoutSaveColumns;
     }
 
     public LinkedHashSet<GridColumn> getSaveColumns() {
@@ -558,5 +576,13 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public List<Object> getDisplayedColumnsOrCode() {
         return displayedColumnsOrCode;
+    }
+
+    public LinkedHashSet<DisplayedGridColumn> getNonTransientDisplayedColumns() {
+        return nonTransientDisplayedColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getNonTransientSelectedColumns() {
+        return nonTransientSelectedColumns;
     }
 }

@@ -33,6 +33,7 @@ angular.module('test')
                     linesToSave.push({
                         name: editedLine.name,
                         status: editedLine.status,
+                        commentTemp: editedLine.commentTemp,
                         enabled: editedLine.enabled,
                         id: editedLine.id,
                         version: editedLine.version

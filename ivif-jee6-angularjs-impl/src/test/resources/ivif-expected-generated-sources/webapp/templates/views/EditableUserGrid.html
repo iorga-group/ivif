@@ -28,6 +28,10 @@
                 Desc : {{line.profile_description}}
             </td>
         
+                        <td data-title="'Comment Temp'">
+                            <span ng-if="!($edit)">{{line.commentTemp}}</span>
+                            <span ng-if="$edit"><input type="text" class="form-control" ng-model="line.commentTemp"/></span>
+                        </td>
                         <td data-title="'Enabled'" sortable="'enabled'" >
                             <input type="checkbox" class="form-control" ng-model="line.enabled" ng-disabled="!($edit)" />
                         </td>

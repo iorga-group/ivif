@@ -17,6 +17,7 @@
                 Desc : {{$line.profile.description}}
             </td>
         ]]></code>
+        <column ref="commentTemp" editable="true"/>
         <column ref="enabled" editable="true"/>
     </grid>
 
