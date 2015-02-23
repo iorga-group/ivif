@@ -65,6 +65,9 @@ public class ${entity.name} implements ${util.useClass("java.io.Serializable", f
     <#if attribute.enum>
     @${util.useClass("org.hibernate.annotations.Type")}(type = "${attribute.type}$UserType")
     </#if>
+    <#if element.transient>
+    @${util.useClass("javax.persistence.Transient")}
+    </#if>
     private ${util.useClass(attribute.type)} ${element.name};
 
 </#list>

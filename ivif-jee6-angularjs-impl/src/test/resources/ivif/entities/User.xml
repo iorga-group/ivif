@@ -14,6 +14,7 @@
         <string name="comment" column="&quot;COMMENT&quot;"/>
         <enum name="status" ref="UserStatusType"/>
         <boolean name="enabled" from-type="string" true-value="OK" false-value="KO"/>
+        <string name="commentTemp" transient="true"/>
     </entity>
 
     <selection name="UserStatusType" from-type="string">

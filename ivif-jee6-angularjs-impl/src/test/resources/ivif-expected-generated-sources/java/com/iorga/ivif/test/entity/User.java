@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.Type;
@@ -61,6 +62,9 @@ public class User implements Serializable, Versionable<Long> {
     }
     @Type(type = "com.iorga.ivif.test.entity.User$EnabledUserType")
     private Boolean enabled;
+
+    @Transient
+    private String commentTemp;
 
 
     /// Getters & Setters
@@ -126,6 +130,14 @@ public class User implements Serializable, Versionable<Long> {
 
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public String getCommentTemp() {
+        return commentTemp;
+    }
+
+    public void setCommentTemp(String commentTemp) {
+        this.commentTemp = commentTemp;
     }
 
 }

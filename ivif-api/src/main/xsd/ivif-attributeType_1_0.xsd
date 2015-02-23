@@ -23,6 +23,7 @@
         <xs:attribute name="formula" type="xs:string"/>
         <xs:attribute name="insertable" type="xs:boolean" default="true"/>
         <xs:attribute name="updatable" type="xs:boolean" default="true"/>
+        <xs:attribute name="transient" type="xs:boolean" default="false"/>
     </xs:complexType>
 
     <xs:complexType name="versionableAttributeType">
