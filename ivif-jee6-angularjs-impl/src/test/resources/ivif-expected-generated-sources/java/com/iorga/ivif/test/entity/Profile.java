@@ -21,6 +21,8 @@ public class Profile implements Serializable {
     @NotNull
     private String name;
 
+    private String description;
+
 
     /// Getters & Setters
     public Integer getId() {
@@ -37,6 +39,14 @@ public class Profile implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

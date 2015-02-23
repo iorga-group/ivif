@@ -25,7 +25,10 @@
             <xs:sequence>
                 <xs:element ref="toolbar" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="highlight" minOccurs="0" maxOccurs="unbounded"/>
-                <xs:element ref="column" minOccurs="1" maxOccurs="unbounded"/>
+                <xs:choice maxOccurs="unbounded">
+                    <xs:element ref="column" minOccurs="1" maxOccurs="unbounded"/>
+                    <xs:element ref="code" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:choice>
                 <xs:element ref="query" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
             <xs:attribute name="on-open" type="xs:string"/>
@@ -102,6 +105,8 @@
             <xs:attribute name="col-span" type="xs:integer"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="code"/>
 
     <xs:element name="query">
         <xs:complexType>

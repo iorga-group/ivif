@@ -16,9 +16,11 @@ import com.iorga.ivif.tag.TargetPreparedWaiter;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Element;
 
 import java.lang.Boolean;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.iorga.ivif.ja.tag.views.JsExpressionParser.*;
@@ -26,7 +28,7 @@ import static com.iorga.ivif.ja.tag.views.JsExpressionParser.*;
 public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected final Grid element;
 
-    public static final Pattern LINE_REF_PATTERN = Pattern.compile("(?<![\\w\\$])\\$line\\.[\\p{Alpha}\\$_][\\w\\$\\.]*");
+    public static final Pattern LINE_OR_RECORD_REF = Pattern.compile("(?<![\\w\\$])\\$(line|record)(\\.[\\p{Alpha}\\$_][\\w\\$]*)*");
 
     protected String variableName;
     protected List<GridColumn> selectedColumns;
@@ -44,6 +46,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
      */
     protected LinkedHashSet<GridColumn> saveColumns;
     protected LinkedHashSet<GridColumn> selectedWithoutSaveColumns;
+    protected List<Object> displayedColumnsOrCode;
     protected GridColumn versionColumn;
     protected QueryModel queryModel;
 
@@ -214,6 +217,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         selectedColumnsByRef = new HashMap<>();
         idColumns = new LinkedHashSet<>();
         editableColumns = new LinkedHashSet<>();
+        displayedColumnsOrCode = new ArrayList<>();
 
         // Handle selection
         singleSelection = SelectionType.SINGLE.equals(element.getSelection());
@@ -233,15 +237,44 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
             protected void onConfigurationPrepared(final JAConfiguration configuration) throws Exception {
 
                 entityTargetFileId = new EntityTargetFileId(element.getEntity(), configuration);
-                for (Column column : element.getColumn()) {
-                    DisplayedGridColumn displayedGridColumn = new DisplayedGridColumn(column);
+                for (Object columnOrCode : element.getColumnOrCode()) {
+                    if (columnOrCode instanceof Column) {
+                        Column column = (Column) columnOrCode;
+                        DisplayedGridColumn displayedGridColumn = new DisplayedGridColumn(column);
 
-                    displayedColumns.add(displayedGridColumn);
-                    if (displayedGridColumn.isEditable()) {
-                        editableColumns.add(displayedGridColumn);
+                        displayedColumns.add(displayedGridColumn);
+                        displayedColumnsOrCode.add(displayedGridColumn);
+                        if (displayedGridColumn.isEditable()) {
+                            editableColumns.add(displayedGridColumn);
+                        }
+
+                        prepareSelectedColumn(displayedGridColumn, context, configuration);
+                    } else {
+                        // this is a <code> element
+                        String code = ((Element) columnOrCode).getTextContent();
+                        // we must replace the $line and $record references
+                        final StringBuffer codeBuffer = new StringBuffer();
+                        final Matcher matcher = LINE_OR_RECORD_REF.matcher(code);
+                        while (matcher.find()) {
+                            String ref = matcher.group();
+                            final int dotIndex = ref.indexOf('.');
+                            final StringBuilder refBuilder = new StringBuilder();
+                            if (dotIndex > -1) {
+                                // we have field references, let's replace them
+                                final String fieldsRef = ref.substring(dotIndex + 1);
+                                addColumnsToSelectForRefIfNecessary(fieldsRef, configuration, context); // add them as a select if necessary
+                                refBuilder.append("." + fieldsRef.replaceAll("\\.", "_"));
+                            }
+                            if (ref.startsWith("$line")) {
+                                refBuilder.insert(0, "line");
+                            } else if (ref.startsWith("$record")) {
+                                refBuilder.insert(0, "line.$original");
+                            }
+                            matcher.appendReplacement(codeBuffer, refBuilder.toString());
+                        }
+                        matcher.appendTail(codeBuffer);
+                        displayedColumnsOrCode.add(codeBuffer.toString());
                     }
-
-                    prepareSelectedColumn(displayedGridColumn, context, configuration);
                 }
 
                 // Add columns selected by actions
@@ -377,11 +410,15 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     private void addColumnsToSelectForExpressionIfNecessary(JsExpression jsExpression, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
         for (LineRef lineRef : jsExpression.getLineRefs()) {
             final String ref = lineRef.getRef();
-            if (!selectedColumnsByRef.containsKey(ref)) {
-                // Add this non already added id column
-                GridColumn gridColumn = new GridColumn(ref);
-                prepareSelectedColumn(gridColumn, context, configuration);
-            }
+            addColumnsToSelectForRefIfNecessary(ref, configuration, context);
+        }
+    }
+
+    private void addColumnsToSelectForRefIfNecessary(String ref, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+        if (!selectedColumnsByRef.containsKey(ref)) {
+            // Add this non already added id column
+            GridColumn gridColumn = new GridColumn(ref);
+            prepareSelectedColumn(gridColumn, context, configuration);
         }
     }
 
@@ -517,5 +554,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public List<GridHighlight> getHighlights() {
         return highlights;
+    }
+
+    public List<Object> getDisplayedColumnsOrCode() {
+        return displayedColumnsOrCode;
     }
 }

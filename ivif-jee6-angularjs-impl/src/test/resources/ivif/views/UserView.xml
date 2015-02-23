@@ -12,6 +12,11 @@
         <column ref="firstName"/>
         <column ref="name" editable-if="$record.profile.name === 'editableName'"/>
         <column ref="status" editable="true"/>
+        <code><![CDATA[
+            <td data-title="'Profile description'">
+                Desc : {{$line.profile.description}}
+            </td>
+        ]]></code>
         <column ref="enabled" editable="true"/>
     </grid>
 
