@@ -4,7 +4,7 @@ angular.module('${model.configuration.angularModuleName}', [
         'ngRoute',
         'ngTable',
         'angularMoment',
-        'ui.bootstrap'
+        'mgcrea.ngStrap'
     ])
     .value('locationUtils', {
         fromObjectToSearch: function(object) {

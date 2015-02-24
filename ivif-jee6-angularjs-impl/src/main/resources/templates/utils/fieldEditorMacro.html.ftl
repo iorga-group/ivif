@@ -8,7 +8,7 @@
 <@tabulate nbTabs=nbTabs/>{{${model} | amDateFormat:'ll'}}
             <#break>
         <#case "datetime">
-<@tabulate nbTabs=nbTabs/><span am-time-ago="${model}" tooltip="{{${model} | amDateFormat:'lll'}}"></span>
+<@tabulate nbTabs=nbTabs/><span am-time-ago="${model}" bs-tooltip data-title="{{${model} | amDateFormat:'lll'}}"></span>
             <#break>
         <#case "enum">
             <#assign selectionName=entityAttribute.element.value.ref>
