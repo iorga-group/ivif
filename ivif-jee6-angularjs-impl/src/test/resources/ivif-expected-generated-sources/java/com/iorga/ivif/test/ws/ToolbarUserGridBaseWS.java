@@ -22,8 +22,10 @@ public class ToolbarUserGridBaseWS {
     private UserBaseService userBaseService;
 
 
-    public static class ToolbarUserGridSearchResult {
+    public static class ToolbarUserGridFilterResult {
         public String name;
+    }
+    public static class ToolbarUserGridSearchResult extends ToolbarUserGridFilterResult {
         public Integer id;
         public String profile_name;
         public Integer profile_id;
@@ -36,7 +38,8 @@ public class ToolbarUserGridBaseWS {
             this.profile_id = profile_id;
         }
     }
-    public static class ToolbarUserGridSearchFilter extends ToolbarUserGridSearchResult {
+    public static class ToolbarUserGridSearchFilter extends ToolbarUserGridFilterResult {
+        public String firstName;
     }
     public static class ToolbarUserGridSearchParam extends GridSearchParam<ToolbarUserGridSearchFilter> {}
     @POST

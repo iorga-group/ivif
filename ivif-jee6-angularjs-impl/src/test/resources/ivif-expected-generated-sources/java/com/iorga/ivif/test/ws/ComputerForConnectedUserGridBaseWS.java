@@ -21,15 +21,17 @@ public class ComputerForConnectedUserGridBaseWS {
     private ComputerBaseService computerBaseService;
 
 
-    public static class ComputerForConnectedUserGridSearchResult {
+    public static class ComputerForConnectedUserGridFilterResult {
         public String name;
+    }
+    public static class ComputerForConnectedUserGridSearchResult extends ComputerForConnectedUserGridFilterResult {
 
         public ComputerForConnectedUserGridSearchResult() {}
         public ComputerForConnectedUserGridSearchResult(String name) {
             this.name = name;
         }
     }
-    public static class ComputerForConnectedUserGridSearchFilter extends ComputerForConnectedUserGridSearchResult {
+    public static class ComputerForConnectedUserGridSearchFilter extends ComputerForConnectedUserGridFilterResult {
     }
     public static class ComputerForConnectedUserGridSearchParam extends GridSearchParam<ComputerForConnectedUserGridSearchFilter> {}
     @POST

@@ -67,7 +67,7 @@ angular.module('${model.configuration.angularModuleName}')
             angular.forEach($scope.editedLinesById, function(editedLine) {
                 if (!angular.equals(editedLine, editedLine.$original)) {
                     linesToSave.push({
-    <#list grid.saveColumns as column>
+    <#list grid.editableGridColumns as column>
                         ${column.refVariableName}: editedLine.${column.refVariableName}<#if column_has_next>,</#if>
     </#list>
                     });
@@ -147,8 +147,8 @@ angular.module('${model.configuration.angularModuleName}')
 </#if>
             $scope.${tableParamsVariableName} = new ngTableParams({
                 page: 1,
-                count: 10<#if model.actionOpenViewDefined>,
-                filter: locationUtils.fromSearchToObject($location.search())</#if>
+                count: 10,
+                filter: locationUtils.fromSearchToObject($location.search())
             }, {
                 total: 0, // length of data
                 getData: getData

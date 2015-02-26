@@ -39,7 +39,8 @@ angular.module('test')
         if (!locationService.initializeController($scope)) {
             $scope.computerForConnectedUserGridTableParams = new ngTableParams({
                 page: 1,
-                count: 10
+                count: 10,
+                filter: locationUtils.fromSearchToObject($location.search())
             }, {
                 total: 0, // length of data
                 getData: getData

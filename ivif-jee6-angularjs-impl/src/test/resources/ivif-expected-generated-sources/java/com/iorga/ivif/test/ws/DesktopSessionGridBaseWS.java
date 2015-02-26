@@ -22,9 +22,11 @@ public class DesktopSessionGridBaseWS {
     private DesktopSessionBaseService desktopSessionBaseService;
 
 
-    public static class DesktopSessionGridSearchResult {
+    public static class DesktopSessionGridFilterResult {
         public Integer computerId;
         public String name;
+    }
+    public static class DesktopSessionGridSearchResult extends DesktopSessionGridFilterResult {
 
         public DesktopSessionGridSearchResult() {}
         public DesktopSessionGridSearchResult(Integer computerId, String name) {
@@ -39,7 +41,7 @@ public class DesktopSessionGridBaseWS {
     public static class OpenCurrentUserDesktopSessionGridFromComputer {
         public Integer computerId;
     }
-    public static class DesktopSessionGridSearchFilter extends DesktopSessionGridSearchResult {
+    public static class DesktopSessionGridSearchFilter extends DesktopSessionGridFilterResult {
         public OpenDesktopSessionGridFromComputer openDesktopSessionGridFromComputer;
         public OpenCurrentUserDesktopSessionGridFromComputer openCurrentUserDesktopSessionGridFromComputer;
     }

@@ -22,9 +22,11 @@ public class UserGridBaseWS {
     private UserBaseService userBaseService;
 
 
-    public static class UserGridSearchResult {
+    public static class UserGridFilterResult {
         public String name;
         public Integer profile_id;
+    }
+    public static class UserGridSearchResult extends UserGridFilterResult {
 
         public UserGridSearchResult() {}
         public UserGridSearchResult(String name, Integer profile_id) {
@@ -35,7 +37,7 @@ public class UserGridBaseWS {
     public static class OpenUserGridFromComputer {
         public Integer userId;
     }
-    public static class UserGridSearchFilter extends UserGridSearchResult {
+    public static class UserGridSearchFilter extends UserGridFilterResult {
         public OpenUserGridFromComputer openUserGridFromComputer;
     }
     public static class UserGridSearchParam extends GridSearchParam<UserGridSearchFilter> {}

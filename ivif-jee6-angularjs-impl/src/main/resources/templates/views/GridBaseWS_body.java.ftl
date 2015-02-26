@@ -1,5 +1,6 @@
 <#include "../utils/rolesAllowedMacro.java.ftl"/>
 <#assign grid=model.grid>
+<#assign gridName=grid.element.name>
 <#assign editable=grid.element.editable>
 <#assign serviceVariableName=model.baseService.variableName>
 <#assign entityClassName=model.baseService.entityClassName>
@@ -7,7 +8,7 @@
 @${util.useClass("com.iorga.ivif.ja.Generated", false)}
 @${util.useClass("javax.ejb.Stateless", false)}
 <@rolesAllowed rolesAllowed=grid.element.rolesAllowed util=util inCurrentClass=false/>
-public class ${grid.element.name}BaseWS {
+public class ${gridName}BaseWS {
 
     @${util.useClass("javax.inject.Inject")} @${util.useClass("com.iorga.ivif.ja.Generated")}
     private ${util.useClass(model.baseService.className)} ${serviceVariableName};
@@ -18,9 +19,18 @@ public class ${grid.element.name}BaseWS {
 
 </#if>
 
+<#assign hasEditableResultFilter=grid.editableResultFilterIntersectionGridColumns?size &gt; 0>
 <#if editable>
-    public static class ${model.saveParamSimpleClassName} {
-    <#list grid.saveColumns as column>
+    <#-- Save class -->
+    <#if hasEditableResultFilter>
+    public static class ${gridName}EditableFilterResult {
+        <#list grid.editableResultFilterIntersectionGridColumns as column>
+        public ${util.useClass(column.entityAttribute.type)} ${column.refVariableName};
+        </#list>
+    }
+    </#if>
+    public static class ${model.saveParamSimpleClassName} <#if hasEditableResultFilter>extends ${gridName}EditableFilterResult </#if>{
+    <#list grid.editableOnlyAndResultIntersectionGridColumns as column>
         public ${util.useClass(column.entityAttribute.type)} ${column.refVariableName};
     </#list>
     }
@@ -37,7 +47,7 @@ public class ${grid.element.name}BaseWS {
                 entityToSave = new ${util.useClass(entityClassName)}();
             }
             // Apply modifications
-    <#list grid.editableColumns as column>
+    <#list grid.editableOnlyAndEditableResultFilterIntersectionGridColumns as column>
         <#-- TODO should check if one can edit this column, checking editable-if expression -->
             entityToSave.<#list column.refEntityAttributes as entityAttribute><#if entityAttribute_has_next>${entityAttribute.getterName}().<#else>${entityAttribute.setterName}(</#if></#list>saveParam.${column.refVariableName});
     </#list>
@@ -59,14 +69,22 @@ public class ${grid.element.name}BaseWS {
 
 </#if>
 <#-- SearchResult class -->
-    public static class ${model.searchResultSimpleClassName} <#if editable>extends ${model.saveParamSimpleClassName} </#if>{
-<#list grid.nonTransientSelectedWithoutSaveColumns as column>
+<#assign hasFilterResult=grid.filterResultIntersectionGridColumns?size &gt; 0>
+<#if hasFilterResult>
+    public static class ${gridName}FilterResult <#if hasEditableResultFilter>extends ${gridName}EditableFilterResult </#if>{
+    <#list grid.filterResultIntersectionGridColumns as column>
+        public ${util.useClass(column.entityAttribute.type)} ${column.refVariableName};
+    </#list>
+    }
+</#if>
+    public static class ${model.searchResultSimpleClassName} <#if hasFilterResult>extends ${gridName}FilterResult <#elseif hasEditableResultFilter>extends ${gridName}EditableFilterResult </#if>{
+<#list grid.resultOnlyAndEditableIntersectionGridColumns as column>
         public ${util.useClass(column.entityAttribute.type)} ${column.refVariableName};
 </#list>
 
         public ${model.searchResultSimpleClassName}() {}
-        public ${model.searchResultSimpleClassName}(<#list grid.nonTransientSelectedColumns as column>${util.useClass(column.entityAttribute.type)} ${column.refVariableName}<#if column_has_next>, </#if></#list>) {
-<#list grid.nonTransientSelectedColumns as column>
+        public ${model.searchResultSimpleClassName}(<#list grid.resultGridColumns as column>${util.useClass(column.entityAttribute.type)} ${column.refVariableName}<#if column_has_next>, </#if></#list>) {
+<#list grid.resultGridColumns as column>
             this.${column.refVariableName} = ${column.refVariableName};
 </#list>
         }
@@ -82,10 +100,13 @@ public class ${grid.element.name}BaseWS {
     }
 </#list>
 <#-- Filter class -->
-    public static class ${model.searchFilterSimpleClassName} extends ${util.useClass(model.searchResultClassName)} {
+    public static class ${model.searchFilterSimpleClassName} <#if hasFilterResult>extends ${gridName}FilterResult <#elseif hasEditableResultFilter>extends ${gridName}EditableFilterResult </#if>{
 <#-- TODO add target entity id attribute -->
 <#list model.openViewActions as openViewAction>
         public ${util.useClass(openViewAction.className)} ${openViewAction.variableName};
+</#list>
+<#list grid.filterOnlyGridColumns as column>
+        public ${util.useClass(column.entityAttribute.type)} ${column.refVariableName};
 </#list>
     }
     public static class ${model.searchParamSimpleClassName} extends ${util.useClass("com.iorga.ivif.ja.GridSearchParam")}<${util.useClass(model.searchFilterClassName)}> {}

@@ -27,6 +27,7 @@
             <button title="Open computer" action="openComputerGridFromUser({userId: $line.id})"/>
         </toolbar>
         <column ref="name"/>
+        <column-filter ref="firstName"/>
     </grid>
 
     <grid name="SelectEditableAndButtonUserGrid" entity="User" selection="single" on-select="$inject(aService)($line.id)" editable="true">

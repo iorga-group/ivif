@@ -30,11 +30,13 @@ public class EditableUserGridBaseWS {
     private UserBaseService userBaseService;
 
 
-    public static class EditableUserGridSaveParam {
+    public static class EditableUserGridEditableFilterResult {
         public String name;
         public UserStatusType status;
-        public String commentTemp;
         public Boolean enabled;
+    }
+    public static class EditableUserGridSaveParam extends EditableUserGridEditableFilterResult {
+        public String commentTemp;
         public Integer id;
         public Long version;
     }
@@ -53,7 +55,6 @@ public class EditableUserGridBaseWS {
             // Apply modifications
             entityToSave.setName(saveParam.name);
             entityToSave.setStatus(saveParam.status);
-            entityToSave.setCommentTemp(saveParam.commentTemp);
             entityToSave.setEnabled(saveParam.enabled);
             // Set version for optimistic lock
             userBaseService.detach(entityToSave);
@@ -64,11 +65,15 @@ public class EditableUserGridBaseWS {
         }
     }
 
-    public static class EditableUserGridSearchResult extends EditableUserGridSaveParam {
+    public static class EditableUserGridFilterResult extends EditableUserGridEditableFilterResult {
         public String firstName;
+    }
+    public static class EditableUserGridSearchResult extends EditableUserGridFilterResult {
         public String profile_description;
         public Integer profile_id;
         public String profile_name;
+        public Integer id;
+        public Long version;
 
         public EditableUserGridSearchResult() {}
         public EditableUserGridSearchResult(String firstName, String name, UserStatusType status, String profile_description, Boolean enabled, Integer profile_id, String profile_name, Integer id, Long version) {
@@ -83,7 +88,7 @@ public class EditableUserGridBaseWS {
             this.version = version;
         }
     }
-    public static class EditableUserGridSearchFilter extends EditableUserGridSearchResult {
+    public static class EditableUserGridSearchFilter extends EditableUserGridFilterResult {
     }
     public static class EditableUserGridSearchParam extends GridSearchParam<EditableUserGridSearchFilter> {}
     @POST

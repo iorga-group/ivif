@@ -22,8 +22,10 @@ public class ComputerToCurrentUserDesktopSessionGridBaseWS {
     private ComputerBaseService computerBaseService;
 
 
-    public static class ComputerToCurrentUserDesktopSessionGridSearchResult {
+    public static class ComputerToCurrentUserDesktopSessionGridFilterResult {
         public String name;
+    }
+    public static class ComputerToCurrentUserDesktopSessionGridSearchResult extends ComputerToCurrentUserDesktopSessionGridFilterResult {
         public Integer id;
 
         public ComputerToCurrentUserDesktopSessionGridSearchResult() {}
@@ -32,7 +34,7 @@ public class ComputerToCurrentUserDesktopSessionGridBaseWS {
             this.id = id;
         }
     }
-    public static class ComputerToCurrentUserDesktopSessionGridSearchFilter extends ComputerToCurrentUserDesktopSessionGridSearchResult {
+    public static class ComputerToCurrentUserDesktopSessionGridSearchFilter extends ComputerToCurrentUserDesktopSessionGridFilterResult {
     }
     public static class ComputerToCurrentUserDesktopSessionGridSearchParam extends GridSearchParam<ComputerToCurrentUserDesktopSessionGridSearchFilter> {}
     @POST

@@ -24,8 +24,10 @@ public class ProfileGridBaseWS {
     private ProfileBaseService profileBaseService;
 
 
-    public static class ProfileGridSearchResult {
+    public static class ProfileGridFilterResult {
         public String name;
+    }
+    public static class ProfileGridSearchResult extends ProfileGridFilterResult {
 
         public ProfileGridSearchResult() {}
         public ProfileGridSearchResult(String name) {
@@ -35,7 +37,7 @@ public class ProfileGridBaseWS {
     public static class OpenProfileGridFromUser {
         public Integer profileId;
     }
-    public static class ProfileGridSearchFilter extends ProfileGridSearchResult {
+    public static class ProfileGridSearchFilter extends ProfileGridFilterResult {
         public OpenProfileGridFromUser openProfileGridFromUser;
     }
     public static class ProfileGridSearchParam extends GridSearchParam<ProfileGridSearchFilter> {}

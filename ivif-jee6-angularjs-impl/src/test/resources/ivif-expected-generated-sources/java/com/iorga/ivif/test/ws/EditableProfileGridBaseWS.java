@@ -29,8 +29,10 @@ public class EditableProfileGridBaseWS {
     private ProfileService saveService;
 
 
-    public static class EditableProfileGridSaveParam {
+    public static class EditableProfileGridEditableFilterResult {
         public String name;
+    }
+    public static class EditableProfileGridSaveParam extends EditableProfileGridEditableFilterResult {
         public Integer id;
     }
     @POST
@@ -53,7 +55,8 @@ public class EditableProfileGridBaseWS {
         }
     }
 
-    public static class EditableProfileGridSearchResult extends EditableProfileGridSaveParam {
+    public static class EditableProfileGridSearchResult extends EditableProfileGridEditableFilterResult {
+        public Integer id;
 
         public EditableProfileGridSearchResult() {}
         public EditableProfileGridSearchResult(String name, Integer id) {
@@ -61,7 +64,7 @@ public class EditableProfileGridBaseWS {
             this.id = id;
         }
     }
-    public static class EditableProfileGridSearchFilter extends EditableProfileGridSearchResult {
+    public static class EditableProfileGridSearchFilter extends EditableProfileGridEditableFilterResult {
     }
     public static class EditableProfileGridSearchParam extends GridSearchParam<EditableProfileGridSearchFilter> {}
     @POST

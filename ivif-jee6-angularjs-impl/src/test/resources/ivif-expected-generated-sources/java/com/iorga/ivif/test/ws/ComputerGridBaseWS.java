@@ -22,9 +22,11 @@ public class ComputerGridBaseWS {
     private ComputerBaseService computerBaseService;
 
 
-    public static class ComputerGridSearchResult {
+    public static class ComputerGridFilterResult {
         public String name;
         public String user_name;
+    }
+    public static class ComputerGridSearchResult extends ComputerGridFilterResult {
         public Integer user_id;
 
         public ComputerGridSearchResult() {}
@@ -37,7 +39,7 @@ public class ComputerGridBaseWS {
     public static class OpenComputerGridFromUser {
         public Integer userid;
     }
-    public static class ComputerGridSearchFilter extends ComputerGridSearchResult {
+    public static class ComputerGridSearchFilter extends ComputerGridFilterResult {
         public OpenComputerGridFromUser openComputerGridFromUser;
     }
     public static class ComputerGridSearchParam extends GridSearchParam<ComputerGridSearchFilter> {}

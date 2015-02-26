@@ -166,6 +166,9 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (filter.name != null) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
+        if (filter.firstName != null) {
+            jpaQuery.where($record.firstName.containsIgnoreCase(filter.firstName));
+        }
         // Applying action filters
         // Applying sorting
         Sorting sorting = searchParam.sorting;

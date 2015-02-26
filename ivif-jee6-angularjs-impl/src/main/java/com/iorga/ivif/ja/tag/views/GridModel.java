@@ -1,5 +1,6 @@
 package com.iorga.ivif.ja.tag.views;
 
+import com.google.common.collect.Lists;
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.ServiceTargetFileId;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
@@ -31,25 +32,47 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     public static final Pattern LINE_OR_RECORD_REF = Pattern.compile("(?<![\\w\\$])\\$(line|record)(\\.[\\p{Alpha}\\$_][\\w\\$]*)*");
 
     protected String variableName;
-    protected List<GridColumn> selectedColumns;
-    protected LinkedHashSet<GridColumn> nonTransientSelectedColumns;
-    protected List<DisplayedGridColumn> displayedColumns;
-    protected LinkedHashSet<DisplayedGridColumn> nonTransientDisplayedColumns;
     protected EntityTargetFileId entityTargetFileId;
     protected ServiceTargetFileId serviceTargetFileId;
-    protected Map<String, GridColumn> selectedColumnsByRef;
-    protected LinkedHashSet<GridColumn> idColumns;
+
+    protected Map<String, GridColumn> gridColumnsByRef;
+
+    protected LinkedHashSet<GridColumn> editableGridColumns;
+    protected LinkedHashSet<GridColumn> resultGridColumns;
+    protected LinkedHashSet<GridColumn> filterGridColumns;
+    protected LinkedHashSet<GridColumn> sortableGridColumns;
+
     /**
-     * Editable columns are all columns which are editable = true
+     * Editable grid columns (not shared with results & filters) + intersection between results & edit => transient fields + [id + version which are not displayed + column brought by "editable-if" expressions]
      */
-    protected LinkedHashSet<GridColumn> editableColumns;
+    protected LinkedHashSet<GridColumn> editableOnlyAndResultIntersectionGridColumns;
     /**
-     * Save columns are all editable columns + all id columns + version column if any
+     * Results grid columns (not shared with editable & filters) + intersection between results & edit => column to display (which are not filterable and not transient) + columns brought from the expressions in buttons and highlights + [id + version which are not displayed + column brought by "editable-if" expressions]
      */
-    protected LinkedHashSet<GridColumn> saveColumns;
-    protected LinkedHashSet<GridColumn> nonTransientSelectedWithoutSaveColumns;
+    protected LinkedHashSet<GridColumn> resultOnlyAndEditableIntersectionGridColumns;
+    /**
+     * Intersection between filters & results (without editable) grid columns => column to display, filterable but not editable
+     */
+    protected LinkedHashSet<GridColumn> filterResultIntersectionGridColumns;
+    /**
+     * Filters grid columns (not shared with editable & results) => column which are filter only (not to display) + column brought by actions + query parameters
+     */
+    protected LinkedHashSet<GridColumn> filterOnlyGridColumns;
+    /**
+     * Intersection of editable / results / filters grid columns => column to display which are editable and filterable
+     */
+    protected LinkedHashSet<GridColumn> editableResultFilterIntersectionGridColumns;
+    /**
+     * Editable grid columns + intersection between editable / results / filters => transient fields + [column to display which are editable and filterable]
+     */
+    protected LinkedHashSet<GridColumn> editableOnlyAndEditableResultFilterIntersectionGridColumns;
+
     protected List<Object> displayedColumnsOrCode;
+    protected List<DisplayedGridColumn> displayedColumns;
+
+    protected LinkedHashSet<GridColumn> idColumns;
     protected GridColumn versionColumn;
+
     protected QueryModel queryModel;
 
     protected boolean singleSelection;
@@ -69,7 +92,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         protected String ref;
         private EntityAttribute entityAttribute;
         private List<EntityAttribute> refEntityAttributes = new ArrayList<>();
-        private boolean editable;
+        public boolean resultToResolve = false;
+        public boolean filterToResolve = false;
+        public boolean sortableToResolve = false;
 
         public GridColumn(EntityAttribute entityAttribute) {
             this(entityAttribute.getElement().getValue().getName());
@@ -214,14 +239,25 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         variableName = TargetFileUtils.getVariableNameFromCamelCasedName(element.getName());
 
         // Prepare displayed columns
-        selectedColumns = new ArrayList<>();
-        nonTransientSelectedColumns = new LinkedHashSet<>();
-        displayedColumns = new ArrayList<>();
-        nonTransientDisplayedColumns = new LinkedHashSet<>();
-        selectedColumnsByRef = new HashMap<>();
-        idColumns = new LinkedHashSet<>();
-        editableColumns = new LinkedHashSet<>();
+        gridColumnsByRef = new HashMap<>();
+
+        editableGridColumns = new LinkedHashSet<>();
+        resultGridColumns = new LinkedHashSet<>();
+        filterGridColumns = new LinkedHashSet<>();
+        sortableGridColumns = new LinkedHashSet<>();
+
+        editableOnlyAndResultIntersectionGridColumns = null;
+        resultOnlyAndEditableIntersectionGridColumns = null;
+        filterResultIntersectionGridColumns = null;
+        filterOnlyGridColumns = null;
+        editableResultFilterIntersectionGridColumns = null;
+        editableOnlyAndEditableResultFilterIntersectionGridColumns = null;
+
         displayedColumnsOrCode = new ArrayList<>();
+        displayedColumns = new ArrayList<>();
+
+        idColumns = new LinkedHashSet<>();
+        versionColumn = null;
 
         // Handle selection
         singleSelection = SelectionType.SINGLE.equals(element.getSelection());
@@ -247,13 +283,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                         DisplayedGridColumn displayedGridColumn = new DisplayedGridColumn(column);
 
                         displayedColumns.add(displayedGridColumn);
-                        nonTransientDisplayedColumns.add(displayedGridColumn); // will remove if non transient when it will be resolved
                         displayedColumnsOrCode.add(displayedGridColumn);
-                        if (displayedGridColumn.isEditable()) {
-                            editableColumns.add(displayedGridColumn);
-                        }
-
-                        prepareSelectedColumn(displayedGridColumn, context, configuration);
+                        prepareNewGridColumn(displayedGridColumn, displayedGridColumn.isEditable(), true, true, true, context, configuration);
                     } else {
                         // this is a <code> element
                         String code = ((Element) columnOrCode).getTextContent();
@@ -267,7 +298,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                             if (dotIndex > -1) {
                                 // we have field references, let's replace them
                                 final String fieldsRef = ref.substring(dotIndex + 1);
-                                addColumnsToSelectForRefIfNecessary(fieldsRef, configuration, context); // add them as a select if necessary
+                                addResultColumnForRefIfNecessary(fieldsRef, configuration, context); // add them as a select if necessary
                                 refBuilder.append("." + fieldsRef.replaceAll("\\.", "_"));
                             }
                             if (ref.startsWith("$line")) {
@@ -282,19 +313,24 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     }
                 }
 
+                // Add columns for simple column-filters
+                for (ColumnFilter columnFilter : element.getColumnFilter()) {
+                    addColumnForRefIfNecessary(columnFilter.getRef(), false, true, false, configuration, context);
+                }
+
                 // Add columns selected by actions
-                onOpen = addSelectColumnForActionIfNecessary(element.getOnOpen(), "selectedLine", "selectedLine.$original", configuration, context);
-                onSelect = addSelectColumnForActionIfNecessary(element.getOnSelect(), "selectedLine", "selectedLine.$original", configuration, context);
+                onOpen = addResultColumnForActionIfNecessary(element.getOnOpen(), "selectedLine", "selectedLine.$original", configuration, context);
+                onSelect = addResultColumnForActionIfNecessary(element.getOnSelect(), "selectedLine", "selectedLine.$original", configuration, context);
                 final Toolbar toolbar = element.getToolbar();
                 if (toolbar != null) {
                     for (Button button : toolbar.getButton()) {
-                        final JsExpression actionExpression = addSelectColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", "$scope.selectedLine.$original", configuration, context);
+                        final JsExpression actionExpression = addResultColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", "$scope.selectedLine.$original", configuration, context);
                         String disabledIfStr = button.getDisabledIf();
                         if (!actionExpression.getLineRefs().isEmpty()) {
                             // Button will be disabled if no line is selected
                             disabledIfStr = "!selectedLine" + (StringUtils.isNotBlank(disabledIfStr) ? " || (selectedLine && ("+disabledIfStr+"))" : "");
                         }
-                        final JsExpression disabledIfExpression = addSelectColumnForExpressionIfNecessary(disabledIfStr, "selectedLine", "selectedLine.$original", configuration, context);
+                        final JsExpression disabledIfExpression = addResultColumnForExpressionIfNecessary(disabledIfStr, "selectedLine", "selectedLine.$original", configuration, context);
                         final ToolbarButton toolbarButton = new ToolbarButton(button, actionExpression, disabledIfExpression);
                         toolbarButtons.add(toolbarButton);
                         // Now compute the roles allowed if any
@@ -318,7 +354,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
                 // Compute highlights
                 for (Highlight highlight : element.getHighlight()) {
-                    final JsExpression expression = addSelectColumnForExpressionIfNecessary(highlight.getIf(), "line", "line.$record", configuration, context);
+                    final JsExpression expression = addResultColumnForExpressionIfNecessary(highlight.getIf(), "line", "line.$record", configuration, context);
                     highlights.add(new GridHighlight(highlight.getColorClass(), expression.getExpression()));
                 }
                 // handle single selection as a highlight
@@ -333,7 +369,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                         protected void onTargetPrepared(EntityTargetFile entityTargetFile) throws Exception {
                             // Add id columns if not specified on selected columns
                             for (EntityAttribute entityAttribute : entityTargetFile.getIdAttributes()) {
-                                addNewIdGridColumnIfNecessary(entityAttribute, context, configuration);
+                                addNewIdResultColumnIfNecessary(entityAttribute, false, context, configuration);
                             }
                         }
                     });
@@ -342,32 +378,25 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 if (element.isEditable()) {
                     // Parse the potential editable-if expression of displayed columns
                     for (DisplayedGridColumn displayedColumn : displayedColumns) {
-                        displayedColumn.setEditableIfExpression(addSelectColumnForExpressionIfNecessary(displayedColumn.getElement().getEditableIf(), "line", "line.$original", configuration, context));
+                        displayedColumn.setEditableIfExpression(addResultColumnForExpressionIfNecessary(displayedColumn.getElement().getEditableIf(), "line", "line.$original", configuration, context));
                     }
-                    nonTransientSelectedWithoutSaveColumns = new LinkedHashSet<>(nonTransientSelectedColumns);
 
                     context.waitForEvent(new TargetPreparedWaiter<EntityTargetFile, EntityTargetFileId, JAGeneratorContext>(EntityTargetFile.class, entityTargetFileId, GridModel.this) {
                         @Override
                         protected void onTargetPrepared(EntityTargetFile entityTargetFile) throws Exception {
                             // If the grid is editable, we must be sure that id columns & version columns of the entity is selected
-                            saveColumns = new LinkedHashSet<>(editableColumns);
 
                             // Add id columns if not specified on selected columns
                             for (EntityAttribute entityAttribute : entityTargetFile.getIdAttributes()) {
-                                final GridColumn gridColumn = addNewIdGridColumnIfNecessary(entityAttribute, context, configuration);
-                                saveColumns.add(gridColumn);
+                                addNewIdResultColumnIfNecessary(entityAttribute, true, context, configuration);
                             }
                             final EntityAttribute versionAttribute = entityTargetFile.getVersionAttribute();
                             if (versionAttribute != null) {
-                                final GridColumn gridColumn = addNewGridColumnIfNecessary(versionAttribute, context, configuration);
-                                saveColumns.add(gridColumn);
+                                final GridColumn gridColumn = addNewResultColumnIfNecessary(versionAttribute, true, context, configuration);
                                 versionColumn = gridColumn;
                             }
-                            nonTransientSelectedWithoutSaveColumns.removeAll(saveColumns);
                         }
                     });
-                } else {
-                    nonTransientSelectedWithoutSaveColumns = new LinkedHashSet<>(nonTransientSelectedColumns);
                 }
 
                 //TODO create main JAX-RS Application to set base WS path to '/api'
@@ -386,70 +415,116 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         });
     }
 
-    private GridColumn addNewIdGridColumnIfNecessary(EntityAttribute entityAttribute, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
-        final GridColumn gridColumn = addNewGridColumnIfNecessary(entityAttribute, context, configuration);
+    private void prepareNewGridColumn(GridColumn gridColumn, boolean editable, boolean filter, boolean result, boolean sortable, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
+        gridColumnsByRef.put(gridColumn.ref, gridColumn);
+
+        if (gridColumn.entityAttribute == null) {
+            // entity attribute is not yet resolved, result (depending on transient), filter (depending on the field type + transient) and sortable (depending on transient) should be resolved later, but added new anyways
+            if (filter) {
+                gridColumn.filterToResolve = true;
+            }
+            if (result) {
+                gridColumn.resultToResolve = true;
+            }
+            if (sortable) {
+                gridColumn.sortableToResolve = true;
+            }
+        }
+
+        updateLists(gridColumn, editable, filter, result, sortable);
+
+        if (gridColumn.entityAttribute == null) {
+            // Ask to resolve later
+            Deque<String> refPath = new LinkedList<>(Arrays.asList(gridColumn.ref.split("\\.")));
+            waitToPrepareGridColumnRecursive(refPath, entityTargetFileId, gridColumn, context, configuration);
+        }
+    }
+
+    private void updateLists(GridColumn gridColumn, boolean editable, boolean filter, boolean result, boolean sortable) {
+        if (editable) {
+            editableGridColumns.add(gridColumn);
+        }
+        if (filter) {
+            filterGridColumns.add(gridColumn);
+        }
+        if (result) {
+            resultGridColumns.add(gridColumn);
+        }
+        if (sortable) {
+            sortableGridColumns.add(gridColumn);
+        }
+    }
+
+    private static final Set<String> FILTERABLE_IVIF_TYPES = new HashSet<>(Lists.newArrayList(new String[]{"string", "integer", "enum"}));
+    private boolean isFilterable(GridColumn gridColumn) {
+        return gridColumn.entityAttribute != null && FILTERABLE_IVIF_TYPES.contains(gridColumn.entityAttribute.getElement().getName().getLocalPart());
+    }
+
+    private boolean isTransient(DisplayedGridColumn displayedGridColumn) {
+        final EntityAttribute entityAttribute = displayedGridColumn.getEntityAttribute();
+        return entityAttribute != null && entityAttribute.getElement().getValue().isTransient();
+    }
+
+    private GridColumn addNewIdResultColumnIfNecessary(EntityAttribute entityAttribute, boolean editable, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
+        final GridColumn gridColumn = addNewResultColumnIfNecessary(entityAttribute, editable, context, configuration);
         idColumns.add(gridColumn);
         return gridColumn;
     }
 
-    private GridColumn addNewGridColumnIfNecessary(EntityAttribute entityAttribute, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
+    private GridColumn addNewResultColumnIfNecessary(EntityAttribute entityAttribute, boolean editable, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
         final String attributeName = entityAttribute.getElement().getValue().getName();
-        if (!selectedColumnsByRef.containsKey(attributeName)) {
+        GridColumn gridColumn = gridColumnsByRef.get(attributeName);
+        if (gridColumn == null) {
             // Add this non already added id column
-            prepareSelectedColumn(new GridColumn(entityAttribute), context, configuration);
+            gridColumn = new GridColumn(entityAttribute);
+            prepareNewGridColumn(gridColumn, editable, false, true, false, context, configuration);
+        } else {
+            updateLists(gridColumn, editable, false, true, false);
         }
-        return selectedColumnsByRef.get(attributeName);
+        return gridColumn;
     }
 
-    private JsExpression addSelectColumnForExpressionIfNecessary(String expression, String dollarLineReplacement, String dollarRecordReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+    private JsExpression addResultColumnForExpressionIfNecessary(String expression, String dollarLineReplacement, String dollarRecordReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
         if (StringUtils.isNotBlank(expression)) {
             final JsExpression jsExpression = JsExpressionParser.parseExpression(expression, dollarLineReplacement, dollarRecordReplacement);
 
-            addColumnsToSelectForExpressionIfNecessary(jsExpression, configuration, context);
+            addResultColumnsForExpressionIfNecessary(jsExpression, configuration, context);
             return jsExpression;
         } else {
             return null;
         }
     }
 
-    private void addColumnsToSelectForExpressionIfNecessary(JsExpression jsExpression, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+    private void addResultColumnsForExpressionIfNecessary(JsExpression jsExpression, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
         for (LineRef lineRef : jsExpression.getLineRefs()) {
             final String ref = lineRef.getRef();
-            addColumnsToSelectForRefIfNecessary(ref, configuration, context);
+            addResultColumnForRefIfNecessary(ref, configuration, context);
         }
     }
 
-    private void addColumnsToSelectForRefIfNecessary(String ref, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
-        if (!selectedColumnsByRef.containsKey(ref)) {
+    private void addResultColumnForRefIfNecessary(String ref, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+        addColumnForRefIfNecessary(ref, false, false, true, configuration, context);
+    }
+
+    private void addColumnForRefIfNecessary(String ref, boolean editable, boolean filter, boolean result, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+        GridColumn gridColumn = gridColumnsByRef.get(ref);
+        if (gridColumn == null) {
             // Add this non already added id column
-            GridColumn gridColumn = new GridColumn(ref);
-            prepareSelectedColumn(gridColumn, context, configuration);
+            gridColumn = new GridColumn(ref);
+            prepareNewGridColumn(gridColumn, editable, filter, result, false, context, configuration);
+        } else {
+            updateLists(gridColumn, editable, filter, result, false);
         }
     }
 
-    private JsExpression addSelectColumnForActionIfNecessary(String expression, String dollarLineReplacement, String dollarRecordReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+    private JsExpression addResultColumnForActionIfNecessary(String expression, String dollarLineReplacement, String dollarRecordReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
         if (StringUtils.isNotBlank(expression)) {
             final JsExpression jsExpression = JsExpressionParser.parseActions(expression, dollarLineReplacement, dollarRecordReplacement);
 
-            addColumnsToSelectForExpressionIfNecessary(jsExpression, configuration, context);
+            addResultColumnsForExpressionIfNecessary(jsExpression, configuration, context);
             return jsExpression;
         } else {
             return null;
-        }
-    }
-
-    protected void prepareSelectedColumn(GridColumn gridColumn, JAGeneratorContext context, final JAConfiguration configuration) throws Exception {
-        String ref = gridColumn.ref;
-        selectedColumns.add(gridColumn);
-        selectedColumnsByRef.put(gridColumn.ref, gridColumn);
-        if (gridColumn.entityAttribute == null) {
-            nonTransientSelectedColumns.add(gridColumn); // will remove if non transient when the entityAttribute will be resolved
-            Deque<String> refPath = new LinkedList<>(Arrays.asList(ref.split("\\.")));
-            waitToPrepareGridColumnRecursive(refPath, entityTargetFileId, gridColumn, context, configuration);
-        } else {
-            if (!gridColumn.entityAttribute.getElement().getValue().isTransient()) {
-                nonTransientSelectedColumns.add(gridColumn);
-            }
         }
     }
 
@@ -462,12 +537,23 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 if (refPath.isEmpty()) {
                     // that was the last part of the path, we can resolve the attribute
                     gridColumn.setEntityAttribute(entityAttribute);
-                    // And remove from the non transient column list if it is
+                    // Now, fix the repartition of that grid column if previously not resolved and put in wrong lists
+                    // It was previously considered as not transient and not filtered. Must change lists if now it is not the case anymore
                     if (entityAttribute.getElement().getValue().isTransient()) {
-                        nonTransientSelectedColumns.remove(gridColumn);
-                        nonTransientDisplayedColumns.remove(gridColumn);
-                        if (nonTransientSelectedWithoutSaveColumns != null) {
-                            nonTransientSelectedWithoutSaveColumns.remove(gridColumn);
+                        // It has become transient, must remove from the filters & results & sortable
+                        if (gridColumn.filterToResolve) {
+                            filterGridColumns.remove(gridColumn);
+                        }
+                        if (gridColumn.resultToResolve) {
+                            resultGridColumns.remove(gridColumn);
+                        }
+                        if (gridColumn.sortableToResolve) {
+                            sortableGridColumns.remove(gridColumn);
+                        }
+                    } else if (isFilterable(gridColumn)) {
+                        // It has become filterable, add it to filters
+                        if (gridColumn.filterToResolve) {
+                            filterGridColumns.add(gridColumn);
                         }
                     }
                 } else {
@@ -479,6 +565,63 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         });
     }
 
+    public LinkedHashSet<GridColumn> getEditableOnlyAndResultIntersectionGridColumns() {
+        if (editableOnlyAndResultIntersectionGridColumns == null) {
+            // compute it
+            editableOnlyAndResultIntersectionGridColumns = new LinkedHashSet<>(editableGridColumns);
+            editableOnlyAndResultIntersectionGridColumns.removeAll(filterGridColumns);
+        }
+        return editableOnlyAndResultIntersectionGridColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getResultOnlyAndEditableIntersectionGridColumns() {
+        if (resultOnlyAndEditableIntersectionGridColumns == null) {
+            // compute it
+            resultOnlyAndEditableIntersectionGridColumns = new LinkedHashSet<>(resultGridColumns);
+            resultOnlyAndEditableIntersectionGridColumns.removeAll(filterGridColumns);
+        }
+        return resultOnlyAndEditableIntersectionGridColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getFilterResultIntersectionGridColumns() {
+        if (filterResultIntersectionGridColumns == null) {
+            // compute it
+            filterResultIntersectionGridColumns = new LinkedHashSet<>(filterGridColumns);
+            filterResultIntersectionGridColumns.retainAll(resultGridColumns);
+            filterResultIntersectionGridColumns.removeAll(editableGridColumns);
+        }
+        return filterResultIntersectionGridColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getFilterOnlyGridColumns() {
+        if (filterOnlyGridColumns == null) {
+            // compute it
+            filterOnlyGridColumns = new LinkedHashSet<>(filterGridColumns);
+            filterOnlyGridColumns.removeAll(editableGridColumns);
+            filterOnlyGridColumns.removeAll(resultGridColumns);
+        }
+        return filterOnlyGridColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getEditableResultFilterIntersectionGridColumns() {
+        if (editableResultFilterIntersectionGridColumns == null) {
+            // compute it
+            editableResultFilterIntersectionGridColumns = new LinkedHashSet<>(editableGridColumns);
+            editableResultFilterIntersectionGridColumns.retainAll(filterGridColumns);
+            editableResultFilterIntersectionGridColumns.retainAll(resultGridColumns);
+        }
+        return editableResultFilterIntersectionGridColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getEditableOnlyAndEditableResultFilterIntersectionGridColumns() {
+        if (editableOnlyAndEditableResultFilterIntersectionGridColumns == null) {
+            // compute it
+            editableOnlyAndEditableResultFilterIntersectionGridColumns = new LinkedHashSet<>(editableGridColumns);
+            editableOnlyAndEditableResultFilterIntersectionGridColumns.retainAll(getEditableResultFilterIntersectionGridColumns());
+        }
+        return editableOnlyAndEditableResultFilterIntersectionGridColumns;
+    }
+
     public String getGridName() {
         return getId();
     }
@@ -487,6 +630,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 	public String toString() {
 		return "GridModel [id=" + getId() + "]";
 	}
+
 
     /// Getters & Setters
 
@@ -502,10 +646,6 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         return variableName;
     }
 
-    public List<GridColumn> getSelectedColumns() {
-        return selectedColumns;
-    }
-
     public List<DisplayedGridColumn> getDisplayedColumns() {
         return displayedColumns;
     }
@@ -516,18 +656,6 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public LinkedHashSet<GridColumn> getIdColumns() {
         return idColumns;
-    }
-
-    public LinkedHashSet<GridColumn> getEditableColumns() {
-        return editableColumns;
-    }
-
-    public LinkedHashSet<GridColumn> getNonTransientSelectedWithoutSaveColumns() {
-        return nonTransientSelectedWithoutSaveColumns;
-    }
-
-    public LinkedHashSet<GridColumn> getSaveColumns() {
-        return saveColumns;
     }
 
     public GridColumn getVersionColumn() {
@@ -578,11 +706,19 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         return displayedColumnsOrCode;
     }
 
-    public LinkedHashSet<DisplayedGridColumn> getNonTransientDisplayedColumns() {
-        return nonTransientDisplayedColumns;
+    public LinkedHashSet<GridColumn> getEditableGridColumns() {
+        return editableGridColumns;
     }
 
-    public LinkedHashSet<GridColumn> getNonTransientSelectedColumns() {
-        return nonTransientSelectedColumns;
+    public LinkedHashSet<GridColumn> getFilterGridColumns() {
+        return filterGridColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getResultGridColumns() {
+        return resultGridColumns;
+    }
+
+    public LinkedHashSet<GridColumn> getSortableGridColumns() {
+        return sortableGridColumns;
     }
 }

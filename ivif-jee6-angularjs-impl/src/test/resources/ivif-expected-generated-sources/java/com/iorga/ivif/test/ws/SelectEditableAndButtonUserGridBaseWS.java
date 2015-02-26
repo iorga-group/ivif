@@ -26,8 +26,10 @@ public class SelectEditableAndButtonUserGridBaseWS {
     private UserBaseService userBaseService;
 
 
-    public static class SelectEditableAndButtonUserGridSaveParam {
+    public static class SelectEditableAndButtonUserGridEditableFilterResult {
         public Integer id;
+    }
+    public static class SelectEditableAndButtonUserGridSaveParam extends SelectEditableAndButtonUserGridEditableFilterResult {
         public Long version;
     }
     @POST
@@ -43,6 +45,7 @@ public class SelectEditableAndButtonUserGridBaseWS {
                 entityToSave = new User();
             }
             // Apply modifications
+            entityToSave.setId(saveParam.id);
             // Set version for optimistic lock
             userBaseService.detach(entityToSave);
             entityToSave.setVersion(saveParam.version);
@@ -52,9 +55,12 @@ public class SelectEditableAndButtonUserGridBaseWS {
         }
     }
 
-    public static class SelectEditableAndButtonUserGridSearchResult extends SelectEditableAndButtonUserGridSaveParam {
+    public static class SelectEditableAndButtonUserGridFilterResult extends SelectEditableAndButtonUserGridEditableFilterResult {
         public String name;
+    }
+    public static class SelectEditableAndButtonUserGridSearchResult extends SelectEditableAndButtonUserGridFilterResult {
         public String profile_name;
+        public Long version;
 
         public SelectEditableAndButtonUserGridSearchResult() {}
         public SelectEditableAndButtonUserGridSearchResult(String name, Integer id, String profile_name, Long version) {
@@ -64,7 +70,7 @@ public class SelectEditableAndButtonUserGridBaseWS {
             this.version = version;
         }
     }
-    public static class SelectEditableAndButtonUserGridSearchFilter extends SelectEditableAndButtonUserGridSearchResult {
+    public static class SelectEditableAndButtonUserGridSearchFilter extends SelectEditableAndButtonUserGridFilterResult {
     }
     public static class SelectEditableAndButtonUserGridSearchParam extends GridSearchParam<SelectEditableAndButtonUserGridSearchFilter> {}
     @POST
