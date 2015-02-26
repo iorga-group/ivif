@@ -9,7 +9,7 @@ angular.module('test')
                     controller: 'ComputerToDesktopSessionGridCtrl'
                 });
         }])
-    .controller('ComputerToDesktopSessionGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openDesktopSessionGridFromComputerAction', function($scope, ngTableParams, $timeout, $http, locationService, openDesktopSessionGridFromComputerAction) {
+    .controller('ComputerToDesktopSessionGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openDesktopSessionGridFromComputerAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, openDesktopSessionGridFromComputerAction, $location, locationUtils) {
         // Utils
         // Declare actions
         $scope.clickLine = function(selectedLine) {

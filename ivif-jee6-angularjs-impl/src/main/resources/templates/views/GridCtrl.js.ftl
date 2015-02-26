@@ -16,7 +16,7 @@ angular.module('${model.configuration.angularModuleName}')
                     controller: '${grid.element.name}Ctrl'
                 });
         }])
-    .controller('${grid.element.name}Ctrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService'<#list model.injections as injection>, '${injection}'</#list><#if model.actionOpenViewDefined>, '$location', 'locationUtils'</#if>, function($scope, ngTableParams, $timeout, $http, locationService<#list model.injections as injection>, ${injection}</#list><#if model.actionOpenViewDefined>, $location, locationUtils</#if>) {
+    .controller('${grid.element.name}Ctrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService'<#list model.injections as injection>, '${injection}'</#list>, '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService<#list model.injections as injection>, ${injection}</#list>, $location, locationUtils) {
         // Utils
 <#if editable || grid.singleSelection>
         function getIdForLine(line) {

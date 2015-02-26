@@ -9,7 +9,7 @@ angular.module('test')
                     controller: 'EditableProfileGridCtrl'
                 });
         }])
-    .controller('EditableProfileGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', function($scope, ngTableParams, $timeout, $http, locationService) {
+    .controller('EditableProfileGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, $location, locationUtils) {
         // Utils
         function getIdForLine(line) {
             return line.id;

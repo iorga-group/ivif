@@ -9,7 +9,7 @@ angular.module('test')
                     controller: 'SelectEditableAndButtonUserGridCtrl'
                 });
         }])
-    .controller('SelectEditableAndButtonUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'aService', 'aService2', function($scope, ngTableParams, $timeout, $http, locationService, aService, aService2) {
+    .controller('SelectEditableAndButtonUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'aService', 'aService2', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, aService, aService2, $location, locationUtils) {
         // Utils
         function getIdForLine(line) {
             return line.id;

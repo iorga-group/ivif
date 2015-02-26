@@ -9,7 +9,7 @@ angular.module('test')
                     controller: 'ComputerForConnectedUserGridCtrl'
                 });
         }])
-    .controller('ComputerForConnectedUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', function($scope, ngTableParams, $timeout, $http, locationService) {
+    .controller('ComputerForConnectedUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, $location, locationUtils) {
         // Utils
         // Declare actions
 

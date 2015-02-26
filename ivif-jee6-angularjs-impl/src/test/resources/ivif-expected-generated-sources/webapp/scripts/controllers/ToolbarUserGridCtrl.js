@@ -9,7 +9,7 @@ angular.module('test')
                     controller: 'ToolbarUserGridCtrl'
                 });
         }])
-    .controller('ToolbarUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'aService', 'anotherService', 'openProfileGridFromUserAction', 'openComputerGridFromUserAction', function($scope, ngTableParams, $timeout, $http, locationService, aService, anotherService, openProfileGridFromUserAction, openComputerGridFromUserAction) {
+    .controller('ToolbarUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'aService', 'anotherService', 'openProfileGridFromUserAction', 'openComputerGridFromUserAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, aService, anotherService, openProfileGridFromUserAction, openComputerGridFromUserAction, $location, locationUtils) {
         // Utils
         function getIdForLine(line) {
             return line.id;
