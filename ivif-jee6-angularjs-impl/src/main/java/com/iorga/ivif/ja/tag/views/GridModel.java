@@ -617,7 +617,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         if (editableOnlyAndEditableResultFilterIntersectionGridColumns == null) {
             // compute it
             editableOnlyAndEditableResultFilterIntersectionGridColumns = new LinkedHashSet<>(editableGridColumns);
-            editableOnlyAndEditableResultFilterIntersectionGridColumns.retainAll(getEditableResultFilterIntersectionGridColumns());
+            editableOnlyAndEditableResultFilterIntersectionGridColumns.removeAll(getResultGridColumns());
+            editableOnlyAndEditableResultFilterIntersectionGridColumns.addAll(getEditableResultFilterIntersectionGridColumns());
         }
         return editableOnlyAndEditableResultFilterIntersectionGridColumns;
     }

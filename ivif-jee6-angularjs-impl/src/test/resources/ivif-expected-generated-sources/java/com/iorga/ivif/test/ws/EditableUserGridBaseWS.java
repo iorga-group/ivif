@@ -53,6 +53,7 @@ public class EditableUserGridBaseWS {
                 entityToSave = new User();
             }
             // Apply modifications
+            entityToSave.setCommentTemp(saveParam.commentTemp);
             entityToSave.setName(saveParam.name);
             entityToSave.setStatus(saveParam.status);
             entityToSave.setEnabled(saveParam.enabled);
