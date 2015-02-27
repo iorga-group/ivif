@@ -12,13 +12,11 @@ import com.iorga.ivif.tag.TargetPartPreparedEvent;
 import com.iorga.ivif.tag.bean.*;
 import com.iorga.ivif.tag.bean.Enum;
 import org.apache.commons.lang3.StringUtils;
+import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
 import java.lang.Boolean;
 import java.util.*;
-
-import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
 
 public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
 
@@ -32,15 +30,15 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
     private String implementsCode;
 
     // Declare attribute tag names to Class mapping
-    private final static Map<String, Class<?>> attributeTypesToClass = new HashMap<>();
+    public final static Map<String, Class<?>> ATTRIBUTE_TYPES_TO_CLASS = new HashMap<>();
     static {
-        attributeTypesToClass.put("string", String.class);
-        attributeTypesToClass.put("long", Long.class);
-        attributeTypesToClass.put("boolean", Boolean.class);
-        attributeTypesToClass.put("date", Date.class);
-        attributeTypesToClass.put("datetime", Date.class); // TODO handle difference between datetime & date during generation
-        attributeTypesToClass.put("integer", Integer.class);
-        attributeTypesToClass.put("character", Character.class);
+        ATTRIBUTE_TYPES_TO_CLASS.put("string", String.class);
+        ATTRIBUTE_TYPES_TO_CLASS.put("long", Long.class);
+        ATTRIBUTE_TYPES_TO_CLASS.put("boolean", Boolean.class);
+        ATTRIBUTE_TYPES_TO_CLASS.put("date", Date.class);
+        ATTRIBUTE_TYPES_TO_CLASS.put("datetime", Date.class); // TODO handle difference between datetime & date during generation
+        ATTRIBUTE_TYPES_TO_CLASS.put("integer", Integer.class);
+        ATTRIBUTE_TYPES_TO_CLASS.put("character", Character.class);
     }
 
 
@@ -97,7 +95,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
             } else {
                 // This is a simple attribute, let's set its type and declare as resolved
                 String attributeType = attributeElement.getName().getLocalPart();
-                entityAttribute.setType(attributeTypesToClass.get(attributeType).getName());
+                entityAttribute.setType(ATTRIBUTE_TYPES_TO_CLASS.get(attributeType).getName());
             }
             addEntityAttribute(entityAttribute, context);
             // group id attributes

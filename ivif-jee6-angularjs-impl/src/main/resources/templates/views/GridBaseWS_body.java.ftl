@@ -12,12 +12,17 @@ public class ${gridName}BaseWS {
 
     @${util.useClass("javax.inject.Inject")} @${util.useClass("com.iorga.ivif.ja.Generated")}
     private ${util.useClass(model.baseService.className)} ${serviceVariableName};
+<#if grid.serviceSaveClassName?has_content>
 
-<#if grid.serviceSaveClassname?has_content>
     @${util.useClass("javax.inject.Inject")}
-    private ${util.useClass(grid.serviceSaveClassname)} saveService;
-
+    private ${util.useClass(grid.serviceSaveClassName)} saveService;
 </#if>
+<#if grid.serviceSearchClassName?has_content>
+
+    @${util.useClass("javax.inject.Inject")}
+    private ${util.useClass(grid.serviceSearchClassName)} searchService;
+</#if>
+
 
 <#assign hasEditableResultFilter=grid.editableResultFilterIntersectionGridColumns?size &gt; 0>
 <#if editable>
@@ -102,11 +107,14 @@ public class ${gridName}BaseWS {
 <#-- Filter class -->
     public static class ${model.searchFilterSimpleClassName} <#if hasFilterResult>extends ${gridName}FilterResult <#elseif hasEditableResultFilter>extends ${gridName}EditableFilterResult </#if>{
 <#-- TODO add target entity id attribute -->
-<#list model.openViewActions as openViewAction>
-        public ${util.useClass(openViewAction.className)} ${openViewAction.variableName};
-</#list>
 <#list grid.filterOnlyGridColumns as column>
         public ${util.useClass(column.entityAttribute.type)} ${column.refVariableName};
+</#list>
+<#list grid.columnFilterParams as param>
+        public ${util.useClass(param.className)} ${param.name};
+</#list>
+<#list model.openViewActions as openViewAction>
+        public ${util.useClass(openViewAction.className)} ${openViewAction.variableName};
 </#list>
     }
     public static class ${model.searchParamSimpleClassName} extends ${util.useClass("com.iorga.ivif.ja.GridSearchParam")}<${util.useClass(model.searchFilterClassName)}> {}
@@ -115,6 +123,10 @@ public class ${gridName}BaseWS {
     @${util.useClass("javax.ws.rs.Consumes")}("application/json")
     @${util.useClass("javax.ws.rs.Produces")}("application/json")
     public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass(model.searchParamClassName)} searchParam) {
+<#if grid.serviceSearchMethod?has_content>
+        return searchService.${grid.serviceSearchMethod}(searchParam);
+<#else>
         return ${serviceVariableName}.search(searchParam);
+</#if>
     }
 }

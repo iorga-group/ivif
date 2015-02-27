@@ -16,7 +16,6 @@ import com.iorga.ivif.test.ws.ProfileGridBaseWS.ProfileGridSearchFilter;
 import com.iorga.ivif.test.ws.ProfileGridBaseWS.ProfileGridSearchParam;
 import com.iorga.ivif.test.ws.ProfileGridBaseWS.ProfileGridSearchResult;
 import com.mysema.query.SearchResults;
-import com.mysema.query.jpa.JPQLTemplates;
 import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
@@ -50,9 +49,15 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
 
     @RolesAllowed("manager")
     public SearchResults<ProfileGridSearchResult> search(ProfileGridSearchParam searchParam) {
-        JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        JPAQuery jpaQuery = createJPAQuery();
         QProfile $record = new QProfile("profile");
         jpaQuery.from($record);
+        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
+        applyLimitAndOffset(searchParam, jpaQuery);
+        return listSearchResults($record, searchParam, jpaQuery);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(QProfile $record, ProfileGridSearchParam searchParam, JPAQuery jpaQuery) {
         // Applying filter
         ProfileGridSearchFilter filter = searchParam.filter;
         if (filter.name != null) {
@@ -74,17 +79,27 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
-        // Applying limit & offset
+    }
+
+    protected void applyLimitAndOffset(ProfileGridSearchParam searchParam, JPAQuery jpaQuery) {
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
-        // Returning projection
+    }
+
+    protected SearchResults<ProfileGridSearchResult> listSearchResults(QProfile $record, ProfileGridSearchParam searchParam, JPAQuery jpaQuery) {
         return jpaQuery.listResults(ConstructorExpression.create(ProfileGridSearchResult.class, $record.name));
     }
 
     public SearchResults<EditableProfileGridSearchResult> search(EditableProfileGridSearchParam searchParam) {
-        JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        JPAQuery jpaQuery = createJPAQuery();
         QProfile $record = new QProfile("profile");
         jpaQuery.from($record);
+        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
+        applyLimitAndOffset(searchParam, jpaQuery);
+        return listSearchResults($record, searchParam, jpaQuery);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(QProfile $record, EditableProfileGridSearchParam searchParam, JPAQuery jpaQuery) {
         // Applying filter
         EditableProfileGridSearchFilter filter = searchParam.filter;
         if (filter.name != null) {
@@ -100,10 +115,14 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
-        // Applying limit & offset
+    }
+
+    protected void applyLimitAndOffset(EditableProfileGridSearchParam searchParam, JPAQuery jpaQuery) {
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
-        // Returning projection
+    }
+
+    protected SearchResults<EditableProfileGridSearchResult> listSearchResults(QProfile $record, EditableProfileGridSearchParam searchParam, JPAQuery jpaQuery) {
         return jpaQuery.listResults(ConstructorExpression.create(EditableProfileGridSearchResult.class, $record.name, $record.id));
     }
 

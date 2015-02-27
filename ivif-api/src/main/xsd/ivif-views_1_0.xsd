@@ -30,11 +30,13 @@
                     <xs:element ref="code" minOccurs="0" maxOccurs="unbounded"/>
                 </xs:choice>
                 <xs:element ref="column-filter" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="column-filter-param" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="query" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
             <xs:attribute name="on-open" type="xs:string"/>
             <xs:attribute name="on-select" type="xs:string"/>
             <xs:attribute name="service-save-method" type="xs:string"/>
+            <xs:attribute name="service-search-method" type="xs:string"/>
             <xs:attribute name="editable" type="xs:boolean" default="false"/>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="title" type="xs:string"/>
@@ -112,6 +114,13 @@
     <xs:element name="column-filter">
         <xs:complexType>
             <xs:attribute name="ref" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="column-filter-param">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="type" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 

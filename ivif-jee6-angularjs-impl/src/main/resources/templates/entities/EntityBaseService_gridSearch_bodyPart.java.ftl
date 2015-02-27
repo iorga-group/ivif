@@ -2,9 +2,15 @@
 <#assign grid=model.grid>
 <@rolesAllowed rolesAllowed=grid.element.rolesAllowed util=util nbTabs=1/>
     public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass(model.searchParamClassName)} searchParam) {
-        ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery = new ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")}(entityManager, ${util.useClass("com.mysema.query.jpa.JPQLTemplates")}.DEFAULT);
+        ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery = createJPAQuery();
         ${util.useClass(baseModel.qEntityClassName)} $record = new ${util.useClass(baseModel.qEntityClassName)}("${baseModel.entityVariableName}");
         jpaQuery.from($record);
+        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
+        applyLimitAndOffset(searchParam, jpaQuery);
+        return listSearchResults($record, searchParam, jpaQuery);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(${util.useClass(baseModel.qEntityClassName)} $record, ${util.useClass(model.searchParamClassName)} searchParam, ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery) {
 <#if grid.queryModel.queryDslCode?exists>
         // Applying static query
         jpaQuery.where(<@grid.queryModel.queryDslCode?interpret/>);
@@ -53,10 +59,14 @@
         }
     </#if>
 </#list>
-        // Applying limit & offset
+    }
+
+    protected void applyLimitAndOffset(${util.useClass(model.searchParamClassName)} searchParam, ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery) {
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
-        // Returning projection
+    }
+
+    protected ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> listSearchResults(${util.useClass(baseModel.qEntityClassName)} $record, ${util.useClass(model.searchParamClassName)} searchParam, ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery) {
         return jpaQuery.listResults(${util.useClass("com.mysema.query.types.ConstructorExpression")}.create(${util.useClass(model.searchResultClassName)}.class, <#list grid.resultGridColumns as column>$record.${column.ref}<#if column_has_next>, </#if></#list>));
     }
 

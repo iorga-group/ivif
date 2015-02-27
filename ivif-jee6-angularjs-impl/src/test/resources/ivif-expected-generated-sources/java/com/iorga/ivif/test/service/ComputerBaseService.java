@@ -21,7 +21,6 @@ import com.iorga.ivif.test.ws.ComputerToDesktopSessionGridBaseWS.ComputerToDeskt
 import com.iorga.ivif.test.ws.ComputerToDesktopSessionGridBaseWS.ComputerToDesktopSessionGridSearchParam;
 import com.iorga.ivif.test.ws.ComputerToDesktopSessionGridBaseWS.ComputerToDesktopSessionGridSearchResult;
 import com.mysema.query.SearchResults;
-import com.mysema.query.jpa.JPQLTemplates;
 import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
@@ -54,9 +53,15 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
     }
 
     public SearchResults<ComputerGridSearchResult> search(ComputerGridSearchParam searchParam) {
-        JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        JPAQuery jpaQuery = createJPAQuery();
         QComputer $record = new QComputer("computer");
         jpaQuery.from($record);
+        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
+        applyLimitAndOffset(searchParam, jpaQuery);
+        return listSearchResults($record, searchParam, jpaQuery);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(QComputer $record, ComputerGridSearchParam searchParam, JPAQuery jpaQuery) {
         // Applying static query
         jpaQuery.where($record.defaultProfile.isNull());
         // Applying filter
@@ -83,17 +88,27 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
-        // Applying limit & offset
+    }
+
+    protected void applyLimitAndOffset(ComputerGridSearchParam searchParam, JPAQuery jpaQuery) {
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
-        // Returning projection
+    }
+
+    protected SearchResults<ComputerGridSearchResult> listSearchResults(QComputer $record, ComputerGridSearchParam searchParam, JPAQuery jpaQuery) {
         return jpaQuery.listResults(ConstructorExpression.create(ComputerGridSearchResult.class, $record.name, $record.user.name, $record.user.id));
     }
 
     public SearchResults<ComputerToDesktopSessionGridSearchResult> search(ComputerToDesktopSessionGridSearchParam searchParam) {
-        JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        JPAQuery jpaQuery = createJPAQuery();
         QComputer $record = new QComputer("computer");
         jpaQuery.from($record);
+        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
+        applyLimitAndOffset(searchParam, jpaQuery);
+        return listSearchResults($record, searchParam, jpaQuery);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(QComputer $record, ComputerToDesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
         // Applying filter
         ComputerToDesktopSessionGridSearchFilter filter = searchParam.filter;
         if (filter.id != null) {
@@ -119,17 +134,27 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
-        // Applying limit & offset
+    }
+
+    protected void applyLimitAndOffset(ComputerToDesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
-        // Returning projection
+    }
+
+    protected SearchResults<ComputerToDesktopSessionGridSearchResult> listSearchResults(QComputer $record, ComputerToDesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
         return jpaQuery.listResults(ConstructorExpression.create(ComputerToDesktopSessionGridSearchResult.class, $record.id, $record.name, $record.user.id));
     }
 
     public SearchResults<ComputerForConnectedUserGridSearchResult> search(ComputerForConnectedUserGridSearchParam searchParam) {
-        JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        JPAQuery jpaQuery = createJPAQuery();
         QComputer $record = new QComputer("computer");
         jpaQuery.from($record);
+        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
+        applyLimitAndOffset(searchParam, jpaQuery);
+        return listSearchResults($record, searchParam, jpaQuery);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(QComputer $record, ComputerForConnectedUserGridSearchParam searchParam, JPAQuery jpaQuery) {
         // Applying static query
         jpaQuery.where($record.user.id.eq(connectedUser.getUserId()));
         // Applying filter
@@ -147,17 +172,27 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
-        // Applying limit & offset
+    }
+
+    protected void applyLimitAndOffset(ComputerForConnectedUserGridSearchParam searchParam, JPAQuery jpaQuery) {
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
-        // Returning projection
+    }
+
+    protected SearchResults<ComputerForConnectedUserGridSearchResult> listSearchResults(QComputer $record, ComputerForConnectedUserGridSearchParam searchParam, JPAQuery jpaQuery) {
         return jpaQuery.listResults(ConstructorExpression.create(ComputerForConnectedUserGridSearchResult.class, $record.name));
     }
 
     public SearchResults<ComputerToCurrentUserDesktopSessionGridSearchResult> search(ComputerToCurrentUserDesktopSessionGridSearchParam searchParam) {
-        JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        JPAQuery jpaQuery = createJPAQuery();
         QComputer $record = new QComputer("computer");
         jpaQuery.from($record);
+        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
+        applyLimitAndOffset(searchParam, jpaQuery);
+        return listSearchResults($record, searchParam, jpaQuery);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(QComputer $record, ComputerToCurrentUserDesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
         // Applying filter
         ComputerToCurrentUserDesktopSessionGridSearchFilter filter = searchParam.filter;
         if (filter.name != null) {
@@ -173,10 +208,14 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
-        // Applying limit & offset
+    }
+
+    protected void applyLimitAndOffset(ComputerToCurrentUserDesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
-        // Returning projection
+    }
+
+    protected SearchResults<ComputerToCurrentUserDesktopSessionGridSearchResult> listSearchResults(QComputer $record, ComputerToCurrentUserDesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
         return jpaQuery.listResults(ConstructorExpression.create(ComputerToCurrentUserDesktopSessionGridSearchResult.class, $record.name, $record.id));
     }
 

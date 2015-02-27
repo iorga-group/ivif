@@ -14,7 +14,6 @@ import com.iorga.ivif.test.ws.DesktopSessionGridBaseWS.DesktopSessionGridSearchR
 import com.iorga.ivif.test.ws.DesktopSessionGridBaseWS.OpenCurrentUserDesktopSessionGridFromComputer;
 import com.iorga.ivif.test.ws.DesktopSessionGridBaseWS.OpenDesktopSessionGridFromComputer;
 import com.mysema.query.SearchResults;
-import com.mysema.query.jpa.JPQLTemplates;
 import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
@@ -66,9 +65,15 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
     }
 
     public SearchResults<DesktopSessionGridSearchResult> search(DesktopSessionGridSearchParam searchParam) {
-        JPAQuery jpaQuery = new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        JPAQuery jpaQuery = createJPAQuery();
         QDesktopSession $record = new QDesktopSession("desktopSession");
         jpaQuery.from($record);
+        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
+        applyLimitAndOffset(searchParam, jpaQuery);
+        return listSearchResults($record, searchParam, jpaQuery);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(QDesktopSession $record, DesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
         // Applying filter
         DesktopSessionGridSearchFilter filter = searchParam.filter;
         if (filter.computerId != null) {
@@ -97,10 +102,14 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
-        // Applying limit & offset
+    }
+
+    protected void applyLimitAndOffset(DesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
         jpaQuery.limit(searchParam.limit);
         jpaQuery.offset(searchParam.offset);
-        // Returning projection
+    }
+
+    protected SearchResults<DesktopSessionGridSearchResult> listSearchResults(QDesktopSession $record, DesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
         return jpaQuery.listResults(ConstructorExpression.create(DesktopSessionGridSearchResult.class, $record.computerId, $record.name));
     }
 

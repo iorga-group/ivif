@@ -69,6 +69,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     protected List<Object> displayedColumnsOrCode;
     protected List<DisplayedGridColumn> displayedColumns;
+    protected List<GridColumnFilterParam> columnFilterParams;
 
     protected LinkedHashSet<GridColumn> idColumns;
     protected GridColumn versionColumn;
@@ -81,11 +82,31 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected String title;
     protected JsExpression onSelect;
 
-    protected String serviceSaveClassname;
+    protected String serviceSaveClassName;
     protected String serviceSaveMethod;
+    protected String serviceSearchClassName;
+    protected String serviceSearchMethod;
     protected String tabTitle;
 
     protected List<GridHighlight> highlights;
+
+    public static class GridColumnFilterParam {
+        private String name;
+        private String className;
+
+        public GridColumnFilterParam(String name, String className) {
+            this.name = name;
+            this.className = className;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getClassName() {
+            return className;
+        }
+    }
 
     public static class GridColumn {
         protected String refVariableName;
@@ -266,10 +287,17 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
         highlights = new ArrayList<>();
 
+        // Handle service method bypass
         final String serviceSaveMethod = StringUtils.trim(element.getServiceSaveMethod());
         if (StringUtils.isNotBlank(serviceSaveMethod)) {
-            this.serviceSaveClassname = StringUtils.substringBeforeLast(serviceSaveMethod, ".");
+            this.serviceSaveClassName = StringUtils.substringBeforeLast(serviceSaveMethod, ".");
             this.serviceSaveMethod = StringUtils.substringAfterLast(serviceSaveMethod, ".");
+        }
+
+        String serviceSearchMethod = StringUtils.trim(element.getServiceSearchMethod());
+        if (StringUtils.isNotBlank(serviceSearchMethod)) {
+            this.serviceSearchClassName = StringUtils.substringBeforeLast(serviceSearchMethod, ".");
+            this.serviceSearchMethod = StringUtils.substringAfterLast(serviceSearchMethod, ".");
         }
 
         context.waitForEvent(new JAConfigurationPreparedWaiter(this) {
@@ -316,6 +344,18 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 // Add columns for simple column-filters
                 for (ColumnFilter columnFilter : element.getColumnFilter()) {
                     addColumnForRefIfNecessary(columnFilter.getRef(), false, true, false, configuration, context);
+                }
+
+                columnFilterParams = new ArrayList<>();
+                // Handle column-filter-params
+                for (ColumnFilterParam columnFilterParam : element.getColumnFilterParam()) {
+                    // TODO handle enum type like 'type="enum[MyEnum]"
+                    final String paramType = columnFilterParam.getType();
+                    final Class<?> typeClass = EntityTargetFile.ATTRIBUTE_TYPES_TO_CLASS.get(paramType);
+                    if (typeClass == null) {
+                        throw new IllegalStateException("column-filter-param type cannot be resolved to a Java class: "+paramType);
+                    }
+                    columnFilterParams.add(new GridColumnFilterParam(columnFilterParam.getName(), typeClass.getName()));
                 }
 
                 // Add columns selected by actions
@@ -687,8 +727,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         return onSelect;
     }
 
-    public String getServiceSaveClassname() {
-        return serviceSaveClassname;
+    public String getServiceSaveClassName() {
+        return serviceSaveClassName;
     }
 
     public String getServiceSaveMethod() {
@@ -721,5 +761,17 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public LinkedHashSet<GridColumn> getSortableGridColumns() {
         return sortableGridColumns;
+    }
+
+    public List<GridColumnFilterParam> getColumnFilterParams() {
+        return columnFilterParams;
+    }
+
+    public String getServiceSearchClassName() {
+        return serviceSearchClassName;
+    }
+
+    public String getServiceSearchMethod() {
+        return serviceSearchMethod;
     }
 }

@@ -30,6 +30,12 @@
         <column-filter ref="firstName"/>
     </grid>
 
+    <grid name="SpecificSearchUserGrid" entity="User" service-search-method="com.iorga.ivif.test.UserService.search">
+        <column ref="name"/>
+        <column-filter ref="firstName"/>
+        <column-filter-param name="testFlag" type="boolean"/>
+    </grid>
+
     <grid name="SelectEditableAndButtonUserGrid" entity="User" selection="single" on-select="$inject(aService)($line.id)" editable="true">
         <toolbar>
             <button title="Test service" action="$inject(aService2)($line.id)" disabled-if="$record.name === 'test'"/>

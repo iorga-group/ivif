@@ -1,6 +1,8 @@
 package com.iorga.ivif.ja;
 
 import com.google.common.reflect.TypeToken;
+import com.mysema.query.jpa.JPQLTemplates;
+import com.mysema.query.jpa.impl.JPAQuery;
 
 import javax.ejb.TransactionAttribute;
 import javax.persistence.NonUniqueResultException;
@@ -74,15 +76,14 @@ public abstract class EntityBaseService<E, I> extends PersistenceService {
         if (list != null) {
             if (list.size() > 1) {
               throw new NonUniqueResultException("Query produced " + list.size() + " results (expected 1)");
-//            	try{
-//            		list.
-//            	}catch (NonUniqueResultException ex){
-//            		 System.out.println(ex.getMessage());
-//            	}
             } else if (!list.isEmpty()) {
                 return list.get(0);
             }
         }
         return null;
+    }
+
+    protected JPAQuery createJPAQuery() {
+        return new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
     }
 }
