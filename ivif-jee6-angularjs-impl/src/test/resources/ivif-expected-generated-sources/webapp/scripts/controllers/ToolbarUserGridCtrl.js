@@ -26,10 +26,10 @@ angular.module('test')
             // on-select call
             aService(selectedLine.id);anotherService(selectedLine.profile_name);;
         };
-        $scope.clickOnButton0 = function() {
+        $scope.clickOnButton1 = function() {
             openProfileGridFromUserAction({profileId:$scope.selectedLine.profile_id});
         };
-        $scope.clickOnButton1 = function() {
+        $scope.clickOnButton2 = function() {
             openComputerGridFromUserAction({userId:$scope.selectedLine.id});
         };
 

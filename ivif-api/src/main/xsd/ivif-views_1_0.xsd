@@ -74,6 +74,7 @@
         <xs:complexType>
             <xs:choice minOccurs="1" maxOccurs="unbounded">
                 <xs:element ref="button"/>
+                <xs:element ref="code"/>
             </xs:choice>
         </xs:complexType>
     </xs:element>

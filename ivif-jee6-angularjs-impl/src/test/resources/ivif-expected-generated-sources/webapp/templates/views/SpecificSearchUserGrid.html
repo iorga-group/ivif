@@ -1,0 +1,24 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <fieldset>
+                <legend>Specific Search User Grid</legend>
+                <nav class="navbar navbar-default">
+                    <div class="collapse navbar-collapse">
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton1()">Test</button>
+
+                <div>Test {{selectedLine.profile_name}}</div>
+            
+                    </div>
+                </nav>
+                <table ng-table="specificSearchUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
+                    <tr ng-repeat="line in $data">
+                        <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
+                            {{line.name}}
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+        </div>
+    </div>
+</div>

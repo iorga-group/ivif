@@ -79,6 +79,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected boolean singleSelection;
     protected JsExpression onOpen;
     protected List<ToolbarButton> toolbarButtons;
+    protected List<Object> toolbarButtonsOrCode;
     protected String title;
     protected JsExpression onSelect;
 
@@ -200,12 +201,14 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         private final JsExpression actionExpression;
         private final JsExpression disabledIfExpression;
         public List<List<String>> rolesAllowed;
+        private final String name;
 
-        public ToolbarButton(Button element, JsExpression actionExpression, JsExpression disabledIfExpression) {
+        public ToolbarButton(Button element, JsExpression actionExpression, JsExpression disabledIfExpression, String name) {
             this.element = element;
             this.actionExpression = actionExpression;
             this.disabledIfExpression = disabledIfExpression;
             rolesAllowed = new ArrayList<>();
+            this.name = name;
         }
 
         public Button getElement() {
@@ -222,6 +225,10 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
         public JsExpression getDisabledIfExpression() {
             return disabledIfExpression;
+        }
+
+        public String getName() {
+            return name;
         }
     }
 
@@ -283,8 +290,6 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         // Handle selection
         singleSelection = SelectionType.SINGLE.equals(element.getSelection());
 
-        toolbarButtons = new ArrayList<>();
-
         highlights = new ArrayList<>();
 
         // Handle service method bypass
@@ -316,28 +321,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     } else {
                         // this is a <code> element
                         String code = ((Element) columnOrCode).getTextContent();
-                        // we must replace the $line and $record references
-                        final StringBuffer codeBuffer = new StringBuffer();
-                        final Matcher matcher = LINE_OR_RECORD_REF.matcher(code);
-                        while (matcher.find()) {
-                            String ref = matcher.group();
-                            final int dotIndex = ref.indexOf('.');
-                            final StringBuilder refBuilder = new StringBuilder();
-                            if (dotIndex > -1) {
-                                // we have field references, let's replace them
-                                final String fieldsRef = ref.substring(dotIndex + 1);
-                                addResultColumnForRefIfNecessary(fieldsRef, configuration, context); // add them as a select if necessary
-                                refBuilder.append("." + fieldsRef.replaceAll("\\.", "_"));
-                            }
-                            if (ref.startsWith("$line")) {
-                                refBuilder.insert(0, "line");
-                            } else if (ref.startsWith("$record")) {
-                                refBuilder.insert(0, "line.$original");
-                            }
-                            matcher.appendReplacement(codeBuffer, refBuilder.toString());
-                        }
-                        matcher.appendTail(codeBuffer);
-                        displayedColumnsOrCode.add(codeBuffer.toString());
+                        displayedColumnsOrCode.add(parseCode(code, "line", "line.$original", context, configuration));
                     }
                 }
 
@@ -361,33 +345,47 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 // Add columns selected by actions
                 onOpen = addResultColumnForActionIfNecessary(element.getOnOpen(), "selectedLine", "selectedLine.$original", configuration, context);
                 onSelect = addResultColumnForActionIfNecessary(element.getOnSelect(), "selectedLine", "selectedLine.$original", configuration, context);
+                // Handle toolbar
+                toolbarButtons = new ArrayList<>();
+                toolbarButtonsOrCode = new ArrayList<>();
+                int buttonNumber = 1;
                 final Toolbar toolbar = element.getToolbar();
                 if (toolbar != null) {
-                    for (Button button : toolbar.getButton()) {
-                        final JsExpression actionExpression = addResultColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", "$scope.selectedLine.$original", configuration, context);
-                        String disabledIfStr = button.getDisabledIf();
-                        if (!actionExpression.getLineRefs().isEmpty()) {
-                            // Button will be disabled if no line is selected
-                            disabledIfStr = "!selectedLine" + (StringUtils.isNotBlank(disabledIfStr) ? " || (selectedLine && ("+disabledIfStr+"))" : "");
-                        }
-                        final JsExpression disabledIfExpression = addResultColumnForExpressionIfNecessary(disabledIfStr, "selectedLine", "selectedLine.$original", configuration, context);
-                        final ToolbarButton toolbarButton = new ToolbarButton(button, actionExpression, disabledIfExpression);
-                        toolbarButtons.add(toolbarButton);
-                        // Now compute the roles allowed if any
-                        for (String action : actionExpression.getActions()) {
-                            context.waitForEvent(new TargetPreparedWaiter<ActionOpenViewModel, String, JAGeneratorContext>(ActionOpenViewModel.class, action, GridModel.this) {
-                                @Override
-                                protected void onTargetPrepared(ActionOpenViewModel actionOpenViewModel) throws Exception {
-                                    addRolesAllowedIfNotEmpty(actionOpenViewModel.getElement().getRolesAllowed());
-                                    addRolesAllowedIfNotEmpty(actionOpenViewModel.getGridBaseWSTargetFile().getGrid().getElement().getRolesAllowed());
-                                }
+                    for (Object buttonOrCode : toolbar.getButtonOrCode()) {
+                        if (buttonOrCode instanceof Button) {
+                            Button button = (Button) buttonOrCode;
+                            final JsExpression actionExpression = addResultColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", "$scope.selectedLine.$original", configuration, context);
+                            String disabledIfStr = button.getDisabledIf();
+                            if (actionExpression != null && !actionExpression.getLineRefs().isEmpty()) {
+                                // Button will be disabled if no line is selected
+                                disabledIfStr = "!selectedLine" + (StringUtils.isNotBlank(disabledIfStr) ? " || (selectedLine && ("+disabledIfStr+"))" : "");
+                            }
+                            final JsExpression disabledIfExpression = addResultColumnForExpressionIfNecessary(disabledIfStr, "selectedLine", "selectedLine.$original", configuration, context);
+                            final ToolbarButton toolbarButton = new ToolbarButton(button, actionExpression, disabledIfExpression, ""+(buttonNumber++)); // TODO use title to "name" the button
+                            toolbarButtons.add(toolbarButton);
+                            toolbarButtonsOrCode.add(toolbarButton);
+                            // Now compute the roles allowed if any
+                            if (actionExpression != null) {
+                                for (String action : actionExpression.getActions()) {
+                                    context.waitForEvent(new TargetPreparedWaiter<ActionOpenViewModel, String, JAGeneratorContext>(ActionOpenViewModel.class, action, GridModel.this) {
+                                        @Override
+                                        protected void onTargetPrepared(ActionOpenViewModel actionOpenViewModel) throws Exception {
+                                            addRolesAllowedIfNotEmpty(actionOpenViewModel.getElement().getRolesAllowed());
+                                            addRolesAllowedIfNotEmpty(actionOpenViewModel.getGridBaseWSTargetFile().getGrid().getElement().getRolesAllowed());
+                                        }
 
-                                private void addRolesAllowedIfNotEmpty(List<String> rolesAllowed) {
-                                    if (rolesAllowed != null && !rolesAllowed.isEmpty()) {
-                                        toolbarButton.rolesAllowed.add(rolesAllowed);
-                                    }
+                                        private void addRolesAllowedIfNotEmpty(List<String> rolesAllowed) {
+                                            if (rolesAllowed != null && !rolesAllowed.isEmpty()) {
+                                                toolbarButton.rolesAllowed.add(rolesAllowed);
+                                            }
+                                        }
+                                    });
                                 }
-                            });
+                            }
+                        } else {
+                            // this is a <code> element
+                            final String code = ((Element) buttonOrCode).getTextContent();
+                            toolbarButtonsOrCode.add(parseCode(code, "selectedLine", "selectedLine.$original", context, configuration));
                         }
                     }
                 }
@@ -453,6 +451,31 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 });
             }
         });
+    }
+
+    private String parseCode(String code, String dollarLineReplacement, String dollarRecordReplacement, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
+        // we must replace the $line and $record references
+        final StringBuffer codeBuffer = new StringBuffer();
+        final Matcher matcher = LINE_OR_RECORD_REF.matcher(code);
+        while (matcher.find()) {
+            String ref = matcher.group();
+            final int dotIndex = ref.indexOf('.');
+            final StringBuilder refBuilder = new StringBuilder();
+            if (dotIndex > -1) {
+                // we have field references, let's replace them
+                final String fieldsRef = ref.substring(dotIndex + 1);
+                addResultColumnForRefIfNecessary(fieldsRef, configuration, context); // add them as a select if necessary
+                refBuilder.append("." + fieldsRef.replaceAll("\\.", "_"));
+            }
+            if (ref.startsWith("$line")) {
+                refBuilder.insert(0, dollarLineReplacement);
+            } else if (ref.startsWith("$record")) {
+                refBuilder.insert(0, dollarRecordReplacement);
+            }
+            matcher.appendReplacement(codeBuffer, refBuilder.toString());
+        }
+        matcher.appendTail(codeBuffer);
+        return codeBuffer.toString();
     }
 
     private void prepareNewGridColumn(GridColumn gridColumn, boolean editable, boolean filter, boolean result, boolean sortable, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
@@ -773,5 +796,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public String getServiceSearchMethod() {
         return serviceSearchMethod;
+    }
+
+    public List<Object> getToolbarButtonsOrCode() {
+        return toolbarButtonsOrCode;
     }
 }

@@ -14,11 +14,16 @@
                         <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit">Save</button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit">Cancel</button>
     </#if>
-    <#list grid.toolbarButtons as toolbarButton>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton${toolbarButton_index}()"<#rt>
-        <#if toolbarButton.disabledIfExpression?has_content> ng-disabled="${toolbarButton.disabledIfExpression.expression}"</#if><#t>
-        <#if toolbarButton.rolesAllowed?size &gt; 0> ng-if="<#list toolbarButton.rolesAllowed as rolesAllowed>hasRole(<#list rolesAllowed as roleAllowed>'${roleAllowed}'<#if roleAllowed_has_next>, </#if></#list>)<#if rolesAllowed_has_next> && </#if></#list>"</#if><#t>
-        >${toolbarButton.element.title}</button><#lt>
+    <#list grid.toolbarButtonsOrCode as toolbarButtonOrCode>
+        <#if toolbarButtonOrCode?is_hash>
+            <#assign toolbarButton=toolbarButtonOrCode>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton${toolbarButton.name}()"<#rt>
+            <#if toolbarButton.disabledIfExpression?has_content> ng-disabled="${toolbarButton.disabledIfExpression.expression}"</#if><#t>
+            <#if toolbarButton.rolesAllowed?size &gt; 0> ng-if="<#list toolbarButton.rolesAllowed as rolesAllowed>hasRole(<#list rolesAllowed as roleAllowed>'${roleAllowed}'<#if roleAllowed_has_next>, </#if></#list>)<#if rolesAllowed_has_next> && </#if></#list>"</#if><#t>
+            >${toolbarButton.element.title}</button><#lt>
+        <#else>
+            ${toolbarButtonOrCode}<#lt>
+        </#if>
     </#list>
                     </div>
                 </nav>

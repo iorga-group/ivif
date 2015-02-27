@@ -26,7 +26,7 @@ angular.module('test')
             // on-select call
             aService(selectedLine.id);
         };
-        $scope.clickOnButton0 = function() {
+        $scope.clickOnButton1 = function() {
             aService2($scope.selectedLine.id);
         };
         $scope.edit = function() {

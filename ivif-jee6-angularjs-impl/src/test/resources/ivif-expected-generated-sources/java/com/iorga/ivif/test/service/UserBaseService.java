@@ -184,7 +184,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
     }
 
     protected SearchResults<SpecificSearchUserGridSearchResult> listSearchResults(QUser $record, SpecificSearchUserGridSearchParam searchParam, JPAQuery jpaQuery) {
-        return jpaQuery.listResults(ConstructorExpression.create(SpecificSearchUserGridSearchResult.class, $record.name));
+        return jpaQuery.listResults(ConstructorExpression.create(SpecificSearchUserGridSearchResult.class, $record.name, $record.profile.name));
     }
 
     public SearchResults<SelectEditableAndButtonUserGridSearchResult> search(SelectEditableAndButtonUserGridSearchParam searchParam) {

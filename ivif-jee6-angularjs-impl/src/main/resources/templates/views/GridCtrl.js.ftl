@@ -51,8 +51,10 @@ angular.module('${model.configuration.angularModuleName}')
         };
 </#if>
 <#list grid.toolbarButtons as toolbarButton>
-        $scope.clickOnButton${toolbarButton_index} = function() {
+        $scope.clickOnButton${toolbarButton.name} = function() {
+    <#if toolbarButton.actionExpression?has_content>
             ${toolbarButton.actionExpression.expression};
+    </#if>
         };
 </#list>
 <#if editable>

@@ -31,6 +31,12 @@
     </grid>
 
     <grid name="SpecificSearchUserGrid" entity="User" service-search-method="com.iorga.ivif.test.UserService.search">
+        <toolbar>
+            <button title="Test"/>
+            <code><![CDATA[
+                <div>Test {{$line.profile.name}}</div>
+            ]]></code>
+        </toolbar>
         <column ref="name"/>
         <column-filter ref="firstName"/>
         <column-filter-param name="testFlag" type="boolean"/>

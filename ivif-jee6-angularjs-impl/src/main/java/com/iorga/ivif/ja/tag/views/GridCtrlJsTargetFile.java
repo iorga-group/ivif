@@ -42,7 +42,10 @@ public class GridCtrlJsTargetFile extends JsTargetFile<String> {
                 addInjectionsIfExpressionExists(gridModel.getOnOpen());
                 addInjectionsIfExpressionExists(gridModel.getOnSelect());
                 for (ToolbarButton toolbarButton : gridModel.getToolbarButtons()) {
-                    injections.addAll(toolbarButton.getActionExpression().getInjections());
+                    final JsExpression actionExpression = toolbarButton.getActionExpression();
+                    if (actionExpression != null) {
+                        injections.addAll(actionExpression.getInjections());
+                    }
                 }
             }
         });
