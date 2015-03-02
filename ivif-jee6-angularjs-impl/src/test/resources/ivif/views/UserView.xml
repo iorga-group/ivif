@@ -40,6 +40,7 @@
         <column ref="name"/>
         <column-filter ref="firstName"/>
         <column-filter-param name="testFlag" type="boolean"/>
+        <column-filter-param name="userType" type="enum[UserStatusType]"/>
     </grid>
 
     <grid name="SelectEditableAndButtonUserGrid" entity="User" selection="single" on-select="$inject(aService)($line.id)" editable="true">

@@ -5,10 +5,9 @@ import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.ServiceTargetFileId;
 import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
-import com.iorga.ivif.ja.tag.entities.EntityAttribute;
-import com.iorga.ivif.ja.tag.entities.EntityAttributePreparedWaiter;
-import com.iorga.ivif.ja.tag.entities.EntityTargetFile;
+import com.iorga.ivif.ja.tag.entities.*;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
+import com.iorga.ivif.ja.tag.entities.EnumSelectionTargetFile.EnumSelectionTargetFileId;
 import com.iorga.ivif.tag.bean.*;
 import com.iorga.ivif.util.TargetFileUtils;
 import com.iorga.ivif.tag.AbstractTarget;
@@ -30,6 +29,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected final Grid element;
 
     public static final Pattern LINE_OR_RECORD_REF = Pattern.compile("(?<![\\w\\$])\\$(line|record)(\\.[\\p{Alpha}\\$_][\\w\\$]*)*");
+    public static final Pattern ENUM_TYPE = Pattern.compile("enum\\[(.*)\\]");
 
     protected String variableName;
     protected EntityTargetFileId entityTargetFileId;
@@ -333,13 +333,18 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 columnFilterParams = new ArrayList<>();
                 // Handle column-filter-params
                 for (ColumnFilterParam columnFilterParam : element.getColumnFilterParam()) {
-                    // TODO handle enum type like 'type="enum[MyEnum]"
                     final String paramType = columnFilterParam.getType();
-                    final Class<?> typeClass = EntityTargetFile.ATTRIBUTE_TYPES_TO_CLASS.get(paramType);
-                    if (typeClass == null) {
-                        throw new IllegalStateException("column-filter-param type cannot be resolved to a Java class: "+paramType);
+                    final Matcher enumMatcher = ENUM_TYPE.matcher(paramType);
+                    if (enumMatcher.find()) {
+                        // This is an enum
+                        columnFilterParams.add(new GridColumnFilterParam(columnFilterParam.getName(), new EnumSelectionTargetFileId(enumMatcher.group(1), configuration).getClassName()));
+                    } else {
+                        final Class<?> typeClass = EntityTargetFile.ATTRIBUTE_TYPES_TO_CLASS.get(paramType);
+                        if (typeClass == null) {
+                            throw new IllegalStateException("column-filter-param type cannot be resolved to a Java class: " + paramType);
+                        }
+                        columnFilterParams.add(new GridColumnFilterParam(columnFilterParam.getName(), typeClass.getName()));
                     }
-                    columnFilterParams.add(new GridColumnFilterParam(columnFilterParam.getName(), typeClass.getName()));
                 }
 
                 // Add columns selected by actions

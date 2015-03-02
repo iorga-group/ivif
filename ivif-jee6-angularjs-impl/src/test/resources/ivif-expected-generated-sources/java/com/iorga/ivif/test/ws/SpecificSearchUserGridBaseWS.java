@@ -3,6 +3,7 @@ package com.iorga.ivif.test.ws;
 import com.iorga.ivif.ja.Generated;
 import com.iorga.ivif.ja.GridSearchParam;
 import com.iorga.ivif.test.UserService;
+import com.iorga.ivif.test.entity.select.UserStatusType;
 import com.iorga.ivif.test.service.UserBaseService;
 import com.mysema.query.SearchResults;
 import java.lang.Boolean;
@@ -41,6 +42,7 @@ public class SpecificSearchUserGridBaseWS {
     public static class SpecificSearchUserGridSearchFilter extends SpecificSearchUserGridFilterResult {
         public String firstName;
         public Boolean testFlag;
+        public UserStatusType userType;
     }
     public static class SpecificSearchUserGridSearchParam extends GridSearchParam<SpecificSearchUserGridSearchFilter> {}
     @POST
