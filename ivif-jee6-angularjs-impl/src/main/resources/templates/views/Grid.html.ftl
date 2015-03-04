@@ -10,9 +10,9 @@
                 <nav class="navbar navbar-default">
                     <div class="collapse navbar-collapse">
     <#if editable>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit">Edit</button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit">Save</button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit">Cancel</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel</button>
     </#if>
     <#list grid.toolbarButtonsOrCode as toolbarButtonOrCode>
         <#if toolbarButtonOrCode?is_hash>
