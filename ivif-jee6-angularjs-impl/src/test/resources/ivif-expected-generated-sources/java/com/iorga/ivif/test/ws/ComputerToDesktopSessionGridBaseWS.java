@@ -12,6 +12,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/computerToDesktopSessionGrid")
 @Generated
@@ -36,6 +37,7 @@ public class ComputerToDesktopSessionGridBaseWS {
             this.user_id = user_id;
         }
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ComputerToDesktopSessionGridSearchFilter extends ComputerToDesktopSessionGridFilterResult {
     }
     public static class ComputerToDesktopSessionGridSearchParam extends GridSearchParam<ComputerToDesktopSessionGridSearchFilter> {}

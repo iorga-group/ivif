@@ -12,6 +12,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/userGrid")
 @Generated
@@ -34,9 +35,11 @@ public class UserGridBaseWS {
             this.profile_id = profile_id;
         }
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OpenUserGridFromComputer {
         public Integer userId;
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class UserGridSearchFilter extends UserGridFilterResult {
         public OpenUserGridFromComputer openUserGridFromComputer;
     }

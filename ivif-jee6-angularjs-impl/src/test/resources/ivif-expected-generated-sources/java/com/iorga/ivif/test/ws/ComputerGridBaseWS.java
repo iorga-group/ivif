@@ -12,6 +12,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/computerGrid")
 @Generated
@@ -36,9 +37,11 @@ public class ComputerGridBaseWS {
             this.user_id = user_id;
         }
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OpenComputerGridFromUser {
         public Integer userid;
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ComputerGridSearchFilter extends ComputerGridFilterResult {
         public OpenComputerGridFromUser openComputerGridFromUser;
     }

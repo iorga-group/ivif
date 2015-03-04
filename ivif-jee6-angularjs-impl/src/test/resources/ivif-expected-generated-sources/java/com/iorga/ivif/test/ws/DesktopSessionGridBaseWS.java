@@ -12,6 +12,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/desktopSessionGrid")
 @Generated
@@ -34,13 +35,16 @@ public class DesktopSessionGridBaseWS {
             this.name = name;
         }
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OpenDesktopSessionGridFromComputer {
         public Integer userId;
         public Integer computerId;
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OpenCurrentUserDesktopSessionGridFromComputer {
         public Integer computerId;
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class DesktopSessionGridSearchFilter extends DesktopSessionGridFilterResult {
         public OpenDesktopSessionGridFromComputer openDesktopSessionGridFromComputer;
         public OpenCurrentUserDesktopSessionGridFromComputer openCurrentUserDesktopSessionGridFromComputer;

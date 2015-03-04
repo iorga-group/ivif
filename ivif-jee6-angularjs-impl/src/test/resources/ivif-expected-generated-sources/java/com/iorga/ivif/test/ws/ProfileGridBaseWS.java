@@ -13,6 +13,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/profileGrid")
 @Generated
@@ -34,9 +35,11 @@ public class ProfileGridBaseWS {
             this.name = name;
         }
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OpenProfileGridFromUser {
         public Integer profileId;
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProfileGridSearchFilter extends ProfileGridFilterResult {
         public OpenProfileGridFromUser openProfileGridFromUser;
     }

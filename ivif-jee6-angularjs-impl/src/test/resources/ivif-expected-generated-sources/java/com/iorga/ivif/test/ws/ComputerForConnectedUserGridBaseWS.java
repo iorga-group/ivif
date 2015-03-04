@@ -11,6 +11,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/computerForConnectedUserGrid")
 @Generated
@@ -31,6 +32,7 @@ public class ComputerForConnectedUserGridBaseWS {
             this.name = name;
         }
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ComputerForConnectedUserGridSearchFilter extends ComputerForConnectedUserGridFilterResult {
     }
     public static class ComputerForConnectedUserGridSearchParam extends GridSearchParam<ComputerForConnectedUserGridSearchFilter> {}

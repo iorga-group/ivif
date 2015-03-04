@@ -34,6 +34,7 @@ public class ${gridName}BaseWS {
         </#list>
     }
     </#if>
+    @${util.useClass("org.codehaus.jackson.annotate.JsonIgnoreProperties")}(ignoreUnknown = true)
     public static class ${model.saveParamSimpleClassName} <#if hasEditableResultFilter>extends ${gridName}EditableFilterResult </#if>{
     <#list grid.editableOnlyAndResultIntersectionGridColumns as column>
         public ${util.useClass(column.entityAttribute.type)} ${column.refVariableName};
@@ -96,6 +97,7 @@ public class ${gridName}BaseWS {
     }
 <#-- Actions class -->
 <#list model.openViewActions as openViewAction>
+    @${util.useClass("org.codehaus.jackson.annotate.JsonIgnoreProperties")}(ignoreUnknown = true)
     public static class ${openViewAction.simpleClassName} {
     <#list openViewAction.queryModel.parameters as parameter>
         <#if !parameter.value?exists>
@@ -105,6 +107,7 @@ public class ${gridName}BaseWS {
     }
 </#list>
 <#-- Filter class -->
+    @${util.useClass("org.codehaus.jackson.annotate.JsonIgnoreProperties")}(ignoreUnknown = true)
     public static class ${model.searchFilterSimpleClassName} <#if hasFilterResult>extends ${gridName}FilterResult <#elseif hasEditableResultFilter>extends ${gridName}EditableFilterResult </#if>{
 <#-- TODO add target entity id attribute -->
 <#list grid.filterOnlyGridColumns as column>

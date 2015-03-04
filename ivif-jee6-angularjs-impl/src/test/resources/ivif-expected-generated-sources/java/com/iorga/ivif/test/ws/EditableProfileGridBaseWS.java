@@ -16,6 +16,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/editableProfileGrid")
 @Generated
@@ -32,6 +33,7 @@ public class EditableProfileGridBaseWS {
     public static class EditableProfileGridEditableFilterResult {
         public String name;
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class EditableProfileGridSaveParam extends EditableProfileGridEditableFilterResult {
         public Integer id;
     }
@@ -64,6 +66,7 @@ public class EditableProfileGridBaseWS {
             this.id = id;
         }
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class EditableProfileGridSearchFilter extends EditableProfileGridEditableFilterResult {
     }
     public static class EditableProfileGridSearchParam extends GridSearchParam<EditableProfileGridSearchFilter> {}

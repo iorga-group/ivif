@@ -3,12 +3,17 @@ package com.iorga.ivif.ja;
 import com.google.common.reflect.TypeToken;
 import com.mysema.query.jpa.JPQLTemplates;
 import com.mysema.query.jpa.impl.JPAQuery;
+import com.mysema.query.support.Expressions;
+import com.mysema.query.types.Ops;
+import com.mysema.query.types.expr.BooleanExpression;
 
 import javax.ejb.TransactionAttribute;
 import javax.persistence.NonUniqueResultException;
 import java.util.List;
 
 public abstract class EntityBaseService<E, I> extends PersistenceService {
+    public static final BooleanExpression FALSE_PREDICATE = Expressions.predicate(Ops.EQ, Expressions.constant(0), Expressions.constant(1));
+    public static final BooleanExpression TRUE_PREDICATE = Expressions.predicate(Ops.EQ, Expressions.constant(1), Expressions.constant(1));
 
     protected Class<E> entityClass;
 

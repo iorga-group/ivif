@@ -19,6 +19,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/editableUserGrid")
 @Generated
@@ -35,6 +36,7 @@ public class EditableUserGridBaseWS {
         public UserStatusType status;
         public Boolean enabled;
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class EditableUserGridSaveParam extends EditableUserGridEditableFilterResult {
         public String commentTemp;
         public Integer id;
@@ -89,6 +91,7 @@ public class EditableUserGridBaseWS {
             this.version = version;
         }
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class EditableUserGridSearchFilter extends EditableUserGridFilterResult {
     }
     public static class EditableUserGridSearchParam extends GridSearchParam<EditableUserGridSearchFilter> {}

@@ -16,6 +16,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/selectEditableAndButtonUserGrid")
 @Generated
@@ -29,6 +30,7 @@ public class SelectEditableAndButtonUserGridBaseWS {
     public static class SelectEditableAndButtonUserGridEditableFilterResult {
         public Integer id;
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SelectEditableAndButtonUserGridSaveParam extends SelectEditableAndButtonUserGridEditableFilterResult {
         public Long version;
     }
@@ -70,6 +72,7 @@ public class SelectEditableAndButtonUserGridBaseWS {
             this.version = version;
         }
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SelectEditableAndButtonUserGridSearchFilter extends SelectEditableAndButtonUserGridFilterResult {
     }
     public static class SelectEditableAndButtonUserGridSearchParam extends GridSearchParam<SelectEditableAndButtonUserGridSearchFilter> {}
