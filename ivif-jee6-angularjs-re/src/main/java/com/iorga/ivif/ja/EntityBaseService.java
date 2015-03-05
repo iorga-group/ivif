@@ -89,6 +89,6 @@ public abstract class EntityBaseService<E, I> extends PersistenceService {
     }
 
     protected JPAQuery createJPAQuery() {
-        return new JPAQuery(entityManager, JPQLTemplates.DEFAULT);
+        return new JPAQuery(entityManager);
     }
 }
