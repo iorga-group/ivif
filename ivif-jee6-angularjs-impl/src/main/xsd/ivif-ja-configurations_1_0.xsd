@@ -8,10 +8,11 @@
 
     <xs:element name="configurations">
         <xs:complexType>
-            <xs:choice>
+            <xs:sequence>
                 <xs:element ref="base-package" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="angular-module-name" minOccurs="0" maxOccurs="1"/>
-            </xs:choice>
+                <xs:element ref="angular-module-import" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
         </xs:complexType>
     </xs:element>
 
@@ -22,6 +23,12 @@
     </xs:element>
 
     <xs:element name="angular-module-name">
+        <xs:complexType>
+            <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="angular-module-import">
         <xs:complexType>
             <xs:attribute name="value" type="xs:string" use="required"/>
         </xs:complexType>

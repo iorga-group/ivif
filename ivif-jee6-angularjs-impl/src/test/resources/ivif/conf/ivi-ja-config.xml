@@ -4,4 +4,6 @@
         xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-ja-configurations">
     <base-package value="com.iorga.ivif.test"/>
     <angular-module-name value="test"/>
+    <angular-module-import value="testImport1"/>
+    <angular-module-import value="testImport2"/>
 </configurations>
