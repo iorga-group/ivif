@@ -16,7 +16,6 @@ public class HeaderUtil {
     private ObjectMapper objectMapper = new ObjectMapper();
 
 
-
     public String toJsonString(Object entity) throws IOException {
         return objectMapper.writeValueAsString(entity);
     }
@@ -25,7 +24,11 @@ public class HeaderUtil {
         return new String(Base64.encodeBase64(toJsonString(entity).getBytes()));
     }
 
+    public String headerName(String headerSuffix) {
+        return HEADER_PREFIX + headerSuffix;
+    }
+
     public void writeTo(Object entity, String headerSuffix, ServerResponse response) throws IOException {
-        response.getMetadata().put(HEADER_PREFIX + headerSuffix, (List) Collections.singletonList(toBase64JsonString(entity)));
+        response.getMetadata().put(headerName(headerSuffix), (List) Collections.singletonList(toBase64JsonString(entity)));
     }
 }

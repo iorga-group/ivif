@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Provider
-public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
+public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionMapper.class);
 
     public static final String HEADER_PREFIX = HeaderUtil.HEADER_PREFIX + "Exception";
@@ -24,10 +24,10 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
     private HeaderUtil headerUtil;
 
     private static class ExceptionTemplate {
-        private final Exception exception;
+        private final Throwable exception;
         private final String uuid;
 
-        public ExceptionTemplate(Exception exception, String uuid) {
+        public ExceptionTemplate(Throwable exception, String uuid) {
             this.exception = exception;
             this.uuid = uuid;
         }
@@ -45,7 +45,7 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         }
     }
     @Override
-    public Response toResponse(Exception exception) {
+    public Response toResponse(Throwable exception) {
         String uuid = UUID.randomUUID().toString();
 
         try {
@@ -56,15 +56,15 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         }
 
         final ExceptionTemplate exceptionTemplate = new ExceptionTemplate(exception, uuid);
-        String gzippedBase64ExceptionTemplate;
+        String base64ExceptionTemplate;
         try {
-            gzippedBase64ExceptionTemplate = headerUtil.toBase64JsonString(exceptionTemplate);
+            base64ExceptionTemplate = headerUtil.toBase64JsonString(exceptionTemplate);
         } catch (IOException e) {
-            LOG.error("Problem while rendering the exception to gzipped base64", e);
-            gzippedBase64ExceptionTemplate = "";
+            LOG.error("Problem while rendering the exception to base64", e);
+            base64ExceptionTemplate = "";
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .header(HEADER_PREFIX, gzippedBase64ExceptionTemplate)
+                .header(HEADER_PREFIX, base64ExceptionTemplate)
                 .entity(Throwables.getStackTraceAsString(exception))
                 .build();
     }

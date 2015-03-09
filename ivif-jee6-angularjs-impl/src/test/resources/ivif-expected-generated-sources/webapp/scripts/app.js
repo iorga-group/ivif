@@ -188,9 +188,18 @@ angular.module('test', [
                 }
                 if (messages) {
                     messages = headerUtil.fromServerToObject(messages);
-                    angular.forEach(messages, function(message) {
-                        messageService.addMessage(message);
-                    });
+                    if (angular.isArray(messages)) {
+                        // Multiple messages
+                        angular.forEach(messages, function (message) {
+                            messageService.addMessage(message);
+                        });
+                    } else if (angular.isString(messages)) {
+                        // Simple string message
+                        messageService.addMessage({title: 'Server message', level: 'ERROR', message: messages});
+                    } else if (angular.isObject(messages)) {
+                        // Simple message
+                        messageService.addMessage(messages);
+                    }
                 }
                 return exception || messages;
             }

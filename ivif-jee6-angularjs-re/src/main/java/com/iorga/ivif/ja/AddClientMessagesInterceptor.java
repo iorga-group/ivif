@@ -1,6 +1,5 @@
 package com.iorga.ivif.ja;
 
-import com.iorga.ivif.ja.ClientMessages.Message;
 import org.jboss.resteasy.annotations.interception.ServerInterceptor;
 import org.jboss.resteasy.core.ServerResponse;
 import org.jboss.resteasy.spi.interception.PostProcessInterceptor;
@@ -29,7 +28,7 @@ public class AddClientMessagesInterceptor implements PostProcessInterceptor {
 
         if (!messages.isEmpty()) {
             try {
-                headerUtil.writeTo(messages, "Messages", response);
+                headerUtil.writeTo(messages, MessageUtils.MESSAGES_HEADER_SUFFIX, response);
             } catch (IOException e) {
                 LOG.error("Error while adding client messages to the response", e);
             }
