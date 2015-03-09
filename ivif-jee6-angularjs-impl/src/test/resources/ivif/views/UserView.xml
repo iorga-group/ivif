@@ -19,6 +19,7 @@
         ]]></code>
         <column ref="commentTemp" editable="true"/>
         <column ref="enabled" editable="true"/>
+        <column ref="bigComment" editable="true"/>
     </grid>
 
     <grid name="ToolbarUserGrid" entity="User" selection="single" on-select="$inject(aService)($line.id); $inject(anotherService)($line.profile.name);">

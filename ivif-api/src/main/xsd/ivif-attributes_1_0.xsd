@@ -9,7 +9,23 @@
     <xs:include schemaLocation="ivif-attributeType_1_0.xsd"/>
 
     <xs:element name="character" type="attributeType" substitutionGroup="entityAttribute"/>
-    <xs:element name="string" type="attributeType" substitutionGroup="entityAttribute"/>
+
+    <xs:element name="string" substitutionGroup="entityAttribute">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="attributeType">
+                    <xs:attribute name="default-editor" type="string-default-editor" default="inputText"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:simpleType name="string-default-editor">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="inputText"/>
+            <xs:enumeration value="textArea"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:element name="long" type="versionableAttributeType" substitutionGroup="entityAttribute"/>
 
     <xs:element name="boolean" substitutionGroup="entityAttribute">

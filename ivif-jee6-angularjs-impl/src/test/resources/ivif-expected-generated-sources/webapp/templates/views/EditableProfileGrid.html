@@ -14,7 +14,7 @@
                     <tr ng-repeat="line in $data">
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
                             <span ng-if="!($edit)">{{line.name}}</span>
-                            <span ng-if="$edit"><input type="text" class="form-control" ng-model="line.name"/></span>
+                            <input ng-if="$edit" type="text" class="form-control" ng-model="line.name"/>
                         </td>
                     </tr>
                 </table>

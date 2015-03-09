@@ -16,6 +16,7 @@ import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
 
 import javax.xml.bind.JAXBElement;
 import java.lang.Boolean;
+import java.lang.String;
 import java.util.*;
 
 public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {

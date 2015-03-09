@@ -35,6 +35,7 @@ public class EditableUserGridBaseWS {
         public String name;
         public UserStatusType status;
         public Boolean enabled;
+        public String bigComment;
     }
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class EditableUserGridSaveParam extends EditableUserGridEditableFilterResult {
@@ -59,6 +60,7 @@ public class EditableUserGridBaseWS {
             entityToSave.setName(saveParam.name);
             entityToSave.setStatus(saveParam.status);
             entityToSave.setEnabled(saveParam.enabled);
+            entityToSave.setBigComment(saveParam.bigComment);
             // Set version for optimistic lock
             userBaseService.detach(entityToSave);
             entityToSave.setVersion(saveParam.version);
@@ -79,12 +81,13 @@ public class EditableUserGridBaseWS {
         public Long version;
 
         public EditableUserGridSearchResult() {}
-        public EditableUserGridSearchResult(String firstName, String name, UserStatusType status, String profile_description, Boolean enabled, Integer profile_id, String profile_name, Integer id, Long version) {
+        public EditableUserGridSearchResult(String firstName, String name, UserStatusType status, String profile_description, Boolean enabled, String bigComment, Integer profile_id, String profile_name, Integer id, Long version) {
             this.firstName = firstName;
             this.name = name;
             this.status = status;
             this.profile_description = profile_description;
             this.enabled = enabled;
+            this.bigComment = bigComment;
             this.profile_id = profile_id;
             this.profile_name = profile_name;
             this.id = id;

@@ -15,6 +15,7 @@
         <enum name="status" ref="UserStatusType"/>
         <boolean name="enabled" from-type="string" true-value="OK" false-value="KO"/>
         <string name="commentTemp" transient="true"/>
+        <string name="bigComment" default-editor="textArea"/>
     </entity>
 
     <selection name="UserStatusType" from-type="string">

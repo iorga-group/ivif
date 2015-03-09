@@ -66,6 +66,8 @@ public class User implements Serializable, Versionable<Long> {
     @Transient
     private String commentTemp;
 
+    private String bigComment;
+
 
     /// Getters & Setters
     public Integer getId() {
@@ -138,6 +140,14 @@ public class User implements Serializable, Versionable<Long> {
 
     public void setCommentTemp(String commentTemp) {
         this.commentTemp = commentTemp;
+    }
+
+    public String getBigComment() {
+        return bigComment;
+    }
+
+    public void setBigComment(String bigComment) {
+        this.bigComment = bigComment;
     }
 
 }

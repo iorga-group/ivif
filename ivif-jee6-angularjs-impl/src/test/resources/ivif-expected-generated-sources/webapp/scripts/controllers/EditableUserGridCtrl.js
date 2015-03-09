@@ -35,6 +35,7 @@ angular.module('test')
                         status: editedLine.status,
                         commentTemp: editedLine.commentTemp,
                         enabled: editedLine.enabled,
+                        bigComment: editedLine.bigComment,
                         id: editedLine.id,
                         version: editedLine.version
                     });

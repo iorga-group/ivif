@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 
 import java.lang.Boolean;
+import java.lang.String;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

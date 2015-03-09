@@ -17,7 +17,7 @@
                         </td>
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
                             <span ng-if="!($edit && (line.$original.profile_name==='editableName'))">{{line.name}}</span>
-                            <span ng-if="$edit && (line.$original.profile_name==='editableName')"><input type="text" class="form-control" ng-model="line.name"/></span>
+                            <input ng-if="$edit && (line.$original.profile_name==='editableName')" type="text" class="form-control" ng-model="line.name"/>
                         </td>
                         <td data-title="'Status'" sortable="'status'" filter="{'status':'select'}" filter-data="UserStatusType.deferOptionList()">
                             <span ng-if="!($edit)">{{UserStatusType.titlesByValue[line.status]}}</span>
@@ -30,10 +30,14 @@
         
                         <td data-title="'Comment Temp'">
                             <span ng-if="!($edit)">{{line.commentTemp}}</span>
-                            <span ng-if="$edit"><input type="text" class="form-control" ng-model="line.commentTemp"/></span>
+                            <input ng-if="$edit" type="text" class="form-control" ng-model="line.commentTemp"/>
                         </td>
                         <td data-title="'Enabled'" sortable="'enabled'" >
                             <input type="checkbox" class="form-control" ng-model="line.enabled" ng-disabled="!($edit)" />
+                        </td>
+                        <td data-title="'Big Comment'" sortable="'bigComment'" filter="{'bigComment':'text'}">
+                            <span ng-if="!($edit)">{{line.bigComment}}</span>
+                            <textarea ng-if="$edit" class="form-control" ng-model="line.bigComment"/>
                         </td>
                     </tr>
                 </table>
