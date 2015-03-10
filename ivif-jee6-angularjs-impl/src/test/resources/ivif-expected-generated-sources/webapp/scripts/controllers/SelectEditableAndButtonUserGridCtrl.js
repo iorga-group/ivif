@@ -33,6 +33,15 @@ angular.module('test')
             $scope.$edit = true;
             $scope.editedLinesById = {};
             $scope.selectEditableAndButtonUserGridTableParams.reload();
+            $scope.dirtyCheckKey = locationService.addDirtyCheck(function() {
+                for (var id in $scope.editedLinesById) {
+                    var editedLine = $scope.editedLinesById[id];
+                    if (!angular.equals(editedLine, editedLine.$original)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
         };
         $scope.save = function() {
             // Send only modified lines to server, thanks to http://stackoverflow.com/a/26975765/535203
@@ -57,6 +66,7 @@ angular.module('test')
             $scope.$edit = false;
             $scope.editedLinesById = null;
             $scope.selectEditableAndButtonUserGridTableParams.reload();
+            locationService.removeDirtyCheck($scope.dirtyCheckKey);
         };
 
         // Init variables
@@ -125,6 +135,6 @@ angular.module('test')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('Select Editable And Button User Grid', $scope, ['selectEditableAndButtonUserGridTableParams', 'editedLinesById', '$edit', 'selectedLineId']);
+        locationService.controllerInitialized('Select Editable And Button User Grid', $scope, ['selectEditableAndButtonUserGridTableParams', 'editedLinesById', '$edit', 'dirtyCheckKey', 'selectedLineId']);
     }])
 ;

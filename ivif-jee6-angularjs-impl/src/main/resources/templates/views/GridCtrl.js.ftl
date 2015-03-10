@@ -62,6 +62,15 @@ angular.module('${model.configuration.angularModuleName}')
             $scope.$edit = true;
             $scope.editedLinesById = {};
             $scope.${tableParamsVariableName}.reload();
+            $scope.dirtyCheckKey = locationService.addDirtyCheck(function() {
+                for (var id in $scope.editedLinesById) {
+                    var editedLine = $scope.editedLinesById[id];
+                    if (!angular.equals(editedLine, editedLine.$original)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
         };
         $scope.save = function() {
             // Send only modified lines to server, thanks to http://stackoverflow.com/a/26975765/535203
@@ -87,6 +96,7 @@ angular.module('${model.configuration.angularModuleName}')
             $scope.$edit = false;
             $scope.editedLinesById = null;
             $scope.${tableParamsVariableName}.reload();
+            locationService.removeDirtyCheck($scope.dirtyCheckKey);
         };
 </#if>
 
@@ -162,6 +172,6 @@ angular.module('${model.configuration.angularModuleName}')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('${grid.tabTitle}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById', '$edit'</#if><#if grid.singleSelection>, 'selectedLineId'</#if>]);
+        locationService.controllerInitialized('${grid.tabTitle}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById', '$edit', 'dirtyCheckKey'</#if><#if grid.singleSelection>, 'selectedLineId'</#if>]);
     }])
 ;

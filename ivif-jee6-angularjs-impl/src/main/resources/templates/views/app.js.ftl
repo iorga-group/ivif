@@ -23,10 +23,11 @@ angular.module('${model.configuration.angularModuleName}', [
             return object;
         }
     })
-    .factory('locationService', ['$location', '$filter', function($location, $filter) {
+    .factory('locationService', ['$location', '$filter', '$rootScope', function($location, $filter, $rootScope) {
         var newLocationToBePushed = false,
             locationContexts = [],
             locationLoading = false,
+            currentDirtyCheckKey = 0,
             locationService = {
                 controllerInitialized: function(title, scope, scopeAttributesToSave) {
                     var locationContext = {
@@ -36,7 +37,8 @@ angular.module('${model.configuration.angularModuleName}', [
                         scopeAttributesToSave: scopeAttributesToSave,
                         path: $location.path(),
                         search: $location.search(),
-                        savedScopeAttributes: null
+                        savedScopeAttributes: null,
+                        dirtyChecks: {}
                     };
                     if (!locationLoading) {
                         if (!newLocationToBePushed) {
@@ -62,17 +64,57 @@ angular.module('${model.configuration.angularModuleName}', [
                     // Go to asked new location
                     $location.path(path).search(search);
                 },
-                loadLocationContext: function(locationIndex) {
+                loadLocationContextWithIndex: function(locationIndex) {
                     // Deleting previous location Context
-                    for (var i = locationContexts.length - 1 ; i > locationIndex ; i--) {
-                        locationContexts.pop();
+                    if (locationService.checkDirtyAndRemoveLocationContext(locationIndex)) {
+                        var locationContext = locationService.getCurrentLocationContext();
+                        locationService.loadLocationContext(locationContext);
                     }
-                    var locationContext = locationService.getCurrentLocationContext();
+                },
+                checkDirtyAndRemoveLocationContext: function(locationIndex, onlyReturnConfirmMessage) {
+                    var lastLocation = true;
+                    for (var i = locationContexts.length - 1 ; i > locationIndex ; i--) {
+                        var locationContext = locationContexts[i];
+                        var dirtyChecks = locationContext.dirtyChecks;
+                        // Check for dirty checks to confirm to leave before really leaving that locationContext
+                        for (var dirtyCheckKey in dirtyChecks) {
+                            if (dirtyChecks[dirtyCheckKey]()) {
+                                // this is dirty, we must confirm this to leave
+                                var title = lastLocation ? $filter('interpolate')(locationContext.originalTitle, locationContext.scope) : locationContext.title;
+                                var message = 'There are some unsaved changes in tab "' + title + '", do you really want to leave and loose those changes?';
+                                if (!onlyReturnConfirmMessage) {
+                                    if (!confirm(message)) {
+                                        if (lastLocation) {
+                                            return false; // the user didn't want to loose the changes, but we are already at this location
+                                        } else {
+                                            // the user didn't want to loose the changes, let's go to this location
+                                            locationService.loadLocationContext(locationContext);
+                                            return false; // Don't execute the rest of the code, because we loaded another location context than asked at first
+                                        }
+                                    }
+                                } else {
+                                    locationService.loadLocationContext(locationContext);
+                                    return message;
+                                }
+                            }
+                        }
+                        locationContexts.pop(); // all dirty checks passed, we can safely remove this locationContext
+                        lastLocation = false;
+                    }
+                    return true;
+                },
+                checkAllDirtyLocationContextsBeforeLeaving: function(onlyReturnConfirmMessage) {
+                    return locationService.checkDirtyAndRemoveLocationContext(-1, onlyReturnConfirmMessage);
+                },
+                loadLocationContext: function(locationContext) {
                     locationLoading = true;
                     // Recover original title
                     locationContext.title = locationContext.originalTitle;
                     // Go to asked location
-                    $location.path(locationContext.path).search(locationContext.search);
+                    $rootScope.$evalAsync(function() {
+                        // in an $evalAsync because sometimes we are trying to go to a new $location AND want to cancel the current attempt. See https://github.com/angular/angular.js/issues/9607#issuecomment-59087310
+                        $location.path(locationContext.path).search(locationContext.search);
+                    });
                 },
                 initializeController: function(scope) {
                     if (locationLoading) {
@@ -95,9 +137,46 @@ angular.module('${model.configuration.angularModuleName}', [
                 },
                 getLocationContexts: function() {
                     return locationContexts;
+                },
+                addDirtyCheck: function(dirtyCheck) {
+                    var dirtyCheckKey = String.valueOf(currentDirtyCheckKey++);
+                    var locationContext = locationService.getCurrentLocationContext();
+                    locationContext.dirtyChecks[dirtyCheckKey] = dirtyCheck;
+                    return dirtyCheckKey;
+                },
+                removeDirtyCheck: function(dirtyCheckKey) {
+                    // Search for the locationContext which contains that key
+                    for (var i = locationContexts.length - 1 ; i > 0 ; i--) {
+                        var dirtyCheck = locationContexts[i].dirtyChecks[dirtyCheckKey];
+                        if (dirtyCheck) {
+                            delete locationContexts[i].dirtyChecks[dirtyCheckKey];
+                            break; // there can be only one dirtyCheck per key
+                        }
+                    }
+                },
+                isLocationLoading: function() {
+                    return locationLoading;
+                },
+                isNewLocationToBePushed: function() {
+                    return newLocationToBePushed;
                 }
             };
         return locationService;
+    }])
+    .run(['locationService', '$window', '$rootScope', function(locationService, $window, $rootScope) {
+        // register the dirty guards which will prevent the user to leave unsaved modifications
+        $rootScope.$on('$locationChangeStart', function(event) {
+            if (!locationService.isLocationLoading() && !locationService.isNewLocationToBePushed() && !locationService.checkAllDirtyLocationContextsBeforeLeaving()) {
+                // the location change event has been intercepted by the user, let's cancel the event
+                event.preventDefault();
+            }
+        });
+        $window.onbeforeunload = function() {
+            var message = locationService.checkAllDirtyLocationContextsBeforeLeaving(true);
+            if (message !== true) {
+                return message;
+            }
+        }
     }])
     .filter('interpolate', ['$interpolate', function($interpolate) {
         return function(str, scope) {
