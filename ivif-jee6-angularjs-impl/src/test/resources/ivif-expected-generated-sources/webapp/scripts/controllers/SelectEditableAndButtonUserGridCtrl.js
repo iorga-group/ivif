@@ -125,6 +125,6 @@ angular.module('test')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('Select Editable And Button User Grid', $scope, ['selectEditableAndButtonUserGridTableParams', 'editedLinesById', 'selectedLineId']);
+        locationService.controllerInitialized('Select Editable And Button User Grid', $scope, ['selectEditableAndButtonUserGridTableParams', 'editedLinesById', '$edit', 'selectedLineId']);
     }])
 ;

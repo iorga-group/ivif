@@ -99,6 +99,6 @@ angular.module('test')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('Profiles', $scope, ['editableProfileGridTableParams', 'editedLinesById']);
+        locationService.controllerInitialized('Profiles', $scope, ['editableProfileGridTableParams', 'editedLinesById', '$edit']);
     }])
 ;

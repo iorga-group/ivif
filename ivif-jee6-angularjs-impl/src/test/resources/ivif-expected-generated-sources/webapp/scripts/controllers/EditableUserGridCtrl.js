@@ -109,6 +109,6 @@ angular.module('test')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('Users', $scope, ['editableUserGridTableParams', 'editedLinesById']);
+        locationService.controllerInitialized('Users', $scope, ['editableUserGridTableParams', 'editedLinesById', '$edit']);
     }])
 ;
