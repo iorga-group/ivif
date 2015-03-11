@@ -28,7 +28,6 @@ import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
 import java.lang.Integer;
-import java.lang.Override;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -40,16 +39,6 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
     @PersistenceContext
     protected EntityManager entityManager;
 
-
-    @Override
-    protected Integer getId(User entity) {
-        return entity.getId();
-    }
-
-    @Override
-    protected void setId(User entity, Integer id) {
-        entity.setId(id);
-    }
 
     public SearchResults<UserGridSearchResult> search(UserGridSearchParam searchParam) {
         JPAQuery jpaQuery = createJPAQuery();

@@ -25,7 +25,6 @@ import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
 import java.lang.Integer;
-import java.lang.Override;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -41,16 +40,6 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
     @Inject
     protected ConnectedUser connectedUser;
 
-
-    @Override
-    protected Integer getId(Computer entity) {
-        return entity.getId();
-    }
-
-    @Override
-    protected void setId(Computer entity, Integer id) {
-        entity.setId(id);
-    }
 
     public SearchResults<ComputerGridSearchResult> search(ComputerGridSearchParam searchParam) {
         JPAQuery jpaQuery = createJPAQuery();

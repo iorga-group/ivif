@@ -35,26 +35,6 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
     protected ConnectedUser connectedUser;
 
 
-    @Override
-    protected DesktopSessionId getId(DesktopSession entity) {
-        if (entity.getUserId() == null && entity.getComputerId() == null) {
-            return null;
-        } else {
-            return new DesktopSessionId(entity.getUserId(), entity.getComputerId());
-        }
-    }
-
-    @Override
-    protected void setId(DesktopSession entity, DesktopSessionId id) {
-        if (id == null) {
-            entity.setUserId(null);
-            entity.setComputerId(null);
-        } else {
-            entity.setUserId(id.getUserId());
-            entity.setComputerId(id.getComputerId());
-        }
-    }
-
     public DesktopSession find(Integer userId, Integer computerId) {
         return find(new DesktopSessionId(userId, computerId));
     }

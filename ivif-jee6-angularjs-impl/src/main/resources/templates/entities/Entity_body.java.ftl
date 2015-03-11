@@ -7,12 +7,16 @@
 <#if entity.table?has_content>
 @${util.useClass("javax.persistence.Table", false)}(name = "${entity.table}")
 </#if>
-public class ${entity.name} implements ${util.useClass("java.io.Serializable", false)}<#if model.implementsCode?has_content>, <@model.implementsCode?interpret/></#if> {
+public class ${entity.name} implements ${util.useClass("java.io.Serializable", false)}, ${util.useClass("com.iorga.ivif.ja.IEntity", false)}<${util.useClass(model.idClassName, false)}><#if model.implementsCode?has_content>, <@model.implementsCode?interpret/></#if> {
 
 <#if model.staticFields?size &gt; 0>
     <#list model.staticFields as staticField>
     public static ${util.useClass(staticField.type)} ${staticField.name} = <#if staticField.type == "java.lang.Character">new ${util.useClass("java.lang.Character")}('${staticField.value}')<#elseif staticField.type == "java.lang.String">"${staticField.value}"<#else>new ${util.useClass(staticField.type)}("${staticField.value}")</#if>;
     </#list>
+
+</#if>
+<#if model.hasMultipleIds()>
+    private ${util.useClass(model.idClassName)} _entityId = new ${util.useClass(model.idClassName)}();
 
 </#if>
 <#list model.attributes as attribute>
@@ -100,6 +104,52 @@ public class ${entity.name} implements ${util.useClass("java.io.Serializable", f
     }
 </#if>
 
+    @${util.useClass("java.lang.Override")}
+    public ${util.useClass(model.idClassName)} entityId() {
+<#if model.hasMultipleIds()>
+        return _entityId;
+<#else>
+        return ${model.idAttribute.element.value.name};
+</#if>
+    }
+
+    @${util.useClass("java.lang.Override")}
+    public void entityId(${util.useClass(model.idClassName)} id) {
+<#if model.hasMultipleIds()>
+        if (id == null) {
+    <#list model.idAttributes as idAttribute>
+            ${idAttribute.setterName}(null);
+    </#list>
+        } else {
+    <#list model.idAttributes as idAttribute>
+            ${idAttribute.setterName}(id.${idAttribute.getterName}());
+    </#list>
+        }
+<#else>
+        ${model.idAttribute.setterName}(id);
+</#if>
+    }
+
+    @${util.useClass("java.lang.Override")}
+    public String displayName() {
+        ${util.useClass("java.lang.StringBuilder")} displayNameBuilder = new ${util.useClass("java.lang.StringBuilder")}(<#rt>
+<#if model.displayNameAttributes?size &gt; 0>
+);
+        displayNameBuilder
+    <#list model.displayNameAttributes as attribute>
+            .append(${attribute.element.value.name})<#if attribute_has_next>.append(", ")<#else>;</#if>
+    </#list>
+<#else>
+    <#-- No display name attributes, let's display the class name + its ids -->
+"${entity.name}#<#if model.hasMultipleIds()>[</#if>");
+        displayNameBuilder
+    <#list model.idAttributes as attribute>
+            .append(${attribute.element.value.name})<#if attribute_has_next>.append(", ")<#else><#if model.hasMultipleIds()>.append("]")</#if>;</#if>
+    </#list>
+</#if>
+        return displayNameBuilder.toString();
+    }
+
     /// Getters & Setters
 <#list model.attributes as attribute>
     <#assign element=attribute.element.value>
@@ -109,6 +159,9 @@ public class ${entity.name} implements ${util.useClass("java.io.Serializable", f
 
     public void ${attribute.setterName}(${util.useClass(attribute.type)} ${element.name}) {
         this.${element.name} = ${element.name};
+    <#if model.hasMultipleIds() && element.id>
+        _entityId.${element.name} = ${element.name};
+    </#if>
     }
 
 </#list>

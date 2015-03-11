@@ -16,7 +16,7 @@
         <xs:attribute name="name" type="xs:string" use="required"/>
         <xs:attribute name="column" type="xs:string"/>
         <xs:attribute name="required" type="xs:boolean" default="false"/>
-        <xs:attribute name="name-column" type="xs:boolean" default="false"/>
+        <xs:attribute name="display-name" type="xs:boolean" default="false"/>
         <xs:attribute name="id" type="xs:boolean" default="false"/>
         <xs:attribute name="title" type="xs:string"/>
         <xs:attribute name="formula" type="xs:string"/>

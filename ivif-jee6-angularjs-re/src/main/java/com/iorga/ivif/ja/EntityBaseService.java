@@ -11,7 +11,7 @@ import javax.ejb.TransactionAttribute;
 import javax.persistence.NonUniqueResultException;
 import java.util.List;
 
-public abstract class EntityBaseService<E, I> extends PersistenceService {
+public abstract class EntityBaseService<E extends IEntity<I>, I> extends PersistenceService {
     public static final BooleanExpression FALSE_PREDICATE = Expressions.predicate(Ops.EQ, Expressions.constant(0), Expressions.constant(1));
     public static final BooleanExpression TRUE_PREDICATE = Expressions.predicate(Ops.EQ, Expressions.constant(1), Expressions.constant(1));
 
@@ -27,12 +27,8 @@ public abstract class EntityBaseService<E, I> extends PersistenceService {
         return entityManager.find(entityClass, id);
     }
 
-    protected abstract I getId(E entity);
-
-    protected abstract void setId(E entity, I id);
-
     public boolean isNew(E entity) {
-        return getId(entity) == null;
+        return entity.entityId() == null;
     }
 
     @TransactionAttribute

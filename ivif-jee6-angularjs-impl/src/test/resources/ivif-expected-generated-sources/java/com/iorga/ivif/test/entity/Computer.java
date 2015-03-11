@@ -1,9 +1,12 @@
 package com.iorga.ivif.test.entity;
 
+import com.iorga.ivif.ja.IEntity;
 import java.io.Serializable;
 import java.lang.Integer;
 import java.lang.Long;
+import java.lang.Override;
 import java.lang.String;
+import java.lang.StringBuilder;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -16,7 +19,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "TEST_COMPUTER")
-public class Computer implements Serializable {
+public class Computer implements Serializable, IEntity<Integer> {
 
     @Id
     @NotNull
@@ -36,6 +39,24 @@ public class Computer implements Serializable {
     @JoinColumn(name = "DEFAULT_PROFILE_ID")
     private Profile defaultProfile;
 
+
+    @Override
+    public Integer entityId() {
+        return id;
+    }
+
+    @Override
+    public void entityId(Integer id) {
+        setId(id);
+    }
+
+    @Override
+    public String displayName() {
+        StringBuilder displayNameBuilder = new StringBuilder("Computer#");
+        displayNameBuilder
+            .append(id);
+        return displayNameBuilder.toString();
+    }
 
     /// Getters & Setters
     public Integer getId() {

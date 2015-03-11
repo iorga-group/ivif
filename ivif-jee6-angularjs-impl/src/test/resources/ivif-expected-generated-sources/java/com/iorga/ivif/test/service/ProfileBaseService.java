@@ -20,7 +20,6 @@ import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
 import java.lang.Integer;
-import java.lang.Override;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -36,16 +35,6 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
     @Inject
     protected SecurityService securityService;
 
-
-    @Override
-    protected Integer getId(Profile entity) {
-        return entity.getId();
-    }
-
-    @Override
-    protected void setId(Profile entity, Integer id) {
-        entity.setId(id);
-    }
 
     @RolesAllowed("manager")
     public SearchResults<ProfileGridSearchResult> search(ProfileGridSearchParam searchParam) {

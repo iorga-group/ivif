@@ -29,6 +29,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
     private List<JavaStaticField> staticFields;
     private EntityAttribute versionAttribute;
     private String implementsCode;
+    private List<EntityAttribute> displayNameAttributes;
 
     // Declare attribute tag names to Class mapping
     public final static Map<String, Class<?>> ATTRIBUTE_TYPES_TO_CLASS = new HashMap<>();
@@ -65,6 +66,7 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
         // Prepare the attributes
         idAttributes = new ArrayList<>();
         staticFields = new ArrayList<>();
+        displayNameAttributes = new ArrayList<>();
         for (JAXBElement<? extends AttributeType> attributeElement : entity.getEntityAttribute()) {
             final EntityAttribute entityAttribute = new EntityAttribute(attributeElement, this);
 
@@ -109,6 +111,9 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
                 } else {
                     versionAttribute = entityAttribute;
                 }
+            }
+            if (attribute.isDisplayName()) {
+                displayNameAttributes.add(entityAttribute);
             }
         }
         // And full id class name if necessary
@@ -193,5 +198,9 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
 
     public String getImplementsCode() {
         return implementsCode;
+    }
+
+    public List<EntityAttribute> getDisplayNameAttributes() {
+        return displayNameAttributes;
     }
 }

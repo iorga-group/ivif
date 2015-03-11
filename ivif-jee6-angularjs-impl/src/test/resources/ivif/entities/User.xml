@@ -7,8 +7,8 @@
         <integer name="id" id="true">
             <sequence name="USER_ID_SEQ"/>
         </integer>
-        <string name="name" column="LAST_NAME" required="true" name-column="true"/>
-        <string name="firstName" column="FIRST_NAME" required="true" name-column="true"/>
+        <string name="name" column="LAST_NAME" required="true" display-name="true"/>
+        <string name="firstName" column="FIRST_NAME" required="true" display-name="true"/>
         <many-to-one name="profile" column="PROFILE_ID" ref="Profile"/>
         <long name="version" version="true"/>
         <string name="comment" column="&quot;COMMENT&quot;"/>

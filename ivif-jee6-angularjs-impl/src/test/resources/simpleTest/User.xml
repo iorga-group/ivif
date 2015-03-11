@@ -5,6 +5,6 @@
 
     <entity name="User" table="TEST_USER">
         <integer name="id" id="true"/>
-        <string name="name" column="LAST_NAME" required="true" name-column="true"/>
+        <string name="name" column="LAST_NAME" required="true" display-name="true"/>
     </entity>
 </entities>

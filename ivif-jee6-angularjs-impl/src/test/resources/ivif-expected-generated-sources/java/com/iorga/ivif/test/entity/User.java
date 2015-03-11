@@ -1,13 +1,16 @@
 package com.iorga.ivif.test.entity;
 
 import com.iorga.ivif.ja.BooleanUserType;
+import com.iorga.ivif.ja.IEntity;
 import com.iorga.ivif.test.Versionable;
 import com.iorga.ivif.test.entity.select.UserStatusType;
 import java.io.Serializable;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Long;
+import java.lang.Override;
 import java.lang.String;
+import java.lang.StringBuilder;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,7 +29,7 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "TEST_USER")
-public class User implements Serializable, Versionable<Long> {
+public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
 
     @Id
     @NotNull
@@ -68,6 +71,25 @@ public class User implements Serializable, Versionable<Long> {
 
     private String bigComment;
 
+
+    @Override
+    public Integer entityId() {
+        return id;
+    }
+
+    @Override
+    public void entityId(Integer id) {
+        setId(id);
+    }
+
+    @Override
+    public String displayName() {
+        StringBuilder displayNameBuilder = new StringBuilder();
+        displayNameBuilder
+            .append(name).append(", ")
+            .append(firstName);
+        return displayNameBuilder.toString();
+    }
 
     /// Getters & Setters
     public Integer getId() {
