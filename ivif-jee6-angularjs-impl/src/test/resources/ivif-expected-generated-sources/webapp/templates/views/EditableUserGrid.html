@@ -11,7 +11,7 @@
                     </div>
                 </nav>
                 <table ng-table="editableUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
-                    <tr ng-repeat="line in $data" ng-click="clickLine(line)">
+                    <tr ng-repeat="line in $data" ng-click="$edit || (openProfileGridFromUserAction({profileId:line.profile_id}))">
                         <td data-title="'First Name'" sortable="'firstName'" filter="{'firstName':'text'}">
                             {{line.firstName}}
                         </td>

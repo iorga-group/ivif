@@ -12,11 +12,10 @@ angular.module('test')
     .controller('UserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openProfileGridFromUserAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, openProfileGridFromUserAction, $location, locationUtils) {
         // Utils
         // Declare actions
-        $scope.clickLine = function(selectedLine) {
-            openProfileGridFromUserAction({profileId:selectedLine.profile_id});
-        };
 
         // Init variables
+        $scope.openProfileGridFromUserAction = openProfileGridFromUserAction;
+
         function getData($defer, params) {
             var sorting = {
                 ref: null,

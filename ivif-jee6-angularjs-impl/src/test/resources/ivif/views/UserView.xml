@@ -3,12 +3,12 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-views">
 
-    <grid name="UserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: $line.profile.id})">
+    <grid name="UserGrid" title="Users" entity="User" on-open="$action(openProfileGridFromUser)({profileId: $line.profile.id})">
         <column ref="name"/>
         <column ref="profile.id"/>
     </grid>
 
-    <grid name="EditableUserGrid" title="Users" entity="User" on-open="openProfileGridFromUser({profileId: $line.profile.id})" editable="true" roles-allowed="admin manager">
+    <grid name="EditableUserGrid" title="Users" entity="User" on-open="$action(openProfileGridFromUser)({profileId: $line.profile.id})" editable="true" roles-allowed="admin manager">
         <column ref="firstName"/>
         <column ref="name" editable-if="$record.profile.name === 'editableName'"/>
         <column ref="status" editable="true"/>
@@ -22,10 +22,10 @@
         <column ref="bigComment" editable="true"/>
     </grid>
 
-    <grid name="ToolbarUserGrid" entity="User" selection="single" on-select="$inject(aService)($line.id); $inject(anotherService)($line.profile.name);">
+    <grid name="ToolbarUserGrid" entity="User" selection="single" on-select="$inject(anotherService)($line.profile.name)">
         <toolbar>
-            <button title="Open profile" action="openProfileGridFromUser({profileId: $line.profile.id})"/>
-            <button title="Open computer" action="openComputerGridFromUser({userId: $line.id})"/>
+            <button title="Open profile" action="$action(openProfileGridFromUser)({profileId: $line.profile.id})"/>
+            <button title="Open computer" action="$action(openComputerGridFromUser)({userId: $line.id})"/>
         </toolbar>
         <column ref="name"/>
         <column-filter ref="firstName"/>
@@ -51,6 +51,12 @@
         <highlight color-class="warning" if="$line.profile.name === 'admin'"/>
         <column ref="name"/>
         <column ref="id"/>
+        <code><![CDATA[
+            <td>
+                <button type="button" ng-click="$inject(myOtherService).click($line)">Click</button>
+            </td>
+        ]]>
+        </code>
     </grid>
 
     <action-open-view name="openProfileGridFromUser" grid-name="ProfileGrid" roles-allowed="admin">

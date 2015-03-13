@@ -8,17 +8,23 @@
                         <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel</button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton1()" ng-disabled="!selectedLine||(selectedLine&&(selectedLine.$original.name==='test'))">Test service</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="aService2(selectedLine.id)" ng-disabled="!selectedLine||(selectedLine&&(selectedLine.$original.name==='test'))">Test service</button>
                     </div>
                 </nav>
                 <table ng-table="selectEditableAndButtonUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
-                    <tr ng-repeat="line in $data" ng-click="clickLine(line)" ng-class="{'warning': line.profile_name==='admin', 'active': line.$selected}">
+                    <tr ng-repeat="line in $data" ng-click="clickLine(line); aService(line.id)" ng-class="{'warning': line.profile_name==='admin', 'active': line.$selected}">
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
                             {{line.name}}
                         </td>
                         <td data-title="'Id'" sortable="'id'" filter="{'id':'text'}">
                             {{line.id}}
                         </td>
+
+            <td>
+                <button type="button" ng-click="myOtherService.click(line)">Click</button>
+            </td>
+        
+        
                     </tr>
                 </table>
             </fieldset>

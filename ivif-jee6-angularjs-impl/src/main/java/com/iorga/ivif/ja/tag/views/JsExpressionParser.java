@@ -1,8 +1,7 @@
 package com.iorga.ivif.ja.tag.views;
 
 import com.antlr.v4.grammars.*;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
@@ -74,15 +73,26 @@ public class JsExpressionParser {
         }
     }
 
-    public static JsExpression parseExpression(String jsExpression, final String lineReplacement, final String recordReplacement) {
-        final ECMAScriptParser parser = new ECMAScriptParser(new CommonTokenStream(new ECMAScriptLexer(new ANTLRInputStream(jsExpression))));
+    public static JsExpression parseExpression(final String jsExpression, final String lineReplacement, final String recordReplacement) {
+        final ECMAScriptParser parser = createParser(jsExpression);
         final ExpressionSequenceContext tree = parser.expressionSequence();
 
         return parse(lineReplacement, recordReplacement, parser, tree);
     }
 
-    public static JsExpression parseActions(String jsExpression, final String lineReplacement, final String recordReplacement) {
+    private static ECMAScriptParser createParser(final String jsExpression) {
         final ECMAScriptParser parser = new ECMAScriptParser(new CommonTokenStream(new ECMAScriptLexer(new ANTLRInputStream(jsExpression))));
+        parser.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                throw new RuntimeException("Syntax error in '"+jsExpression+"': "+msg);
+            }
+        });
+        return parser;
+    }
+
+    public static JsExpression parseActions(String jsExpression, final String lineReplacement, final String recordReplacement) {
+        final ECMAScriptParser parser = createParser(jsExpression);
         final StatementListContext tree = parser.statementList();
 
         return parse(lineReplacement, recordReplacement, parser, tree);
@@ -113,11 +123,8 @@ public class JsExpressionParser {
                         // replace the "$inject(serviceName)" with "serviceName" or "$action(actionName)" with "actionNameAction" directly
                         expressionBuilder.append(injection);
                     } else {
-                        // we are in a single method name call, register the method name as an injection, treat it like if it was an action
-                        String actionName = methodName + "Action";
-                        addAction(actionName, expression);
-                        expression.injections.add(actionName);
-                        expressionBuilder.append(actionName);
+                        // we are in a single method name call
+                        expressionBuilder.append(methodName);
 
                         visitArguments(ctx.arguments()); // only visit arguments now that the method name is "resolved"
                     }

@@ -5,12 +5,12 @@
                 <legend>Toolbar User Grid</legend>
                 <nav class="navbar navbar-default">
                     <div class="collapse navbar-collapse">
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton1()" ng-disabled="!selectedLine" ng-if="hasRole('admin') && hasRole('manager')">Open profile</button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton2()" ng-disabled="!selectedLine">Open computer</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="openProfileGridFromUserAction({profileId:selectedLine.profile_id})" ng-disabled="!selectedLine" ng-if="hasRole('admin') && hasRole('manager')">Open profile</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="openComputerGridFromUserAction({userId:selectedLine.id})" ng-disabled="!selectedLine">Open computer</button>
                     </div>
                 </nav>
                 <table ng-table="toolbarUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
-                    <tr ng-repeat="line in $data" ng-click="clickLine(line)" ng-class="{'active': line.$selected}">
+                    <tr ng-repeat="line in $data" ng-click="clickLine(line); anotherService(line.profile_name)" ng-class="{'active': line.$selected}">
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
                             {{line.name}}
                         </td>

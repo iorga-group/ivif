@@ -1,10 +1,6 @@
 <#assign grid=model.grid>
 <#assign editable=grid.element.editable>
 <#assign tableParamsVariableName=grid.variableName+"TableParams">
-<#if grid.onOpen?exists>
-    <#assign onOpenMethod=grid.onOpen.injections[0]>
-    <#assign onOpenCode=grid.onOpen.expression>
-</#if>
 'use strict';
 
 angular.module('${model.configuration.angularModuleName}')
@@ -24,17 +20,6 @@ angular.module('${model.configuration.angularModuleName}')
         }
 </#if>
         // Declare actions
-<#if onOpenCode?exists>
-        $scope.clickLine = function(selectedLine) {
-    <#if editable>
-            if (!$scope.$edit) {
-                ${onOpenCode};
-            }
-    <#else>
-            ${onOpenCode};
-    </#if>
-        };
-</#if>
 <#if grid.singleSelection>
         $scope.clickLine = function(selectedLine) {
             // unselect previous selected line if any
@@ -44,19 +29,8 @@ angular.module('${model.configuration.angularModuleName}')
             $scope.selectedLine = selectedLine;
             $scope.selectedLineId = getIdForLine(selectedLine);
             selectedLine.$selected = true;
-    <#if grid.onSelect?exists>
-            // on-select call
-            ${grid.onSelect.expression};
-    </#if>
         };
 </#if>
-<#list grid.toolbarButtons as toolbarButton>
-        $scope.clickOnButton${toolbarButton.name} = function() {
-    <#if toolbarButton.actionExpression?has_content>
-            ${toolbarButton.actionExpression.expression};
-    </#if>
-        };
-</#list>
 <#if editable>
         $scope.edit = function() {
             $scope.$edit = true;
@@ -101,6 +75,12 @@ angular.module('${model.configuration.angularModuleName}')
 </#if>
 
         // Init variables
+<#list model.injections as injection>
+        $scope.${injection} = ${injection};
+    <#if !injection_has_next>
+
+    </#if>
+</#list>
         function getData($defer, params) {
             var sorting = {
                 ref: null,

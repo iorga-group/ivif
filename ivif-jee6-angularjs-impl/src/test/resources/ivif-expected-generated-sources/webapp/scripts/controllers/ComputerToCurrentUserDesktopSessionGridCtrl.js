@@ -12,11 +12,10 @@ angular.module('test')
     .controller('ComputerToCurrentUserDesktopSessionGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openCurrentUserDesktopSessionGridFromComputerAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, openCurrentUserDesktopSessionGridFromComputerAction, $location, locationUtils) {
         // Utils
         // Declare actions
-        $scope.clickLine = function(selectedLine) {
-            openCurrentUserDesktopSessionGridFromComputerAction({computerId:selectedLine.id});
-        };
 
         // Init variables
+        $scope.openCurrentUserDesktopSessionGridFromComputerAction = openCurrentUserDesktopSessionGridFromComputerAction;
+
         function getData($defer, params) {
             var sorting = {
                 ref: null,

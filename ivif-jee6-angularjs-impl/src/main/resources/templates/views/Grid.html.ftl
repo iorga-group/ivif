@@ -1,6 +1,10 @@
 <#include "../utils/fieldEditorMacro.html.ftl">
 <#assign grid=model.grid>
 <#assign editable=grid.element.editable>
+<#if grid.onOpen?exists>
+    <#assign onOpenMethod=grid.onOpen.injections[0]>
+    <#assign onOpenCode=grid.onOpen.expression>
+</#if>
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
@@ -17,7 +21,7 @@
     <#list grid.toolbarButtonsOrCode as toolbarButtonOrCode>
         <#if toolbarButtonOrCode?is_hash>
             <#assign toolbarButton=toolbarButtonOrCode>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="clickOnButton${toolbarButton.name}()"<#rt>
+                        <button type="button" class="btn btn-default navbar-btn"<#if toolbarButton.actionExpression?has_content> ng-click="${toolbarButton.actionExpression.expression}"</#if><#rt>
             <#if toolbarButton.disabledIfExpression?has_content> ng-disabled="${toolbarButton.disabledIfExpression.expression}"</#if><#t>
             <#if toolbarButton.rolesAllowed?size &gt; 0> ng-if="<#list toolbarButton.rolesAllowed as rolesAllowed>hasRole(<#list rolesAllowed as roleAllowed>'${roleAllowed}'<#if roleAllowed_has_next>, </#if></#list>)<#if rolesAllowed_has_next> && </#if></#list>"</#if><#t>
             >${toolbarButton.element.title}</button><#lt>
@@ -29,8 +33,20 @@
                 </nav>
 </#if>
                 <table ng-table="${grid.variableName}TableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
-                    <tr ng-repeat="line in $data"<#if grid.element.onOpen?has_content || grid.singleSelection> ng-click="clickLine(line)"</#if><#rt>
-                        <#if grid.highlights?size &gt; 0> ng-class="{<#list grid.highlights as highlight>'${highlight.colorClass}': ${highlight.if}<#if highlight_has_next>, </#if></#list>}"</#if>><#lt>
+                    <tr ng-repeat="line in $data"<#rt>
+<#if grid.element.onOpen?has_content || grid.singleSelection> ng-click="<#rt>
+    <#if grid.onSelect?exists>
+        clickLine(line); ${grid.onSelect.expression}<#t>
+    <#elseif onOpenCode?exists>
+        <#if editable>
+            $edit || (${onOpenCode})<#t>
+        <#else>
+            ${onOpenCode}<#t>
+        </#if>
+    </#if>
+    "<#t>
+</#if>
+<#if grid.highlights?size &gt; 0> ng-class="{<#list grid.highlights as highlight>'${highlight.colorClass}': ${highlight.if}<#if highlight_has_next>, </#if></#list>}"</#if>><#lt>
 <#list grid.displayedColumnsOrCode as columnOrCode>
     <#if columnOrCode?is_hash>
         <#-- this is a DisplayedGridColumn -->

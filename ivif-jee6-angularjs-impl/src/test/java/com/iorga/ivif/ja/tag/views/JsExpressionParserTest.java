@@ -18,8 +18,8 @@ public class JsExpressionParserTest {
     @Test
     public void injectionWithoutDollarInjectTest() {
         final JsExpression expression = JsExpressionParser.parseExpression("myAction({id: $line.a.ref, id2: $line.other})", "myLine", "rec");
-        assertThat(expression.getExpression()).isEqualTo("myActionAction({id:myLine.a_ref,id2:myLine.other})");
-        assertThat(expression.getInjections()).containsExactly("myActionAction");
+        assertThat(expression.getExpression()).isEqualTo("myAction({id:myLine.a_ref,id2:myLine.other})");
+        assertThat(expression.getInjections()).isEmpty();
     }
 
     @Test
@@ -30,10 +30,10 @@ public class JsExpressionParserTest {
 
     @Test
     public void actionThenTest() {
-        JsExpression expression = JsExpressionParser.parseActions("$action(myAction)().then($action(secondAction)())", "line", "rec");
+        JsExpression expression = JsExpressionParser.parseExpression("$action(myAction)().then($action(secondAction)())", "line", "rec");
         assertThat(expression.getExpression()).isEqualTo("myActionAction().then(secondActionAction())");
         expression = JsExpressionParser.parseExpression("myAction().then(secondAction())", "line", "rec");
-        assertThat(expression.getExpression()).isEqualTo("myActionAction().then(secondActionAction())");
+        assertThat(expression.getExpression()).isEqualTo("myAction().then(secondAction())");
     }
 
     @Test
@@ -51,17 +51,22 @@ public class JsExpressionParserTest {
 
     @Test
     public void actionsTest() {
-        JsExpression expression = JsExpressionParser.parseActions("$inject(anAction)($line)", "line", "rec");
+        JsExpression expression = JsExpressionParser.parseExpression("$inject(anAction)($line)", "line", "rec");
         assertThat(expression.getActions()).isEmpty();
         expression = JsExpressionParser.parseExpression("$action(anAction)($line)", "line", "rec");
         assertThat(expression.getActions()).containsExactly("anAction");
         expression = JsExpressionParser.parseExpression("anAction($line)", "line", "rec");
-        assertThat(expression.getActions()).containsExactly("anAction");
+        assertThat(expression.getActions()).isEmpty();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void doubleExpressionTest() {
+        JsExpressionParser.parseExpression("$inject(anAction)($line);$inject(anotherAction)($line.aField)", "line", "rec");
     }
 
     @Test
     public void doubleActionsTest() {
-        JsExpression expression = JsExpressionParser.parseActions("$inject(anAction)($line);$inject(anotherAction)($line.aField)", "line", "rec");
+        final JsExpression expression = JsExpressionParser.parseActions("$inject(anAction)($line);$inject(anotherAction)($line.aField)", "line", "rec");
         assertThat(expression.getInjections()).hasSize(2);
     }
 

@@ -47,6 +47,7 @@ public class GridCtrlJsTargetFile extends JsTargetFile<String> {
                         injections.addAll(actionExpression.getInjections());
                     }
                 }
+                injections.addAll(gridModel.getCodeInjections());
             }
         });
 

@@ -9,7 +9,7 @@ angular.module('test')
                     controller: 'SelectEditableAndButtonUserGridCtrl'
                 });
         }])
-    .controller('SelectEditableAndButtonUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'aService', 'aService2', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, aService, aService2, $location, locationUtils) {
+    .controller('SelectEditableAndButtonUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'aService', 'aService2', 'myOtherService', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, aService, aService2, myOtherService, $location, locationUtils) {
         // Utils
         function getIdForLine(line) {
             return line.id;
@@ -23,11 +23,6 @@ angular.module('test')
             $scope.selectedLine = selectedLine;
             $scope.selectedLineId = getIdForLine(selectedLine);
             selectedLine.$selected = true;
-            // on-select call
-            aService(selectedLine.id);
-        };
-        $scope.clickOnButton1 = function() {
-            aService2($scope.selectedLine.id);
         };
         $scope.edit = function() {
             $scope.$edit = true;
@@ -70,6 +65,10 @@ angular.module('test')
         };
 
         // Init variables
+        $scope.aService = aService;
+        $scope.aService2 = aService2;
+        $scope.myOtherService = myOtherService;
+
         function getData($defer, params) {
             var sorting = {
                 ref: null,

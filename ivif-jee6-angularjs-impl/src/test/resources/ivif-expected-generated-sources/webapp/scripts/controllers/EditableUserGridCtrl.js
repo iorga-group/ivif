@@ -15,11 +15,6 @@ angular.module('test')
             return line.id;
         }
         // Declare actions
-        $scope.clickLine = function(selectedLine) {
-            if (!$scope.$edit) {
-                openProfileGridFromUserAction({profileId:selectedLine.profile_id});
-            }
-        };
         $scope.edit = function() {
             $scope.$edit = true;
             $scope.editedLinesById = {};
@@ -66,6 +61,8 @@ angular.module('test')
         };
 
         // Init variables
+        $scope.openProfileGridFromUserAction = openProfileGridFromUserAction;
+
         function getData($defer, params) {
             var sorting = {
                 ref: null,

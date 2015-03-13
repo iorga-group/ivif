@@ -27,16 +27,16 @@ public class ToolbarUserGridBaseWS {
         public String name;
     }
     public static class ToolbarUserGridSearchResult extends ToolbarUserGridFilterResult {
-        public Integer id;
         public String profile_name;
         public Integer profile_id;
+        public Integer id;
 
         public ToolbarUserGridSearchResult() {}
-        public ToolbarUserGridSearchResult(String name, Integer id, String profile_name, Integer profile_id) {
+        public ToolbarUserGridSearchResult(String name, String profile_name, Integer profile_id, Integer id) {
             this.name = name;
-            this.id = id;
             this.profile_name = profile_name;
             this.profile_id = profile_id;
+            this.id = id;
         }
     }
     @JsonIgnoreProperties(ignoreUnknown = true)

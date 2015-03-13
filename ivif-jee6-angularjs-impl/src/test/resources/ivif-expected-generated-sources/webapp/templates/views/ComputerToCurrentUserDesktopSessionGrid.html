@@ -4,7 +4,7 @@
             <fieldset>
                 <legend>Computers</legend>
                 <table ng-table="computerToCurrentUserDesktopSessionGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
-                    <tr ng-repeat="line in $data" ng-click="clickLine(line)">
+                    <tr ng-repeat="line in $data" ng-click="openCurrentUserDesktopSessionGridFromComputerAction({computerId:line.id})">
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
                             {{line.name}}
                         </td>

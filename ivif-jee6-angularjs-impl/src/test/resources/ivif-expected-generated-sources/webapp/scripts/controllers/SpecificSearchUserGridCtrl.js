@@ -12,8 +12,6 @@ angular.module('test')
     .controller('SpecificSearchUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, $location, locationUtils) {
         // Utils
         // Declare actions
-        $scope.clickOnButton1 = function() {
-        };
 
         // Init variables
         function getData($defer, params) {

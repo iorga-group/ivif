@@ -9,7 +9,7 @@ angular.module('test')
                     controller: 'ToolbarUserGridCtrl'
                 });
         }])
-    .controller('ToolbarUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'aService', 'anotherService', 'openProfileGridFromUserAction', 'openComputerGridFromUserAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, aService, anotherService, openProfileGridFromUserAction, openComputerGridFromUserAction, $location, locationUtils) {
+    .controller('ToolbarUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'anotherService', 'openProfileGridFromUserAction', 'openComputerGridFromUserAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, anotherService, openProfileGridFromUserAction, openComputerGridFromUserAction, $location, locationUtils) {
         // Utils
         function getIdForLine(line) {
             return line.id;
@@ -23,17 +23,13 @@ angular.module('test')
             $scope.selectedLine = selectedLine;
             $scope.selectedLineId = getIdForLine(selectedLine);
             selectedLine.$selected = true;
-            // on-select call
-            aService(selectedLine.id);anotherService(selectedLine.profile_name);;
-        };
-        $scope.clickOnButton1 = function() {
-            openProfileGridFromUserAction({profileId:$scope.selectedLine.profile_id});
-        };
-        $scope.clickOnButton2 = function() {
-            openComputerGridFromUserAction({userId:$scope.selectedLine.id});
         };
 
         // Init variables
+        $scope.anotherService = anotherService;
+        $scope.openProfileGridFromUserAction = openProfileGridFromUserAction;
+        $scope.openComputerGridFromUserAction = openComputerGridFromUserAction;
+
         function getData($defer, params) {
             var sorting = {
                 ref: null,

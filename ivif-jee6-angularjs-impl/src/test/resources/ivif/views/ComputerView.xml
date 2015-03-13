@@ -3,7 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-views">
 
-    <grid name="ComputerGrid" title="Computers" entity="Computer" on-open="openUserGridFromComputer({userId: $line.user.id})">
+    <grid name="ComputerGrid" title="Computers" entity="Computer" on-open="$action(openUserGridFromComputer)({userId: $line.user.id})">
         <column ref="name"/>
         <column ref="user.name"/>
         <query>
@@ -11,7 +11,7 @@
         </query>
     </grid>
 
-    <grid name="ComputerToDesktopSessionGrid" title="Computers" entity="Computer" on-open="openDesktopSessionGridFromComputer({userId: $line.user.id, computerId: $line.id})">
+    <grid name="ComputerToDesktopSessionGrid" title="Computers" entity="Computer" on-open="$action(openDesktopSessionGridFromComputer)({userId: $line.user.id, computerId: $line.id})">
         <column ref="id"/>
         <column ref="name"/>
         <column ref="user.id"/>
@@ -25,7 +25,7 @@
         </query>
     </grid>
 
-    <grid name="ComputerToCurrentUserDesktopSessionGrid" title="Computers" entity="Computer" on-open="openCurrentUserDesktopSessionGridFromComputer({computerId: $line.id})">
+    <grid name="ComputerToCurrentUserDesktopSessionGrid" title="Computers" entity="Computer" on-open="$action(openCurrentUserDesktopSessionGridFromComputer)({computerId: $line.id})">
         <column ref="name"/>
     </grid>
 

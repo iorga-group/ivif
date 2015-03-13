@@ -12,11 +12,10 @@ angular.module('test')
     .controller('ComputerGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openUserGridFromComputerAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, openUserGridFromComputerAction, $location, locationUtils) {
         // Utils
         // Declare actions
-        $scope.clickLine = function(selectedLine) {
-            openUserGridFromComputerAction({userId:selectedLine.user_id});
-        };
 
         // Init variables
+        $scope.openUserGridFromComputerAction = openUserGridFromComputerAction;
+
         function getData($defer, params) {
             var sorting = {
                 ref: null,

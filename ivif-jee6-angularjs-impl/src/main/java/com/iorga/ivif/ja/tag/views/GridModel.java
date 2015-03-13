@@ -30,6 +30,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected final Grid element;
 
     public static final Pattern LINE_OR_RECORD_REF = Pattern.compile("(?<![\\w\\$])\\$(line|record)(\\.[\\p{Alpha}\\$_][\\w\\$]*)*");
+    public static final Pattern INJECT_OR_ACTION_PATTERN = Pattern.compile("(?<![\\w\\$])\\$(inject|action)\\(([\\p{Alpha}\\$_][\\w\\$]*)\\)");
     public static final Pattern ENUM_TYPE = Pattern.compile("enum\\[(.*)\\]");
 
     protected String variableName;
@@ -91,6 +92,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected String tabTitle;
 
     protected List<GridHighlight> highlights;
+
+    protected Set<String> codeInjections;
 
     public static class GridColumnFilterParam {
         private String name;
@@ -293,6 +296,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
         highlights = new ArrayList<>();
 
+        codeInjections = new LinkedHashSet<>();
+
         // Handle service method bypass
         final String serviceSaveMethod = StringUtils.trim(element.getServiceSaveMethod());
         if (StringUtils.isNotBlank(serviceSaveMethod)) {
@@ -349,8 +354,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 }
 
                 // Add columns selected by actions
-                onOpen = addResultColumnForActionIfNecessary(element.getOnOpen(), "selectedLine", "selectedLine.$original", configuration, context);
-                onSelect = addResultColumnForActionIfNecessary(element.getOnSelect(), "selectedLine", "selectedLine.$original", configuration, context);
+                onOpen = addResultColumnForActionIfNecessary(element.getOnOpen(), "line", "line.$original", configuration, context);
+                onSelect = addResultColumnForActionIfNecessary(element.getOnSelect(), "line", "line.$original", configuration, context);
                 // Handle toolbar
                 toolbarButtons = new ArrayList<>();
                 toolbarButtonsOrCode = new ArrayList<>();
@@ -360,7 +365,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     for (Object buttonOrCode : toolbar.getButtonOrCode()) {
                         if (buttonOrCode instanceof Button) {
                             Button button = (Button) buttonOrCode;
-                            final JsExpression actionExpression = addResultColumnForActionIfNecessary(button.getAction(), "$scope.selectedLine", "$scope.selectedLine.$original", configuration, context);
+                            final JsExpression actionExpression = addResultColumnForActionIfNecessary(button.getAction(), "selectedLine", "selectedLine.$original", configuration, context);
                             String disabledIfStr = button.getDisabledIf();
                             if (actionExpression != null && !actionExpression.getLineRefs().isEmpty()) {
                                 // Button will be disabled if no line is selected
@@ -461,8 +466,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     private String parseCode(String code, String dollarLineReplacement, String dollarRecordReplacement, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
         // we must replace the $line and $record references
-        final StringBuffer codeBuffer = new StringBuffer();
-        final Matcher matcher = LINE_OR_RECORD_REF.matcher(code);
+        StringBuffer codeBuffer = new StringBuffer();
+        Matcher matcher = LINE_OR_RECORD_REF.matcher(code);
         while (matcher.find()) {
             String ref = matcher.group();
             final int dotIndex = ref.indexOf('.');
@@ -479,6 +484,20 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 refBuilder.insert(0, dollarRecordReplacement);
             }
             matcher.appendReplacement(codeBuffer, refBuilder.toString());
+        }
+        matcher.appendTail(codeBuffer);
+        code = codeBuffer.toString();
+        // now handle $inject and $action
+        codeBuffer = new StringBuffer();
+        matcher = INJECT_OR_ACTION_PATTERN.matcher(code);
+        while (matcher.find()) {
+            String injectOrAction = matcher.group(1);
+            String ref = matcher.group(2);
+            if ("action".equals(injectOrAction)) {
+                ref += "Action";
+            }
+            codeInjections.add(ref);
+            matcher.appendReplacement(codeBuffer, ref);
         }
         matcher.appendTail(codeBuffer);
         return codeBuffer.toString();
@@ -588,7 +607,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     private JsExpression addResultColumnForActionIfNecessary(String expression, String dollarLineReplacement, String dollarRecordReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
         if (StringUtils.isNotBlank(expression)) {
-            final JsExpression jsExpression = JsExpressionParser.parseActions(expression, dollarLineReplacement, dollarRecordReplacement);
+            final JsExpression jsExpression = JsExpressionParser.parseExpression(expression, dollarLineReplacement, dollarRecordReplacement);
 
             addResultColumnsForExpressionIfNecessary(jsExpression, configuration, context);
             return jsExpression;
@@ -806,5 +825,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public List<Object> getToolbarButtonsOrCode() {
         return toolbarButtonsOrCode;
+    }
+
+    public Set<String> getCodeInjections() {
+        return codeInjections;
     }
 }
