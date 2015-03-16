@@ -64,10 +64,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
      * Intersection of editable / results / filters grid columns => column to display which are editable and filterable
      */
     protected LinkedHashSet<GridColumn> editableResultFilterIntersectionGridColumns;
-    /**
-     * Editable grid columns + intersection between editable / results / filters => transient fields + [column to display which are editable and filterable]
-     */
-    protected LinkedHashSet<GridColumn> editableOnlyAndEditableResultFilterIntersectionGridColumns;
+
+    protected LinkedHashSet<GridColumn> editableGridColumnsWithIdsAndVersion;
 
     protected List<Object> displayedColumnsOrCode;
     protected List<DisplayedGridColumn> displayedColumns;
@@ -283,7 +281,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         filterResultIntersectionGridColumns = null;
         filterOnlyGridColumns = null;
         editableResultFilterIntersectionGridColumns = null;
-        editableOnlyAndEditableResultFilterIntersectionGridColumns = null;
+        editableGridColumnsWithIdsAndVersion = null;
 
         displayedColumnsOrCode = new ArrayList<>();
         displayedColumns = new ArrayList<>();
@@ -328,6 +326,19 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                         // this is a <code> element
                         String code = ((Element) columnOrCode).getTextContent();
                         displayedColumnsOrCode.add(parseCode(code, "line", "line.$original", context, configuration));
+                    }
+                }
+
+                // handle hidden editable columns
+                for (ColumnHiddenEdit columnHiddenEdit : element.getColumnHiddenEdit()) {
+                    final String ref = columnHiddenEdit.getRef();
+                    final GridColumn gridColumn = gridColumnsByRef.get(ref);
+                    if (gridColumn != null) {
+                        // it already exists, let's just update
+                        updateLists(gridColumn, true, false, true, false);
+                    } else {
+                        // new grid column
+                        prepareNewGridColumn(new GridColumn(ref), true, false, true, false, context, configuration);
                     }
                 }
 
@@ -703,14 +714,14 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         return editableResultFilterIntersectionGridColumns;
     }
 
-    public LinkedHashSet<GridColumn> getEditableOnlyAndEditableResultFilterIntersectionGridColumns() {
-        if (editableOnlyAndEditableResultFilterIntersectionGridColumns == null) {
+    public LinkedHashSet<GridColumn> getEditableGridColumnsWithIdsAndVersion() {
+        if (editableGridColumnsWithIdsAndVersion == null) {
             // compute it
-            editableOnlyAndEditableResultFilterIntersectionGridColumns = new LinkedHashSet<>(editableGridColumns);
-            editableOnlyAndEditableResultFilterIntersectionGridColumns.removeAll(getResultGridColumns());
-            editableOnlyAndEditableResultFilterIntersectionGridColumns.addAll(getEditableResultFilterIntersectionGridColumns());
+            editableGridColumnsWithIdsAndVersion = new LinkedHashSet<>(editableGridColumns);
+            editableGridColumnsWithIdsAndVersion.removeAll(idColumns);
+            editableGridColumnsWithIdsAndVersion.remove(versionColumn);
         }
-        return editableOnlyAndEditableResultFilterIntersectionGridColumns;
+        return editableGridColumnsWithIdsAndVersion;
     }
 
     public String getGridName() {

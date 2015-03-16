@@ -19,4 +19,16 @@ public class QueryParserTest {
         assertThat(parsedQuery.getQueryParameters()).hasSize(2);
         assertThat(parsedQuery.getQueryDslCode()).isEqualTo("$record.test.eq(parameters.param).and($record.test2.field.in(parameters.param2)).or($record.test3.eq(\"label\")).or($record.test4.gt(5).and($record.test4.isNull()).and($record.test5.isNotNull()))");
     }
+
+    @Test
+    public void constantParsingTest() throws Exception {
+        // mock creation
+        final JAGeneratorContext context = mock(JAGeneratorContext.class);
+
+        final Query query = new Query();
+        query.setWhere("'test' = :param");
+        final ParsedQuery parsedQuery = QueryParser.parse(query, null, this, context);
+        assertThat(parsedQuery.getQueryParameters()).hasSize(1);
+        assertThat(parsedQuery.getQueryDslCode()).isEqualTo("${util.useClass(\"com.mysema.query.support.Expressions\")}.stringTemplate(\"{0}\", \"test\").eq(parameters.param)");
+    }
 }

@@ -29,6 +29,7 @@
                     <xs:element ref="column" minOccurs="1" maxOccurs="unbounded"/>
                     <xs:element ref="code" minOccurs="0" maxOccurs="unbounded"/>
                 </xs:choice>
+                <xs:element ref="column-hidden-edit" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="column-filter" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="column-filter-param" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="query" minOccurs="0" maxOccurs="1"/>
@@ -111,6 +112,12 @@
     </xs:element>
 
     <xs:element name="code"/>
+
+    <xs:element name="column-hidden-edit">
+        <xs:complexType>
+            <xs:attribute name="ref" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="column-filter">
         <xs:complexType>

@@ -56,9 +56,9 @@ public class EditableUserGridBaseWS {
                 entityToSave = new User();
             }
             // Apply modifications
-            entityToSave.setCommentTemp(saveParam.commentTemp);
             entityToSave.setName(saveParam.name);
             entityToSave.setStatus(saveParam.status);
+            entityToSave.setCommentTemp(saveParam.commentTemp);
             entityToSave.setEnabled(saveParam.enabled);
             entityToSave.setBigComment(saveParam.bigComment);
             // Set version for optimistic lock

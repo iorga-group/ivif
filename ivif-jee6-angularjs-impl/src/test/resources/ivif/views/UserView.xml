@@ -57,6 +57,7 @@
             </td>
         ]]>
         </code>
+        <column-hidden-edit ref="firstName"/>
     </grid>
 
     <action-open-view name="openProfileGridFromUser" grid-name="ProfileGrid" roles-allowed="admin">

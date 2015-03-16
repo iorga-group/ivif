@@ -44,6 +44,7 @@ angular.module('test')
             angular.forEach($scope.editedLinesById, function(editedLine) {
                 if (!angular.equals(editedLine, editedLine.$original)) {
                     linesToSave.push({
+                        firstName: editedLine.firstName,
                         id: editedLine.id,
                         version: editedLine.version
                     });

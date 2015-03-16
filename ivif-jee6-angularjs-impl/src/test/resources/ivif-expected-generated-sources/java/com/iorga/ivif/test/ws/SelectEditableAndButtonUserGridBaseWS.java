@@ -32,6 +32,7 @@ public class SelectEditableAndButtonUserGridBaseWS {
     }
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SelectEditableAndButtonUserGridSaveParam extends SelectEditableAndButtonUserGridEditableFilterResult {
+        public String firstName;
         public Long version;
     }
     @POST
@@ -47,7 +48,7 @@ public class SelectEditableAndButtonUserGridBaseWS {
                 entityToSave = new User();
             }
             // Apply modifications
-            entityToSave.setId(saveParam.id);
+            entityToSave.setFirstName(saveParam.firstName);
             // Set version for optimistic lock
             userBaseService.detach(entityToSave);
             entityToSave.setVersion(saveParam.version);
@@ -61,13 +62,15 @@ public class SelectEditableAndButtonUserGridBaseWS {
         public String name;
     }
     public static class SelectEditableAndButtonUserGridSearchResult extends SelectEditableAndButtonUserGridFilterResult {
+        public String firstName;
         public String profile_name;
         public Long version;
 
         public SelectEditableAndButtonUserGridSearchResult() {}
-        public SelectEditableAndButtonUserGridSearchResult(String name, Integer id, String profile_name, Long version) {
+        public SelectEditableAndButtonUserGridSearchResult(String name, Integer id, String firstName, String profile_name, Long version) {
             this.name = name;
             this.id = id;
+            this.firstName = firstName;
             this.profile_name = profile_name;
             this.version = version;
         }

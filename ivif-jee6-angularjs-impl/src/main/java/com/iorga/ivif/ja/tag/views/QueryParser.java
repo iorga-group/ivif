@@ -9,6 +9,7 @@ import com.iorga.ivif.ja.tag.entities.EntityAttributePreparedWaiter;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 import com.iorga.ivif.tag.bean.Parameter;
 import com.iorga.ivif.tag.bean.Query;
+import com.mysema.query.support.Expressions;
 import org.apache.commons.lang3.BooleanUtils;
 import org.eclipse.persistence.internal.jpa.parsing.*;
 import org.eclipse.persistence.internal.jpa.parsing.jpql.antlr.JPQLParser;
@@ -189,7 +190,31 @@ public class QueryParser {
         }
 
         protected void visitGenericQueryDslMethod(Node node, String queryDslMethod) {
-            visitInspectInstance(node.getLeft());
+            final Node leftNode = node.getLeft();
+            final boolean leftNodeIsLiteral = leftNode instanceof LiteralNode;
+            if (leftNodeIsLiteral) {
+                // Must transform this left node literal to an expression in order to use QueryDSL expression syntax for operation and right node
+                queryDslCode.append(useClass(Expressions.class)).append(".");
+                if (leftNode instanceof TemporalLiteralNode) {
+                    queryDslCode.append("comparableTemplate(").append(useClass(Date.class)).append(".class, \"{0}\", ");
+                } else if (leftNode instanceof StringLiteralNode) {
+                    queryDslCode.append("stringTemplate(\"{0}\", ");
+                } else if (leftNode instanceof FloatLiteralNode) {
+                    queryDslCode.append("numberTemplate(").append(useClass(Float.class)).append(".class, \"{0}\", ");
+                } else if (leftNode instanceof LongLiteralNode) {
+                    queryDslCode.append("numberTemplate(").append(useClass(Long.class)).append(".class, \"{0}\", ");
+                } else if (leftNode instanceof DoubleLiteralNode) {
+                    queryDslCode.append("numberTemplate(").append(useClass(Double.class)).append(".class, \"{0}\", ");
+                } else if (leftNode instanceof IntegerLiteralNode) {
+                    queryDslCode.append("numberTemplate(").append(useClass(Integer.class)).append(".class, \"{0}\", ");
+                } else if (leftNode instanceof BooleanLiteralNode) {
+                    queryDslCode.append("booleanTemplate(\"{0}\", ");
+                }
+            }
+            visitInspectInstance(leftNode);
+            if (leftNodeIsLiteral) {
+                queryDslCode.append(")");
+            }
             queryDslCode.append("." + queryDslMethod + "(");
             visitInspectInstance(node.getRight());
             queryDslCode.append(")");
@@ -256,7 +281,7 @@ public class QueryParser {
             final OperatorContext currentOperatorContext = getCurrentOperatorContext();
             currentOperatorContext.literalNode = node;
             if (node instanceof TemporalLiteralNode) {
-                queryDslCode.append("new ${util.useClass(\"").append(DateFormat.class.getName()).append("\")}.parse(\"").append(literal).append("\")");
+                queryDslCode.append("new ").append(useClass(DateFormat.class)).append(".parse(\"").append(literal).append("\")");
                 currentOperatorContext.literalClass = Date.class;
             } else if (node instanceof StringLiteralNode) {
                 queryDslCode.append("\"").append(literal).append("\"");
@@ -296,6 +321,10 @@ public class QueryParser {
                 queryDslCode.append("parameters.").append(parameterName);
             }
         }
+    }
+
+    public static String useClass(Class<?> klass) {
+        return "${util.useClass(\"" + klass.getName() + "\")}";
     }
 
     public static ParsedQuery parse(Query element, EntityTargetFileId baseEntityId, Object waiter, JAGeneratorContext context) throws Exception {
