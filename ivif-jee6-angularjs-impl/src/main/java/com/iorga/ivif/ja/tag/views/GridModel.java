@@ -465,6 +465,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     }
 
     private String parseCode(String code, String dollarLineReplacement, String dollarRecordReplacement, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
+        dollarLineReplacement = dollarLineReplacement.replaceAll("\\$", "\\\\\\$");
+        dollarRecordReplacement = dollarRecordReplacement.replaceAll("\\$", "\\\\\\$");
         // we must replace the $line and $record references
         StringBuffer codeBuffer = new StringBuffer();
         Matcher matcher = LINE_OR_RECORD_REF.matcher(code);
