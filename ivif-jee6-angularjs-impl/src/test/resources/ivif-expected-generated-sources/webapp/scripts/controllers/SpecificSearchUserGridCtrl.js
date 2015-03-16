@@ -11,7 +11,19 @@ angular.module('test')
         }])
     .controller('SpecificSearchUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, $location, locationUtils) {
         // Utils
+        function getIdForLine(line) {
+            return line.id;
+        }
         // Declare actions
+        $scope.clickLine = function(selectedLine) {
+            // unselect previous selected line if any
+            if ($scope.selectedLine) {
+                delete $scope.selectedLine.$selected;
+            }
+            $scope.selectedLine = selectedLine;
+            $scope.selectedLineId = getIdForLine(selectedLine);
+            selectedLine.$selected = true;
+        };
 
         // Init variables
         function getData($defer, params) {
@@ -32,6 +44,18 @@ angular.module('test')
             }).success(function(data) {
                 params.total(data.total);
                 var results = data.results;
+                if ($scope.selectedLineId) {
+                    // search if the selected line id is in current results and flag the result in that case
+                    for (var i = 0; i < results.length; i++) {
+                        var result = results[i],
+                            id = getIdForLine(result);
+                        if (id === $scope.selectedLineId) {
+                            $scope.selectedLine = result;
+                            result.$selected = true;
+                            break;
+                        }
+                    }
+                }
                 $defer.resolve(results);
             });
         }
@@ -52,6 +76,6 @@ angular.module('test')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('Specific Search User Grid', $scope, ['specificSearchUserGridTableParams']);
+        locationService.controllerInitialized('Specific Search User Grid', $scope, ['specificSearchUserGridTableParams', 'selectedLineId']);
     }])
 ;

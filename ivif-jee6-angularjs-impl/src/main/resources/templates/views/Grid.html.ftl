@@ -35,8 +35,8 @@
                 <table ng-table="${grid.variableName}TableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
                     <tr ng-repeat="line in $data"<#rt>
 <#if grid.element.onOpen?has_content || grid.singleSelection> ng-click="<#rt>
-    <#if grid.onSelect?exists>
-        clickLine(line); ${grid.onSelect.expression}<#t>
+    <#if grid.singleSelection>
+        clickLine(line)<#if grid.onSelect?exists>; ${grid.onSelect.expression}</#if><#t>
     <#elseif onOpenCode?exists>
         <#if editable>
             $edit || (${onOpenCode})<#t>

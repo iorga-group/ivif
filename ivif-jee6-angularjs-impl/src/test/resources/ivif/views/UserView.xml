@@ -31,7 +31,7 @@
         <column-filter ref="firstName"/>
     </grid>
 
-    <grid name="SpecificSearchUserGrid" entity="User" service-search-method="com.iorga.ivif.test.UserService.search">
+    <grid name="SpecificSearchUserGrid" entity="User" service-search-method="com.iorga.ivif.test.UserService.search" selection="single">
         <toolbar>
             <button title="Test"/>
             <code><![CDATA[

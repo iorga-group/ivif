@@ -7,6 +7,7 @@ import com.iorga.ivif.test.entity.select.UserStatusType;
 import com.iorga.ivif.test.service.UserBaseService;
 import com.mysema.query.SearchResults;
 import java.lang.Boolean;
+import java.lang.Integer;
 import java.lang.String;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -33,11 +34,13 @@ public class SpecificSearchUserGridBaseWS {
     }
     public static class SpecificSearchUserGridSearchResult extends SpecificSearchUserGridFilterResult {
         public String profile_name;
+        public Integer id;
 
         public SpecificSearchUserGridSearchResult() {}
-        public SpecificSearchUserGridSearchResult(String name, String profile_name) {
+        public SpecificSearchUserGridSearchResult(String name, String profile_name, Integer id) {
             this.name = name;
             this.profile_name = profile_name;
+            this.id = id;
         }
     }
     @JsonIgnoreProperties(ignoreUnknown = true)
