@@ -16,11 +16,18 @@
         <boolean name="enabled" from-type="string" true-value="OK" false-value="KO"/>
         <string name="commentTemp" transient="true"/>
         <string name="bigComment" default-editor="textArea"/>
+        <enum name="pass" ref="UserPassType"/>
     </entity>
 
     <selection name="UserStatusType" from-type="string">
         <option name="ACTIVE"/>
         <option name="DISABLED" value="DIS"/>
         <option name="UNKNOWN" value="?" title="Not known"/>
+    </selection>
+
+    <selection name="UserPassType" from-type="integer">
+        <option name="NONE" value="1"/>
+        <option name="FULL" value="2"/>
+        <option name="LIMITED" value="3"/>
     </selection>
 </entities>

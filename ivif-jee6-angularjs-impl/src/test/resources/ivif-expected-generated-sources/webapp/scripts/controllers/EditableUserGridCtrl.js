@@ -40,6 +40,7 @@ angular.module('test')
                         commentTemp: editedLine.commentTemp,
                         enabled: editedLine.enabled,
                         bigComment: editedLine.bigComment,
+                        pass: editedLine.pass,
                         id: editedLine.id,
                         version: editedLine.version
                     });

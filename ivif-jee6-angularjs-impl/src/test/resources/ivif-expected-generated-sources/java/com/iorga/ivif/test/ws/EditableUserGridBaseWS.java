@@ -4,6 +4,7 @@ import com.iorga.ivif.ja.Generated;
 import com.iorga.ivif.ja.GridSearchParam;
 import com.iorga.ivif.ja.RolesAllowed;
 import com.iorga.ivif.test.entity.User;
+import com.iorga.ivif.test.entity.select.UserPassType;
 import com.iorga.ivif.test.entity.select.UserStatusType;
 import com.iorga.ivif.test.service.UserBaseService;
 import com.mysema.query.SearchResults;
@@ -36,6 +37,7 @@ public class EditableUserGridBaseWS {
         public UserStatusType status;
         public Boolean enabled;
         public String bigComment;
+        public UserPassType pass;
     }
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class EditableUserGridSaveParam extends EditableUserGridEditableFilterResult {
@@ -61,6 +63,7 @@ public class EditableUserGridBaseWS {
             entityToSave.setCommentTemp(saveParam.commentTemp);
             entityToSave.setEnabled(saveParam.enabled);
             entityToSave.setBigComment(saveParam.bigComment);
+            entityToSave.setPass(saveParam.pass);
             // Set version for optimistic lock
             userBaseService.detach(entityToSave);
             entityToSave.setVersion(saveParam.version);
@@ -81,13 +84,14 @@ public class EditableUserGridBaseWS {
         public Long version;
 
         public EditableUserGridSearchResult() {}
-        public EditableUserGridSearchResult(String firstName, String name, UserStatusType status, String profile_description, Boolean enabled, String bigComment, Integer profile_id, String profile_name, Integer id, Long version) {
+        public EditableUserGridSearchResult(String firstName, String name, UserStatusType status, String profile_description, Boolean enabled, String bigComment, UserPassType pass, Integer profile_id, String profile_name, Integer id, Long version) {
             this.firstName = firstName;
             this.name = name;
             this.status = status;
             this.profile_description = profile_description;
             this.enabled = enabled;
             this.bigComment = bigComment;
+            this.pass = pass;
             this.profile_id = profile_id;
             this.profile_name = profile_name;
             this.id = id;

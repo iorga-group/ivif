@@ -3,6 +3,7 @@ package com.iorga.ivif.test.entity;
 import com.iorga.ivif.ja.BooleanUserType;
 import com.iorga.ivif.ja.IEntity;
 import com.iorga.ivif.test.Versionable;
+import com.iorga.ivif.test.entity.select.UserPassType;
 import com.iorga.ivif.test.entity.select.UserStatusType;
 import java.io.Serializable;
 import java.lang.Boolean;
@@ -70,6 +71,9 @@ public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
     private String commentTemp;
 
     private String bigComment;
+
+    @Type(type = "com.iorga.ivif.test.entity.select.UserPassType$UserType")
+    private UserPassType pass;
 
 
     @Override
@@ -170,6 +174,14 @@ public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
 
     public void setBigComment(String bigComment) {
         this.bigComment = bigComment;
+    }
+
+    public UserPassType getPass() {
+        return pass;
+    }
+
+    public void setPass(UserPassType pass) {
+        this.pass = pass;
     }
 
 }

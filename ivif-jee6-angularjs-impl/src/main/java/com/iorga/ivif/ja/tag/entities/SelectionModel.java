@@ -1,12 +1,13 @@
 package com.iorga.ivif.ja.tag.entities;
 
+import com.iorga.ivif.ja.AbstractIntegerEnumUserType;
+import com.iorga.ivif.ja.AbstractStringEnumUserType;
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.tag.AbstractTarget;
 import com.iorga.ivif.tag.bean.Option;
 import com.iorga.ivif.tag.bean.Selection;
 import com.iorga.ivif.util.TargetFileUtils;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +17,24 @@ public class SelectionModel extends AbstractTarget<String, JAGeneratorContext> {
     private final JAGeneratorContext context;
 
     private List<Option> options;
+    private final String fromTypeClassName;
+    private final String userTypeSuperClassName;
 
     public SelectionModel(Selection element, JAGeneratorContext context) {
         super(element.getName());
         this.element = element;
         this.context = context;
 
-        if (!"string".equals(element.getFromType())) {
-            throw new NotImplementedException("Not yet supported: from-type=" + element.getFromType());
+        final String fromType = element.getFromType();
+        if ("string".equals(fromType)) {
+            fromTypeClassName = String.class.getName();
+            userTypeSuperClassName = AbstractStringEnumUserType.class.getName();
+        } else if ("integer".equals(fromType)) {
+            fromTypeClassName = Integer.class.getName();
+            userTypeSuperClassName = AbstractIntegerEnumUserType.class.getName();
+
+        } else {
+            throw new NotImplementedException("Not yet supported: from-type=" + fromType);
         }
 
         // Compute options
@@ -56,5 +67,13 @@ public class SelectionModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public Selection getElement() {
         return element;
+    }
+
+    public String getFromTypeClassName() {
+        return fromTypeClassName;
+    }
+
+    public String getUserTypeSuperClassName() {
+        return userTypeSuperClassName;
     }
 }

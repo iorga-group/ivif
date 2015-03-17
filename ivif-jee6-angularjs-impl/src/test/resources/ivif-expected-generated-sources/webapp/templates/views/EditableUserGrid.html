@@ -39,6 +39,10 @@
                             <span ng-if="!($edit)">{{line.bigComment}}</span>
                             <textarea ng-if="$edit" class="form-control" ng-model="line.bigComment"/>
                         </td>
+                        <td data-title="'Pass'" sortable="'pass'" filter="{'pass':'select'}" filter-data="UserPassType.deferOptionList()">
+                            <span ng-if="!($edit)">{{UserPassType.titlesByValue[line.pass]}}</span>
+                            <select ng-options="option.id as option.title for (name, option) in UserPassType.optionsByName" ng-model="line.pass" ng-if="$edit" class="form-control"></select>
+                        </td>
                     </tr>
                 </table>
             </fieldset>

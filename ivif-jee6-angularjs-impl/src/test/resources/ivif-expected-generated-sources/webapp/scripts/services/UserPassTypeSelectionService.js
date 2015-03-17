@@ -1,13 +1,10 @@
 'use strict';
-<#assign selectionModel=model.selectionModel>
-<#assign selection=selectionModel.element>
-<#assign isString=(selection.fromType == "string")>
-angular.module('${model.configuration.angularModuleName}')
-    .factory('${selection.name}', ['$q', function($q) {
+angular.module('test')
+    .factory('UserPassType', ['$q', function($q) {
         var selection = {
-<#list selectionModel.options as option>
-                ${option.name}: {value: <#if isString>'</#if>${option.value}<#if isString>'</#if>, title: '${option.title}'}<#if option_has_next>,</#if>
-</#list>
+                NONE: {value: 1, title: 'NONE'},
+                FULL: {value: 2, title: 'FULL'},
+                LIMITED: {value: 3, title: 'LIMITED'}
             },
             optionsByName = {},
             optionList = [],
@@ -31,7 +28,7 @@ angular.module('${model.configuration.angularModuleName}')
             titlesByValue: titlesByValue
         });
     }])
-    .run(['$rootScope', '${selection.name}', function ($rootScope, ${selection.name}) {
-        $rootScope.${selection.name} = ${selection.name};
+    .run(['$rootScope', 'UserPassType', function ($rootScope, UserPassType) {
+        $rootScope.UserPassType = UserPassType;
     }])
 ;
