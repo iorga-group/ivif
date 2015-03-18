@@ -1,7 +1,7 @@
 <#include "../utils/rolesAllowedMacro.java.ftl"/>
 <#assign grid=model.grid>
 <#assign gridName=grid.element.name>
-<#assign editable=grid.element.editable>
+<#assign editable=grid.editable>
 <#assign serviceVariableName=model.baseService.variableName>
 <#assign entityClassName=model.baseService.entityClassName>
 @${util.useClass("javax.ws.rs.Path", false)}("/${grid.variableName}")

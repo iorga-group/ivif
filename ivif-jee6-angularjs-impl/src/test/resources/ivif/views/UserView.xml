@@ -45,7 +45,7 @@
         <column-filter-param name="userType" type="enum[UserStatusType]"/>
     </grid>
 
-    <grid name="SelectEditableAndButtonUserGrid" entity="User" selection="single" on-select="$inject(aService)($line.id)" editable="true">
+    <grid name="SelectEditableAndButtonUserGrid" entity="User" selection="single" on-select="$inject(aService)($line.id)" editable-if="$inject(anotherService).isEditable()">
         <toolbar>
             <button title="Test service" action="$inject(aService2)($line.id)" disabled-if="$record.name === 'test'"/>
         </toolbar>

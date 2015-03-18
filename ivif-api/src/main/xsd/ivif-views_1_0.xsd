@@ -39,6 +39,7 @@
             <xs:attribute name="service-save-method" type="xs:string"/>
             <xs:attribute name="service-search-method" type="xs:string"/>
             <xs:attribute name="editable" type="xs:boolean" default="false"/>
+            <xs:attribute name="editable-if" type="xs:string"/>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="tab-title" type="xs:string"/>

@@ -1,6 +1,6 @@
 <#include "../utils/fieldEditorMacro.html.ftl">
 <#assign grid=model.grid>
-<#assign editable=grid.element.editable>
+<#assign editable=grid.editable>
 <#if grid.onOpen?exists>
     <#assign onOpenMethod=grid.onOpen.injections[0]>
     <#assign onOpenCode=grid.onOpen.expression>
@@ -14,7 +14,7 @@
                 <nav class="navbar navbar-default">
                     <div class="collapse navbar-collapse">
     <#if editable>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit"<#if grid.editableIf?has_content> ng-disabled="!(${grid.editableIf})"</#if>><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel</button>
     </#if>

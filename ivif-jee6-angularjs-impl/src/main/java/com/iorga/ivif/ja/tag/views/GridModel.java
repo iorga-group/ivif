@@ -93,6 +93,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     protected Set<String> codeInjections;
 
+    protected boolean editable;
+    protected String editableIf;
+
     public static class GridColumnFilterParam {
         private String name;
         private String className;
@@ -268,6 +271,10 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
         variableName = TargetFileUtils.getVariableNameFromCamelCasedName(element.getName());
 
+        final String editableIfStr = element.getEditableIf();
+        final boolean isEditableIf = StringUtils.isNotBlank(editableIfStr);
+        editable = element.isEditable() || isEditableIf;
+
         // Prepare displayed columns
         gridColumnsByRef = new HashMap<>();
 
@@ -314,6 +321,13 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
             protected void onConfigurationPrepared(final JAConfiguration configuration) throws Exception {
 
                 entityTargetFileId = new EntityTargetFileId(element.getEntity(), configuration);
+
+                if (isEditableIf) {
+                    final JsExpression editableIfExpr = addResultColumnForExpressionIfNecessary(editableIfStr, "selectedLine", "selectedLine.$original", configuration, context);
+                    codeInjections.addAll(editableIfExpr.getInjections());
+                    editableIf = editableIfExpr.getExpression();
+                }
+
                 for (Object columnOrCode : element.getColumnOrCode()) {
                     if (columnOrCode instanceof Column) {
                         Column column = (Column) columnOrCode;
@@ -435,7 +449,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     });
                 }
 
-                if (element.isEditable()) {
+                if (editable) {
                     // Parse the potential editable-if expression of displayed columns
                     for (DisplayedGridColumn displayedColumn : displayedColumns) {
                         displayedColumn.setEditableIfExpression(addResultColumnForExpressionIfNecessary(displayedColumn.getElement().getEditableIf(), "line", "line.$original", configuration, context));
@@ -842,5 +856,13 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public Set<String> getCodeInjections() {
         return codeInjections;
+    }
+
+    public boolean isEditable() {
+        return editable;
+    }
+
+    public String getEditableIf() {
+        return editableIf;
     }
 }

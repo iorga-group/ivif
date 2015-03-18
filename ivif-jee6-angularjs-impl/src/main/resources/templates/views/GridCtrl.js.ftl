@@ -1,5 +1,5 @@
 <#assign grid=model.grid>
-<#assign editable=grid.element.editable>
+<#assign editable=grid.editable>
 <#assign tableParamsVariableName=grid.variableName+"TableParams">
 'use strict';
 
