@@ -15,7 +15,7 @@
                     <div class="collapse navbar-collapse">
     <#if editable>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit"<#if grid.editableIf?has_content> ng-disabled="!(${grid.editableIf})"</#if>><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit" ng-disabled="!$validDirtyGrid"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel</button>
     </#if>
     <#list grid.toolbarButtonsOrCode as toolbarButtonOrCode>
@@ -66,7 +66,7 @@
             </#switch>
         </#if>
                             ><#lt>
-<@fieldEditor model="line."+column.refVariableName ivifType=ivifType nbTabs=7 editable=(editable && column.editable) editSwitch=column.editSwitch entityAttribute=column.entityAttribute/>
+<@fieldEditor fieldName=column.refVariableName ivifType=ivifType nbTabs=7 editable=(editable && column.editable) editSwitch=column.editSwitch entityAttribute=column.entityAttribute/>
                         </td>
     <#else>
         ${columnOrCode}<#lt>

@@ -6,7 +6,7 @@
                 <nav class="navbar navbar-default">
                     <div class="collapse navbar-collapse">
                         <button type="button" class="btn btn-default navbar-btn" ng-click="edit()" ng-if="!$edit"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="save()" ng-if="$edit" ng-disabled="!$validDirtyGrid"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save</button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="cancel()" ng-if="$edit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel</button>
                     </div>
                 </nav>
@@ -14,7 +14,7 @@
                     <tr ng-repeat="line in $data">
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
                             <span ng-if="!($edit)">{{line.name}}</span>
-                            <input ng-if="$edit" type="text" class="form-control" ng-model="line.name"/>
+                            <input ng-if="$edit" type="text" class="form-control" ng-model="line.name" ng-change="onLineChange(line, 'name')"/>
                         </td>
                     </tr>
                 </table>

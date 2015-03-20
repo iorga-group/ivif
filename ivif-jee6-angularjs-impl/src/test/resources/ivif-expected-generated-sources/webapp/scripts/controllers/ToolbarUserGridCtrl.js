@@ -11,9 +11,9 @@ angular.module('test')
         }])
     .controller('ToolbarUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'anotherService', 'openProfileGridFromUserAction', 'openComputerGridFromUserAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, anotherService, openProfileGridFromUserAction, openComputerGridFromUserAction, $location, locationUtils) {
         // Utils
-        function getIdForLine(line) {
+        $scope.getIdForLine = function(line) {
             return line.id;
-        }
+        };
         // Declare actions
         $scope.clickLine = function(selectedLine) {
             // unselect previous selected line if any
@@ -21,7 +21,7 @@ angular.module('test')
                 delete $scope.selectedLine.$selected;
             }
             $scope.selectedLine = selectedLine;
-            $scope.selectedLineId = getIdForLine(selectedLine);
+            $scope.selectedLineId = $scope.getIdForLine(selectedLine);
             selectedLine.$selected = true;
         };
 
@@ -52,7 +52,7 @@ angular.module('test')
                     // search if the selected line id is in current results and flag the result in that case
                     for (var i = 0; i < results.length; i++) {
                         var result = results[i],
-                            id = getIdForLine(result);
+                            id = $scope.getIdForLine(result);
                         if (id === $scope.selectedLineId) {
                             $scope.selectedLine = result;
                             result.$selected = true;

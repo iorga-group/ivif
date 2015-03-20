@@ -15,9 +15,9 @@ angular.module('${model.configuration.angularModuleName}')
     .controller('${grid.element.name}Ctrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService'<#list model.injections as injection>, '${injection}'</#list>, '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService<#list model.injections as injection>, ${injection}</#list>, $location, locationUtils) {
         // Utils
 <#if editable || grid.singleSelection>
-        function getIdForLine(line) {
+        $scope.getIdForLine = function(line) {
             return <#list grid.idColumns as idColumn>line.${idColumn.refVariableName}<#if idColumn_has_next>+':'+</#if></#list>;
-        }
+        };
 </#if>
         // Declare actions
 <#if grid.singleSelection>
@@ -27,7 +27,7 @@ angular.module('${model.configuration.angularModuleName}')
                 delete $scope.selectedLine.$selected;
             }
             $scope.selectedLine = selectedLine;
-            $scope.selectedLineId = getIdForLine(selectedLine);
+            $scope.selectedLineId = $scope.getIdForLine(selectedLine);
             selectedLine.$selected = true;
         };
 </#if>
@@ -35,28 +35,51 @@ angular.module('${model.configuration.angularModuleName}')
         $scope.edit = function() {
             $scope.$edit = true;
             $scope.editedLinesById = {};
+            $scope.dirtyLinesById = {};
+            $scope.validDirtyLinesById = {};
+            $scope.$dirtyGrid = false;
+            $scope.$validDirtyGrid = false;
             $scope.${tableParamsVariableName}.reload();
             $scope.dirtyCheckKey = locationService.addDirtyCheck(function() {
-                for (var id in $scope.editedLinesById) {
-                    var editedLine = $scope.editedLinesById[id];
-                    if (!angular.equals(editedLine, editedLine.$original)) {
-                        return true;
-                    }
-                }
-                return false;
+                return $scope.$dirtyGrid;
             });
+        };
+        function objectEmpty(obj) {
+            for (var f in obj) {
+                if (obj.hasOwnProperty(f)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        $scope.onLineChange = function(line, fieldName) {
+            // check dirty
+            var dirty = !angular.equals(line[fieldName], line.$original[fieldName]) || !angular.equals(line, line.$original),
+                id = $scope.getIdForLine(line);
+            line.$dirty = dirty;
+            if (dirty) {
+                $scope.dirtyLinesById[id] = line;
+                // check validity
+                $scope.validDirtyLinesById[id] = line;
+            } else {
+                delete $scope.dirtyLinesById[id];
+                delete $scope.validDirtyLinesById[id];
+            }
+            $scope.$dirtyGrid = !objectEmpty($scope.dirtyLinesById);
+            $scope.$validDirtyGrid = !objectEmpty($scope.validDirtyLinesById);
+        };
+        $scope.$isDirty = function(line) {
+            return line.$dirty;
         };
         $scope.save = function() {
             // Send only modified lines to server, thanks to http://stackoverflow.com/a/26975765/535203
             var linesToSave = [];
-            angular.forEach($scope.editedLinesById, function(editedLine) {
-                if (!angular.equals(editedLine, editedLine.$original)) {
-                    linesToSave.push({
+            angular.forEach($scope.validDirtyLinesById, function(editedLine) {
+                linesToSave.push({
     <#list grid.editableGridColumns as column>
-                        ${column.refVariableName}: editedLine.${column.refVariableName}<#if column_has_next>,</#if>
+                    ${column.refVariableName}: editedLine.${column.refVariableName}<#if column_has_next>,</#if>
     </#list>
-                    });
-                }
+                });
             });
             if (linesToSave.length > 0) {
                 // call save function
@@ -68,7 +91,11 @@ angular.module('${model.configuration.angularModuleName}')
         };
         $scope.cancel = function() {
             $scope.$edit = false;
-            $scope.editedLinesById = null;
+            delete $scope.editedLinesById;
+            delete $scope.dirtyLinesById;
+            delete $scope.validDirtyLinesById;
+            delete $scope.$dirtyGrid;
+            delete $scope.$validDirtyGrid;
             $scope.${tableParamsVariableName}.reload();
             locationService.removeDirtyCheck($scope.dirtyCheckKey);
         };
@@ -104,7 +131,7 @@ angular.module('${model.configuration.angularModuleName}')
                     results = [];
                     var editedLinesById = $scope.editedLinesById;
                     angular.forEach(data.results, function(result) {
-                        var id = getIdForLine(result);
+                        var id = $scope.getIdForLine(result);
                         var editedLine = editedLinesById[id];
                         if (editedLine === undefined) {
                             editedLine = angular.copy(result);
@@ -120,7 +147,7 @@ angular.module('${model.configuration.angularModuleName}')
                     // search if the selected line id is in current results and flag the result in that case
                     for (var i = 0; i < results.length; i++) {
                         var result = results[i],
-                            id = getIdForLine(result);
+                            id = $scope.getIdForLine(result);
                         if (id === $scope.selectedLineId) {
                             $scope.selectedLine = result;
                             result.$selected = true;
@@ -152,6 +179,6 @@ angular.module('${model.configuration.angularModuleName}')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('${grid.tabTitle}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById', '$edit', 'dirtyCheckKey'</#if><#if grid.singleSelection>, 'selectedLineId'</#if>]);
+        locationService.controllerInitialized('${grid.tabTitle}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById', '$edit', 'validDirtyLinesById', 'dirtyLinesById', '$dirtyGrid', '$validDirtyGrid', 'dirtyCheckKey'</#if><#if grid.singleSelection>, 'selectedLineId'</#if>]);
     }])
 ;

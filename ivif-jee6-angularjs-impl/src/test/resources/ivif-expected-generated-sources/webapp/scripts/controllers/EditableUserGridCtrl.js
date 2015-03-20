@@ -11,40 +11,63 @@ angular.module('test')
         }])
     .controller('EditableUserGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openProfileGridFromUserAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, openProfileGridFromUserAction, $location, locationUtils) {
         // Utils
-        function getIdForLine(line) {
+        $scope.getIdForLine = function(line) {
             return line.id;
-        }
+        };
         // Declare actions
         $scope.edit = function() {
             $scope.$edit = true;
             $scope.editedLinesById = {};
+            $scope.dirtyLinesById = {};
+            $scope.validDirtyLinesById = {};
+            $scope.$dirtyGrid = false;
+            $scope.$validDirtyGrid = false;
             $scope.editableUserGridTableParams.reload();
             $scope.dirtyCheckKey = locationService.addDirtyCheck(function() {
-                for (var id in $scope.editedLinesById) {
-                    var editedLine = $scope.editedLinesById[id];
-                    if (!angular.equals(editedLine, editedLine.$original)) {
-                        return true;
-                    }
-                }
-                return false;
+                return $scope.$dirtyGrid;
             });
+        };
+        function objectEmpty(obj) {
+            for (var f in obj) {
+                if (obj.hasOwnProperty(f)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        $scope.onLineChange = function(line, fieldName) {
+            // check dirty
+            var dirty = !angular.equals(line[fieldName], line.$original[fieldName]) || !angular.equals(line, line.$original),
+                id = $scope.getIdForLine(line);
+            line.$dirty = dirty;
+            if (dirty) {
+                $scope.dirtyLinesById[id] = line;
+                // check validity
+                $scope.validDirtyLinesById[id] = line;
+            } else {
+                delete $scope.dirtyLinesById[id];
+                delete $scope.validDirtyLinesById[id];
+            }
+            $scope.$dirtyGrid = !objectEmpty($scope.dirtyLinesById);
+            $scope.$validDirtyGrid = !objectEmpty($scope.validDirtyLinesById);
+        };
+        $scope.$isDirty = function(line) {
+            return line.$dirty;
         };
         $scope.save = function() {
             // Send only modified lines to server, thanks to http://stackoverflow.com/a/26975765/535203
             var linesToSave = [];
-            angular.forEach($scope.editedLinesById, function(editedLine) {
-                if (!angular.equals(editedLine, editedLine.$original)) {
-                    linesToSave.push({
-                        name: editedLine.name,
-                        status: editedLine.status,
-                        commentTemp: editedLine.commentTemp,
-                        enabled: editedLine.enabled,
-                        bigComment: editedLine.bigComment,
-                        pass: editedLine.pass,
-                        id: editedLine.id,
-                        version: editedLine.version
-                    });
-                }
+            angular.forEach($scope.validDirtyLinesById, function(editedLine) {
+                linesToSave.push({
+                    name: editedLine.name,
+                    status: editedLine.status,
+                    commentTemp: editedLine.commentTemp,
+                    enabled: editedLine.enabled,
+                    bigComment: editedLine.bigComment,
+                    pass: editedLine.pass,
+                    id: editedLine.id,
+                    version: editedLine.version
+                });
             });
             if (linesToSave.length > 0) {
                 // call save function
@@ -56,7 +79,11 @@ angular.module('test')
         };
         $scope.cancel = function() {
             $scope.$edit = false;
-            $scope.editedLinesById = null;
+            delete $scope.editedLinesById;
+            delete $scope.dirtyLinesById;
+            delete $scope.validDirtyLinesById;
+            delete $scope.$dirtyGrid;
+            delete $scope.$validDirtyGrid;
             $scope.editableUserGridTableParams.reload();
             locationService.removeDirtyCheck($scope.dirtyCheckKey);
         };
@@ -86,7 +113,7 @@ angular.module('test')
                     results = [];
                     var editedLinesById = $scope.editedLinesById;
                     angular.forEach(data.results, function(result) {
-                        var id = getIdForLine(result);
+                        var id = $scope.getIdForLine(result);
                         var editedLine = editedLinesById[id];
                         if (editedLine === undefined) {
                             editedLine = angular.copy(result);
@@ -117,6 +144,6 @@ angular.module('test')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('Users', $scope, ['editableUserGridTableParams', 'editedLinesById', '$edit', 'dirtyCheckKey']);
+        locationService.controllerInitialized('Users', $scope, ['editableUserGridTableParams', 'editedLinesById', '$edit', 'validDirtyLinesById', 'dirtyLinesById', '$dirtyGrid', '$validDirtyGrid', 'dirtyCheckKey']);
     }])
 ;
