@@ -9,7 +9,10 @@
 <@tabulate nbTabs=nbTabs/>{{${model} | amDateFormat:'ll'}}
             <#break>
         <#case "datetime">
+            <#-- TODO bring back this code using a "default-display" feature in entity datetime attributes
 <@tabulate nbTabs=nbTabs/><span am-time-ago="${model}" bs-tooltip data-title="{{${model} | amDateFormat:'lll'}}"></span>
+             -->
+<@tabulate nbTabs=nbTabs/>{{${model} | amDateFormat:'lll'}}
             <#break>
         <#case "enum">
             <#assign selectionName=entityAttribute.element.value.ref>

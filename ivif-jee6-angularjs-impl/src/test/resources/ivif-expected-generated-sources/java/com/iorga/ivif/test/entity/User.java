@@ -12,6 +12,7 @@ import java.lang.Long;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.StringBuilder;
+import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -74,6 +75,8 @@ public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
 
     @Type(type = "com.iorga.ivif.test.entity.select.UserPassType$UserType")
     private UserPassType pass;
+
+    private Date lastModification;
 
 
     @Override
@@ -182,6 +185,14 @@ public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
 
     public void setPass(UserPassType pass) {
         this.pass = pass;
+    }
+
+    public Date getLastModification() {
+        return lastModification;
+    }
+
+    public void setLastModification(Date lastModification) {
+        this.lastModification = lastModification;
     }
 
 }

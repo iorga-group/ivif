@@ -116,6 +116,9 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (filter.pass != null) {
             jpaQuery.where($record.pass.eq(filter.pass));
         }
+        if (filter.lastModification != null) {
+            jpaQuery.where($record.lastModification.eq(filter.lastModification));
+        }
         // Applying action filters
         // Applying sorting
         Sorting sorting = searchParam.sorting;
@@ -132,6 +135,8 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
             sortingExpression = $record.bigComment;
         } else if ("pass".equals(sorting.ref)) {
             sortingExpression = $record.pass;
+        } else if ("lastModification".equals(sorting.ref)) {
+            sortingExpression = $record.lastModification;
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
@@ -144,7 +149,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
     }
 
     protected SearchResults<EditableUserGridSearchResult> listSearchResults(QUser $record, EditableUserGridSearchParam searchParam, JPAQuery jpaQuery) {
-        return jpaQuery.listResults(ConstructorExpression.create(EditableUserGridSearchResult.class, $record.firstName, $record.name, $record.status, $record.profile.description, $record.enabled, $record.bigComment, $record.pass, $record.profile.id, $record.profile.name, $record.id, $record.version));
+        return jpaQuery.listResults(ConstructorExpression.create(EditableUserGridSearchResult.class, $record.firstName, $record.name, $record.status, $record.profile.description, $record.enabled, $record.bigComment, $record.pass, $record.lastModification, $record.profile.id, $record.profile.name, $record.id, $record.version));
     }
 
     public SearchResults<SpecificSearchUserGridSearchResult> search(SpecificSearchUserGridSearchParam searchParam) {

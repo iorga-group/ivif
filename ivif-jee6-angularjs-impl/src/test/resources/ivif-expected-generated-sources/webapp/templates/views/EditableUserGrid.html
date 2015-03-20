@@ -43,6 +43,9 @@
                             <span ng-if="!($edit)">{{UserPassType.titlesByValue[line.pass]}}</span>
                             <select ng-options="option.id as option.title for (name, option) in UserPassType.optionsByName" ng-model="line.pass" ng-if="$edit" ng-change="onLineChange(line, 'pass')" class="form-control"></select>
                         </td>
+                        <td data-title="'Last Modification'" sortable="'lastModification'" >
+                            {{line.lastModification | amDateFormat:'lll'}}
+                        </td>
                     </tr>
                 </table>
             </fieldset>

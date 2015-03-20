@@ -21,6 +21,7 @@
         <column ref="enabled" editable="true"/>
         <column ref="bigComment" editable="true"/>
         <column ref="pass" editable="true"/>
+        <column ref="lastModification" editable="true"/>
     </grid>
 
     <grid name="ToolbarUserGrid" entity="User" selection="single" on-select="$inject(anotherService)($line.profile.name)">

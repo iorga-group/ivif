@@ -65,6 +65,7 @@ angular.module('test')
                     enabled: editedLine.enabled,
                     bigComment: editedLine.bigComment,
                     pass: editedLine.pass,
+                    lastModification: editedLine.lastModification,
                     id: editedLine.id,
                     version: editedLine.version
                 });
