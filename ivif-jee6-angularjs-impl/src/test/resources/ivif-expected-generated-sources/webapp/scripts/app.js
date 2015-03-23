@@ -304,4 +304,19 @@ angular.module('test', [
             }
         }]);
     }])
+    .directive('gridLineField', function() {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, iElement, iAttrs, modelCtrl) {
+                var fieldName = iAttrs.ngModel.substring('line.'.length),
+                    modelCtrls = scope.line.$modelCtrls;
+                if (!modelCtrls) {
+                    modelCtrls = {};
+                    scope.line.$modelCtrls = modelCtrls;
+                }
+                modelCtrls[fieldName] = modelCtrl; // attach current ngModelController to the line
+            }
+        };
+    })
 ;

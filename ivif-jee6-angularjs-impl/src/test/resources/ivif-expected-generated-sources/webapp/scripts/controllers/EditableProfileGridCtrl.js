@@ -20,6 +20,7 @@ angular.module('test')
             $scope.editedLinesById = {};
             $scope.dirtyLinesById = {};
             $scope.validDirtyLinesById = {};
+            $scope.invalidDirtyLinesById = {};
             $scope.$dirtyGrid = false;
             $scope.$validDirtyGrid = false;
             $scope.editableProfileGridTableParams.reload();
@@ -43,13 +44,20 @@ angular.module('test')
             if (dirty) {
                 $scope.dirtyLinesById[id] = line;
                 // check validity
-                $scope.validDirtyLinesById[id] = line;
+                if (line.$modelCtrls[fieldName].$valid) {
+                    $scope.validDirtyLinesById[id] = line;
+                    delete $scope.invalidDirtyLinesById[id];
+                } else {
+                    $scope.invalidDirtyLinesById[id] = line;
+                    delete $scope.validDirtyLinesById[id];
+                }
             } else {
                 delete $scope.dirtyLinesById[id];
                 delete $scope.validDirtyLinesById[id];
+                delete $scope.invalidDirtyLinesById[id];
             }
             $scope.$dirtyGrid = !objectEmpty($scope.dirtyLinesById);
-            $scope.$validDirtyGrid = !objectEmpty($scope.validDirtyLinesById);
+            $scope.$validDirtyGrid = !objectEmpty($scope.validDirtyLinesById) && objectEmpty($scope.invalidDirtyLinesById);
         };
         $scope.$isDirty = function(line) {
             return line.$dirty;
@@ -76,6 +84,7 @@ angular.module('test')
             delete $scope.editedLinesById;
             delete $scope.dirtyLinesById;
             delete $scope.validDirtyLinesById;
+            delete $scope.invalidDirtyLinesById;
             delete $scope.$dirtyGrid;
             delete $scope.$validDirtyGrid;
             $scope.editableProfileGridTableParams.reload();
@@ -136,6 +145,6 @@ angular.module('test')
                 getData: getData
             });
         }
-        locationService.controllerInitialized('Profiles', $scope, ['editableProfileGridTableParams', 'editedLinesById', '$edit', 'validDirtyLinesById', 'dirtyLinesById', '$dirtyGrid', '$validDirtyGrid', 'dirtyCheckKey']);
+        locationService.controllerInitialized('Profiles', $scope, ['editableProfileGridTableParams', 'editedLinesById', '$edit', 'validDirtyLinesById', 'invalidDirtyLinesById', 'dirtyLinesById', '$dirtyGrid', '$validDirtyGrid', 'dirtyCheckKey']);
     }])
 ;

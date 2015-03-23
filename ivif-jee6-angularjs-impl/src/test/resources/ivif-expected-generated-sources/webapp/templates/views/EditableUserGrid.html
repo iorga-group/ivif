@@ -16,12 +16,16 @@
                             {{line.firstName}}
                         </td>
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
-                            <span ng-if="!($edit && (line.$original.profile_name==='editableName'))">{{line.name}}</span>
-                            <input ng-if="$edit && (line.$original.profile_name==='editableName')" type="text" class="form-control" ng-model="line.name" ng-change="onLineChange(line, 'name')"/>
+                            <div class="form-group" ng-class="{'has-error': line.$modelCtrls.name.$invalid}">
+                                <span ng-if="!($edit && (line.$original.profile_name==='editableName'))">{{line.name}}</span>
+                                <input ng-if="$edit && (line.$original.profile_name==='editableName')" type="text" class="form-control" ng-model="line.name" ng-change="onLineChange(line, 'name')" grid-line-field/>
+                            </div>
                         </td>
                         <td data-title="'Status'" sortable="'status'" filter="{'status':'select'}" filter-data="UserStatusType.deferOptionList()">
-                            <span ng-if="!($edit)">{{UserStatusType.titlesByValue[line.status]}}</span>
-                            <select ng-options="option.id as option.title for (name, option) in UserStatusType.optionsByName" ng-model="line.status" ng-if="$edit" ng-change="onLineChange(line, 'status')" class="form-control"></select>
+                            <div class="form-group" ng-class="{'has-error': line.$modelCtrls.status.$invalid}">
+                                <span ng-if="!($edit)">{{UserStatusType.titlesByValue[line.status]}}</span>
+                                <select ng-options="option.id as option.title for (name, option) in UserStatusType.optionsByName" ng-model="line.status" ng-if="$edit" ng-change="onLineChange(line, 'status')" grid-line-field class="form-control"></select>
+                            </div>
                         </td>
 
             <td data-title="'Profile description'">
@@ -29,22 +33,32 @@
             </td>
         
                         <td data-title="'Comment Temp'">
-                            <span ng-if="!($edit)">{{line.commentTemp}}</span>
-                            <input ng-if="$edit" type="text" class="form-control" ng-model="line.commentTemp" ng-change="onLineChange(line, 'commentTemp')"/>
+                            <div class="form-group" ng-class="{'has-error': line.$modelCtrls.commentTemp.$invalid}">
+                                <span ng-if="!($edit)">{{line.commentTemp}}</span>
+                                <input ng-if="$edit" type="text" class="form-control" ng-model="line.commentTemp" ng-change="onLineChange(line, 'commentTemp')" grid-line-field/>
+                            </div>
                         </td>
                         <td data-title="'Enabled'" sortable="'enabled'" >
-                            <input type="checkbox" class="form-control" ng-model="line.enabled" ng-disabled="!($edit)" />
+                            <div class="form-group" ng-class="{'has-error': line.$modelCtrls.enabled.$invalid}">
+                                <div class="checkbox"><label><input type="checkbox" ng-model="line.enabled" ng-disabled="!($edit)" /></label></div>
+                            </div>
                         </td>
                         <td data-title="'Big Comment'" sortable="'bigComment'" filter="{'bigComment':'text'}">
-                            <span ng-if="!($edit)">{{line.bigComment}}</span>
-                            <textarea ng-if="$edit" class="form-control" ng-model="line.bigComment" ng-change="onLineChange(line, 'bigComment')"/>
+                            <div class="form-group" ng-class="{'has-error': line.$modelCtrls.bigComment.$invalid}">
+                                <span ng-if="!($edit)">{{line.bigComment}}</span>
+                                <textarea ng-if="$edit" class="form-control" ng-model="line.bigComment" ng-change="onLineChange(line, 'bigComment')" grid-line-field/>
+                            </div>
                         </td>
                         <td data-title="'Pass'" sortable="'pass'" filter="{'pass':'select'}" filter-data="UserPassType.deferOptionList()">
-                            <span ng-if="!($edit)">{{UserPassType.titlesByValue[line.pass]}}</span>
-                            <select ng-options="option.id as option.title for (name, option) in UserPassType.optionsByName" ng-model="line.pass" ng-if="$edit" ng-change="onLineChange(line, 'pass')" class="form-control"></select>
+                            <div class="form-group" ng-class="{'has-error': line.$modelCtrls.pass.$invalid}">
+                                <span ng-if="!($edit)">{{UserPassType.titlesByValue[line.pass]}}</span>
+                                <select ng-options="option.id as option.title for (name, option) in UserPassType.optionsByName" ng-model="line.pass" ng-if="$edit" ng-change="onLineChange(line, 'pass')" grid-line-field class="form-control"></select>
+                            </div>
                         </td>
                         <td data-title="'Last Modification'" sortable="'lastModification'" >
-                            {{line.lastModification | amDateFormat:'lll'}}
+                            <div class="form-group" ng-class="{'has-error': line.$modelCtrls.lastModification.$invalid}">
+                                {{line.lastModification | amDateFormat:'lll'}}
+                            </div>
                         </td>
                     </tr>
                 </table>

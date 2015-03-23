@@ -52,6 +52,7 @@
         <#-- this is a DisplayedGridColumn -->
         <#assign column=columnOrCode>
         <#assign ivifType=column.entityAttribute.element.name.localPart>
+        <#assign columnEditable=(editable && column.editable)>
                         <td data-title="'${column.title}'"<#rt>
         <#if !column.entityAttribute.element.value.transient>
  sortable="'${column.refVariableName}'" <#rt>
@@ -66,7 +67,15 @@
             </#switch>
         </#if>
                             ><#lt>
-<@fieldEditor fieldName=column.refVariableName ivifType=ivifType nbTabs=7 editable=(editable && column.editable) editSwitch=column.editSwitch entityAttribute=column.entityAttribute/>
+        <#assign nbTabs=7>
+        <#if columnEditable>
+            <#assign nbTabs=nbTabs+1>
+                            <div class="form-group" ng-class="{'has-error': line.$modelCtrls.${column.refVariableName}.$invalid}">
+        </#if>
+<@fieldEditor fieldName=column.refVariableName ivifType=ivifType nbTabs=nbTabs editable=columnEditable editSwitch=column.editSwitch entityAttribute=column.entityAttribute/>
+        <#if columnEditable>
+                            </div>
+        </#if>
                         </td>
     <#else>
         ${columnOrCode}<#lt>
