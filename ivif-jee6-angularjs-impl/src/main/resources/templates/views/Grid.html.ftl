@@ -72,8 +72,11 @@
             <#assign nbTabs=nbTabs+1>
                             <div class="form-group" ng-class="{'has-error': line.$modelCtrls.${column.refVariableName}.$invalid}">
         </#if>
-<@fieldEditor fieldName=column.refVariableName ivifType=ivifType nbTabs=nbTabs editable=columnEditable editSwitch=column.editSwitch entityAttribute=column.entityAttribute/>
+<@fieldEditor fieldName=column.refVariableName ivifType=ivifType nbTabs=nbTabs editable=columnEditable editSwitch=column.editSwitch entityAttribute=column.entityAttribute requiredIf=(column.requiredIfExpression.expression)!/>
         <#if columnEditable>
+            <#if column.requiredIfExpression?has_content>
+                                <p class="help-block" ng-if="(${column.editSwitch}) && line.$modelCtrls.${column.refVariableName}.$error.required">This is required.</p>
+            </#if>
                             </div>
         </#if>
                         </td>

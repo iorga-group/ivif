@@ -102,6 +102,7 @@
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="editable" type="xs:boolean" default="false"/>
             <xs:attribute name="editable-if" type="xs:string"/>
+            <xs:attribute name="required-if" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 

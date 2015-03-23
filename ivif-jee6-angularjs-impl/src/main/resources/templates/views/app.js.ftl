@@ -315,6 +315,16 @@ angular.module('${model.configuration.angularModuleName}', [
                     scope.line.$modelCtrls = modelCtrls;
                 }
                 modelCtrls[fieldName] = modelCtrl; // attach current ngModelController to the line
+                // attach on change listener
+                modelCtrl.$viewChangeListeners.push(function() {
+                    scope.onLineValueChange(scope.line, fieldName);
+                });
+                // attach on validity state change listener
+                scope.$watch(function() {return modelCtrl.$valid;}, function(newValue, oldValue) {
+                    if (newValue !== oldValue) {
+                        scope.onLineValidStatusChange(scope.line, fieldName);
+                    }
+                });
             }
         };
     })

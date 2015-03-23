@@ -17,7 +17,7 @@
                 Desc : {{$line.profile.description}}
             </td>
         ]]></code>
-        <column ref="commentTemp" editable="true"/>
+        <column ref="commentTemp" editable="true" required-if="$isDirty($line)"/>
         <column ref="enabled" editable="true"/>
         <column ref="bigComment" editable="true"/>
         <column ref="pass" editable="true"/>

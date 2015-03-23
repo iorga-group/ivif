@@ -161,6 +161,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         private final boolean editable;
         private JsExpression editableIfExpression;
         private String editSwitch = "$edit";
+        private JsExpression requiredIfExpression;
 
         public DisplayedGridColumn(Column column) {
             super(column.getRef());
@@ -198,6 +199,14 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
         public String getEditSwitch() {
             return editSwitch;
+        }
+
+        public void setRequiredIfExpression(JsExpression requiredIfExpression) {
+            this.requiredIfExpression = requiredIfExpression;
+        }
+
+        public JsExpression getRequiredIfExpression() {
+            return requiredIfExpression;
         }
     }
 
@@ -394,10 +403,10 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                             String disabledIfStr = button.getDisabledIf();
                             if (actionExpression != null && !actionExpression.getLineRefs().isEmpty()) {
                                 // Button will be disabled if no line is selected
-                                disabledIfStr = "!selectedLine" + (StringUtils.isNotBlank(disabledIfStr) ? " || (selectedLine && ("+disabledIfStr+"))" : "");
+                                disabledIfStr = "!selectedLine" + (StringUtils.isNotBlank(disabledIfStr) ? " || (selectedLine && (" + disabledIfStr + "))" : "");
                             }
                             final JsExpression disabledIfExpression = addResultColumnForExpressionIfNecessary(disabledIfStr, "selectedLine", "selectedLine.$original", configuration, context);
-                            final ToolbarButton toolbarButton = new ToolbarButton(button, actionExpression, disabledIfExpression, ""+(buttonNumber++)); // TODO use title to "name" the button
+                            final ToolbarButton toolbarButton = new ToolbarButton(button, actionExpression, disabledIfExpression, "" + (buttonNumber++)); // TODO use title to "name" the button
                             toolbarButtons.add(toolbarButton);
                             toolbarButtonsOrCode.add(toolbarButton);
                             // Now compute the roles allowed if any
@@ -453,6 +462,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                     // Parse the potential editable-if expression of displayed columns
                     for (DisplayedGridColumn displayedColumn : displayedColumns) {
                         displayedColumn.setEditableIfExpression(addResultColumnForExpressionIfNecessary(displayedColumn.getElement().getEditableIf(), "line", "line.$original", configuration, context));
+                        displayedColumn.setRequiredIfExpression(addResultColumnForExpressionIfNecessary(displayedColumn.getElement().getRequiredIf(), "line", "line.$original", configuration, context));
                     }
 
                     context.waitForEvent(new TargetPreparedWaiter<EntityTargetFile, EntityTargetFileId, JAGeneratorContext>(EntityTargetFile.class, entityTargetFileId, GridModel.this) {

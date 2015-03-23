@@ -36,15 +36,35 @@ angular.module('test')
             }
             return true;
         }
-        $scope.onLineChange = function(line, fieldName) {
+        $scope.onLineValueChange = function(line, fieldName) {
             // check dirty
             var dirty = !angular.equals(line[fieldName], line.$original[fieldName]) || !angular.equals(line, line.$original),
                 id = $scope.getIdForLine(line);
             line.$dirty = dirty;
             if (dirty) {
                 $scope.dirtyLinesById[id] = line;
+            } else {
+                delete $scope.dirtyLinesById[id];
+            }
+            $scope.$dirtyGrid = !objectEmpty($scope.dirtyLinesById);
+            // also check valid status in order to enable or disable the save button
+            $scope.onLineValidStatusChange(line, fieldName);
+        };
+        $scope.onLineValidStatusChange = function(line, fieldName) {
+            var id = $scope.getIdForLine(line);
+            if (line.$dirty) {
                 // check validity
-                if (line.$modelCtrls[fieldName].$valid) {
+                var invalidCtrls = line.$invalidCtrls,
+                    modelCtrl = line.$modelCtrls[fieldName];
+                if (!invalidCtrls) {
+                    invalidCtrls = line.$invalidCtrls = {};
+                }
+                if (!modelCtrl.$valid) {
+                    invalidCtrls[fieldName] = modelCtrl;
+                } else {
+                    delete invalidCtrls[fieldName];
+                }
+                if (objectEmpty(invalidCtrls)) {
                     $scope.validDirtyLinesById[id] = line;
                     delete $scope.invalidDirtyLinesById[id];
                 } else {
@@ -52,11 +72,9 @@ angular.module('test')
                     delete $scope.validDirtyLinesById[id];
                 }
             } else {
-                delete $scope.dirtyLinesById[id];
                 delete $scope.validDirtyLinesById[id];
                 delete $scope.invalidDirtyLinesById[id];
             }
-            $scope.$dirtyGrid = !objectEmpty($scope.dirtyLinesById);
             $scope.$validDirtyGrid = !objectEmpty($scope.validDirtyLinesById) && objectEmpty($scope.invalidDirtyLinesById);
         };
         $scope.$isDirty = function(line) {
