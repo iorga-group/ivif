@@ -17,10 +17,15 @@ angular.module('test')
         $scope.openCurrentUserDesktopSessionGridFromComputerAction = openCurrentUserDesktopSessionGridFromComputerAction;
 
         function getData($defer, params) {
-            var sorting = {
-                ref: null,
-                type: null
-            };
+            var $scope = params.settings().$scope.$parent.$parent,
+                sorting = {
+                    ref: null,
+                    type: null
+                };
+            if ($scope.reinitPage) {
+                params.page($scope.reinitPage);
+                delete $scope.reinitPage;
+            }
             var paramsSorting = params.sorting();
             for (var field in paramsSorting) {
                 sorting.ref = field;
@@ -48,11 +53,7 @@ angular.module('test')
                 getData: getData
             });
         } else {
-            // refresh getData function as the $scope is different from the original one
-            $scope.computerToCurrentUserDesktopSessionGridTableParams.settings({
-                total: 0, // length of data
-                getData: getData
-            });
+            $scope.reinitPage = $scope.computerToCurrentUserDesktopSessionGridTableParams.page(); // fix a bug occurring when backing to the grid from another screen: page is reinitialized to 1 by ng-tables
         }
         locationService.controllerInitialized('Computers', $scope, ['computerToCurrentUserDesktopSessionGridTableParams']);
     }])
