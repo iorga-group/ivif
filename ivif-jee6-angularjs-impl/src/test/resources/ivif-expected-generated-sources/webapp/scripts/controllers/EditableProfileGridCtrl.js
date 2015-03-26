@@ -111,7 +111,7 @@ angular.module('test')
 
         // Init variables
         function getData($defer, params) {
-            var $scope = params.settings().$scope.$parent.$parent,
+            var $scope = params.settings().$scope.$parent,
                 sorting = {
                     ref: null,
                     type: null
