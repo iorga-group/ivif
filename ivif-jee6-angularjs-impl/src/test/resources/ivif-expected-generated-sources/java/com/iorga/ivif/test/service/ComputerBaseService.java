@@ -76,6 +76,9 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
+        } else {
+            // default sorting
+            jpaQuery.orderBy($record.name.asc());
         }
     }
 
@@ -160,6 +163,9 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
+        } else {
+            // default sorting
+            jpaQuery.orderBy($record.name.desc(), $record.user.name.asc());
         }
     }
 

@@ -1,27 +1,24 @@
 package com.iorga.ivif.ja.tag.views;
 
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
+import com.iorga.ivif.ja.tag.views.QueryParser.OrderBy;
 import com.iorga.ivif.ja.tag.views.QueryParser.ParsedQuery;
 import com.iorga.ivif.ja.tag.views.QueryParser.QueryParameter;
 import com.iorga.ivif.tag.AbstractTarget;
 import com.iorga.ivif.tag.bean.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 
 public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
-    private final static Logger LOG = LoggerFactory.getLogger(QueryModel.class);
-
     private final Query element;
     private final EntityTargetFileId baseEntityId;
     private final Object waiter;
     private String queryDslCode;
     private List<QueryParameter> parameters;
+    private List<OrderBy> defaultOrderBy;
 
 
     public QueryModel(String id, Query element, EntityTargetFileId baseEntityId, Object waiter) {
@@ -46,6 +43,7 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
             if (parsedQuery != null) {
                 queryDslCode = parsedQuery.getQueryDslCode();
                 parameters = parsedQuery.getQueryParameters();
+                defaultOrderBy = parsedQuery.getDefaultOrderBy();
             }
 
         }
@@ -65,5 +63,9 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public List<QueryParameter> getParameters() {
         return parameters;
+    }
+
+    public List<OrderBy> getDefaultOrderBy() {
+        return defaultOrderBy;
     }
 }

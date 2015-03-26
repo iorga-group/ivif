@@ -6,6 +6,7 @@
     <grid name="UserGrid" title="Users" entity="User" on-open="$action(openProfileGridFromUser)({profileId: $line.profile.id})">
         <column ref="name"/>
         <column ref="profile.id"/>
+        <query><default-order-by>$record.lastModification</default-order-by></query>
     </grid>
 
     <grid name="EditableUserGrid" title="Users" entity="User" on-open="$action(openProfileGridFromUser)({profileId: $line.profile.id})" editable="true" roles-allowed="admin manager">

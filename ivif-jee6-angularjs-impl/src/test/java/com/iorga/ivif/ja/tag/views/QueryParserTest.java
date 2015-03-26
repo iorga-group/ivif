@@ -1,5 +1,6 @@
 package com.iorga.ivif.ja.tag.views;
 
+import com.iorga.ivif.ja.SortingType;
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.views.QueryParser.ParsedQuery;
 import com.iorga.ivif.tag.bean.Query;
@@ -30,5 +31,18 @@ public class QueryParserTest {
         final ParsedQuery parsedQuery = QueryParser.parse(query, null, this, context);
         assertThat(parsedQuery.getQueryParameters()).hasSize(1);
         assertThat(parsedQuery.getQueryDslCode()).isEqualTo("${util.useClass(\"com.mysema.query.support.Expressions\")}.stringTemplate(\"{0}\", \"test\").eq(parameters.param)");
+    }
+
+    @Test
+    public void orderBysTest() throws Exception {
+        // mock creation
+        final JAGeneratorContext context = mock(JAGeneratorContext.class);
+
+        final Query query = new Query();
+        query.setWhere("$record.field1 = $record.field2");
+        query.setDefaultOrderBy("$record.field3 ASC, $record.field DESC, $record.field4");
+        final ParsedQuery parsedQuery = QueryParser.parse(query, null, this, context);
+        assertThat(parsedQuery.getDefaultOrderBy()).hasSize(3);
+        assertThat(parsedQuery.getDefaultOrderBy().get(2).direction).isEqualTo(SortingType.ASCENDING);
     }
 }

@@ -137,13 +137,15 @@
     <xs:element name="query">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="where" minOccurs="1" maxOccurs="1"/>
+                <xs:element ref="where" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="default-order-by" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="parameter" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="where" type="xs:string"/>
+    <xs:element name="default-order-by" type="xs:string"/>
 
     <xs:element name="parameter">
         <xs:complexType>

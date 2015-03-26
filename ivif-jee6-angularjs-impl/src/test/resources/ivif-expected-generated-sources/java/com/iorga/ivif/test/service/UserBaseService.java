@@ -73,6 +73,9 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
+        } else {
+            // default sorting
+            jpaQuery.orderBy($record.lastModification.asc());
         }
     }
 
@@ -150,6 +153,45 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     protected SearchResults<EditableUserGridSearchResult> listSearchResults(QUser $record, EditableUserGridSearchParam searchParam, JPAQuery jpaQuery) {
         return jpaQuery.listResults(ConstructorExpression.create(EditableUserGridSearchResult.class, $record.firstName, $record.name, $record.status, $record.profile.description, $record.enabled, $record.bigComment, $record.pass, $record.lastModification, $record.profile.id, $record.profile.name, $record.id, $record.version));
+    }
+
+    public SearchResults<ToolbarUserGridSearchResult> search(ToolbarUserGridSearchParam searchParam) {
+        JPAQuery jpaQuery = createJPAQuery();
+        QUser $record = new QUser("user");
+        jpaQuery.from($record);
+        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
+        applyLimitAndOffset(searchParam, jpaQuery);
+        return listSearchResults($record, searchParam, jpaQuery);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(QUser $record, ToolbarUserGridSearchParam searchParam, JPAQuery jpaQuery) {
+        // Applying filter
+        ToolbarUserGridSearchFilter filter = searchParam.filter;
+        if (filter.name != null) {
+            jpaQuery.where($record.name.containsIgnoreCase(filter.name));
+        }
+        if (filter.firstName != null) {
+            jpaQuery.where($record.firstName.containsIgnoreCase(filter.firstName));
+        }
+        // Applying action filters
+        // Applying sorting
+        Sorting sorting = searchParam.sorting;
+        ComparableExpressionBase sortingExpression = null;
+        if ("name".equals(sorting.ref)) {
+            sortingExpression = $record.name;
+        }
+        if (sortingExpression != null) {
+            jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
+        }
+    }
+
+    protected void applyLimitAndOffset(ToolbarUserGridSearchParam searchParam, JPAQuery jpaQuery) {
+        jpaQuery.limit(searchParam.limit);
+        jpaQuery.offset(searchParam.offset);
+    }
+
+    protected SearchResults<ToolbarUserGridSearchResult> listSearchResults(QUser $record, ToolbarUserGridSearchParam searchParam, JPAQuery jpaQuery) {
+        return jpaQuery.listResults(ConstructorExpression.create(ToolbarUserGridSearchResult.class, $record.name, $record.profile.name, $record.profile.id, $record.id));
     }
 
     public SearchResults<SpecificSearchUserGridSearchResult> search(SpecificSearchUserGridSearchParam searchParam) {
@@ -230,45 +272,6 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     protected SearchResults<SelectEditableAndButtonUserGridSearchResult> listSearchResults(QUser $record, SelectEditableAndButtonUserGridSearchParam searchParam, JPAQuery jpaQuery) {
         return jpaQuery.listResults(ConstructorExpression.create(SelectEditableAndButtonUserGridSearchResult.class, $record.name, $record.id, $record.firstName, $record.profile.name, $record.version));
-    }
-
-    public SearchResults<ToolbarUserGridSearchResult> search(ToolbarUserGridSearchParam searchParam) {
-        JPAQuery jpaQuery = createJPAQuery();
-        QUser $record = new QUser("user");
-        jpaQuery.from($record);
-        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
-        applyLimitAndOffset(searchParam, jpaQuery);
-        return listSearchResults($record, searchParam, jpaQuery);
-    }
-
-    protected void applyQueryAndFiltersAndSorting(QUser $record, ToolbarUserGridSearchParam searchParam, JPAQuery jpaQuery) {
-        // Applying filter
-        ToolbarUserGridSearchFilter filter = searchParam.filter;
-        if (filter.name != null) {
-            jpaQuery.where($record.name.containsIgnoreCase(filter.name));
-        }
-        if (filter.firstName != null) {
-            jpaQuery.where($record.firstName.containsIgnoreCase(filter.firstName));
-        }
-        // Applying action filters
-        // Applying sorting
-        Sorting sorting = searchParam.sorting;
-        ComparableExpressionBase sortingExpression = null;
-        if ("name".equals(sorting.ref)) {
-            sortingExpression = $record.name;
-        }
-        if (sortingExpression != null) {
-            jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
-        }
-    }
-
-    protected void applyLimitAndOffset(ToolbarUserGridSearchParam searchParam, JPAQuery jpaQuery) {
-        jpaQuery.limit(searchParam.limit);
-        jpaQuery.offset(searchParam.offset);
-    }
-
-    protected SearchResults<ToolbarUserGridSearchResult> listSearchResults(QUser $record, ToolbarUserGridSearchParam searchParam, JPAQuery jpaQuery) {
-        return jpaQuery.listResults(ConstructorExpression.create(ToolbarUserGridSearchResult.class, $record.name, $record.profile.name, $record.profile.id, $record.id));
     }
 
 

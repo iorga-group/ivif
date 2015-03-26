@@ -8,6 +8,7 @@ import com.iorga.ivif.ja.tag.configurations.JAConfigurationPreparedWaiter;
 import com.iorga.ivif.ja.tag.entities.*;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 import com.iorga.ivif.ja.tag.entities.EnumSelectionTargetFile.EnumSelectionTargetFileId;
+import com.iorga.ivif.ja.tag.views.QueryParser.OrderBy;
 import com.iorga.ivif.tag.bean.*;
 import com.iorga.ivif.util.TargetFileUtils;
 import com.iorga.ivif.tag.AbstractTarget;
@@ -95,6 +96,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     protected boolean editable;
     protected String editableIf;
+    protected boolean singleDisplayedOrderByColumn;
 
     public static class GridColumnFilterParam {
         private String name;
@@ -495,6 +497,20 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                         return new QueryModel(queryModelId, element.getQuery(), entityTargetFileId, GridModel.this);
                     }
                 });
+                context.waitForEvent(new TargetPreparedWaiter<QueryModel, String, JAGeneratorContext>(QueryModel.class, queryModelId, GridModel.this) {
+                    @Override
+                    protected void onTargetPrepared(QueryModel queryModel) throws Exception {
+                        // check default order by is single and in displayed columns
+                        final List<OrderBy> defaultOrderBy = queryModel.getDefaultOrderBy();
+                        singleDisplayedOrderByColumn = false;
+                        if (defaultOrderBy != null && defaultOrderBy.size() == 1) {
+                            final GridColumn gridColumn = gridColumnsByRef.get(defaultOrderBy.get(0).getRef());
+                            if (gridColumn != null && gridColumn instanceof DisplayedGridColumn) {
+                                singleDisplayedOrderByColumn = true;
+                            }
+                        }
+                    }
+                });
             }
         });
     }
@@ -874,5 +890,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public String getEditableIf() {
         return editableIf;
+    }
+
+    public boolean isSingleDisplayedOrderByColumn() {
+        return singleDisplayedOrderByColumn;
     }
 }

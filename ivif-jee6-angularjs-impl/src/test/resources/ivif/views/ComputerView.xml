@@ -8,6 +8,7 @@
         <column ref="user.name"/>
         <query>
             <where>$record.defaultProfile IS NULL</where>
+            <default-order-by>$record.name</default-order-by>
         </query>
     </grid>
 
@@ -21,6 +22,7 @@
         <column ref="name"/>
         <query>
             <where>$record.user.id = :currentUserId</where>
+            <default-order-by>$record.name DESC, $record.user.name</default-order-by>
             <parameter name="currentUserId" value="$inject(com.iorga.ivif.ja.test.ConnectedUser).getUserId()"/>
         </query>
     </grid>

@@ -199,7 +199,9 @@ angular.module('${model.configuration.angularModuleName}')
             $scope.${tableParamsVariableName} = new ngTableParams({
                 page: 1,
                 count: 10,
-                filter: locationUtils.fromSearchToObject($location.search())
+                filter: locationUtils.fromSearchToObject($location.search())<#if grid.singleDisplayedOrderByColumn>,
+    <#assign defaultOrderBy=grid.queryModel.defaultOrderBy[0]>
+                sorting: {'${defaultOrderBy.refVariableName}': '<#if defaultOrderBy.direction.toString() == 'ASCENDING'>asc<#else>desc</#if>'}</#if>
             }, {
                 total: 0, // length of data
                 getData: getData

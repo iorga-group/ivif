@@ -47,7 +47,8 @@ angular.module('test')
             $scope.computerGridTableParams = new ngTableParams({
                 page: 1,
                 count: 10,
-                filter: locationUtils.fromSearchToObject($location.search())
+                filter: locationUtils.fromSearchToObject($location.search()),
+                sorting: {'name': 'asc'}
             }, {
                 total: 0, // length of data
                 getData: getData

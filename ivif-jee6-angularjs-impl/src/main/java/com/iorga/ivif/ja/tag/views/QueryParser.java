@@ -3,6 +3,7 @@ package com.iorga.ivif.ja.tag.views;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
+import com.iorga.ivif.ja.SortingType;
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.ja.tag.entities.EntityAttribute;
 import com.iorga.ivif.ja.tag.entities.EntityAttributePreparedWaiter;
@@ -11,16 +12,19 @@ import com.iorga.ivif.tag.bean.Parameter;
 import com.iorga.ivif.tag.bean.Query;
 import com.mysema.query.support.Expressions;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.persistence.expressions.ExpressionOperator;
 import org.eclipse.persistence.internal.jpa.parsing.*;
 import org.eclipse.persistence.internal.jpa.parsing.jpql.antlr.JPQLParser;
 import org.eclipse.persistence.internal.jpa.parsing.jpql.antlr.JPQLParserBuilder;
-import org.eclipse.persistence.internal.libraries.antlr.runtime.RecognitionException;
 
 import java.text.DateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
 public class QueryParser {
+
+    public static final String RECORD_NAME = "$record";
 
     public static class QueryParameter {
         protected String name;
@@ -45,13 +49,43 @@ public class QueryParser {
         }
     }
 
+    public static class OrderBy {
+        protected String ref;
+        protected String refVariableName;
+        protected SortingType direction;
+
+        public OrderBy(OrderByItemNode orderByItemNode) {
+            final String originalRef = ((DotNode) orderByItemNode.getOrderByItem()).getAsString();
+            if (!originalRef.startsWith(RECORD_NAME)) {
+                throw new IllegalArgumentException("Default order by must start with '"+RECORD_NAME+"'. Got '"+originalRef+"'");
+            }
+            ref = StringUtils.substringAfter(originalRef, ".");
+            refVariableName = ref.replaceAll("\\.", "_");
+            direction = orderByItemNode.getDirection().getSortDirection() == ExpressionOperator.Ascending ? SortingType.ASCENDING : SortingType.DESCENDING;
+        }
+
+        public SortingType getDirection() {
+            return direction;
+        }
+
+        public String getRef() {
+            return ref;
+        }
+
+        public String getRefVariableName() {
+            return refVariableName;
+        }
+    }
+
     public static class ParsedQuery {
+        private final List<OrderBy> defaultOrderBy;
         protected String queryDslCode;
         protected List<QueryParameter> queryParameters;
 
-        public ParsedQuery(String queryDslCode, List<QueryParameter> queryParameters) {
+        public ParsedQuery(String queryDslCode, List<QueryParameter> queryParameters, List<OrderBy> defaultOrderBy) {
             this.queryDslCode = queryDslCode;
             this.queryParameters = queryParameters;
+            this.defaultOrderBy = defaultOrderBy;
         }
 
         public String getQueryDslCode() {
@@ -60,6 +94,10 @@ public class QueryParser {
 
         public List<QueryParameter> getQueryParameters() {
             return queryParameters;
+        }
+
+        public List<OrderBy> getDefaultOrderBy() {
+            return defaultOrderBy;
         }
     }
 
@@ -337,35 +375,56 @@ public class QueryParser {
                 parametersValueByName.put(parameterName, JavaParser.parseExpression(parameter.getValue()));
             }
 
-            // Now visit the query
-            final JPQLParser parser = JPQLParserBuilder.buildParser(element.getWhere());
-            final String queryInfo = parser.getQueryInfo();
-            final NodeFactoryImpl factory = new NodeFactoryImpl(queryInfo);
-            parser.setNodeFactory(factory);
-            //final JPQLParseTree tree = parser.parseExpression();
-            final Node tree = (Node) parser.conditionalExpression();
+            // Now visit the where query
             final NodeVisitor nodeVisitor = new NodeVisitor(parametersValueByName);
-            nodeVisitor.visit(tree);
+            final String where = element.getWhere();
+            if (StringUtils.isNotBlank(where)) {
+                final JPQLParser parser = createJPQLParser(where);
+                final Node tree = (Node) parser.conditionalExpression();
+                nodeVisitor.visit(tree);
 
-            // And finally, resolve the parameters specified without value and with identifier paths
-            for (Entry<String, String> identifierPathForParameterName : nodeVisitor.identifierPathToResolveByParameterName.entries()) {
-                final String parameterName = identifierPathForParameterName.getKey();
-                final String identifierPath = identifierPathForParameterName.getValue();
-                final QueryParameter queryParameter = nodeVisitor.queryParametersByParameterName.get(parameterName);
-                Deque<String> identifierPathDeque = new LinkedList<>(Arrays.asList(identifierPath.split("\\.")));
-                final String firstPath = identifierPathDeque.removeFirst();
-                if (!"$record".equals(firstPath)) {
-                    // TODO handle another root, if there are declared joins
-                    throw new IllegalStateException("An identifier must always begin with '$record'. Found " + identifierPath);
-                } else {
-                    resolveParameterClassName(queryParameter, identifierPathDeque, baseEntityId, context, waiter);
+                // And finally, resolve the parameters specified without value and with identifier paths
+                for (Entry<String, String> identifierPathForParameterName : nodeVisitor.identifierPathToResolveByParameterName.entries()) {
+                    final String parameterName = identifierPathForParameterName.getKey();
+                    final String identifierPath = identifierPathForParameterName.getValue();
+                    final QueryParameter queryParameter = nodeVisitor.queryParametersByParameterName.get(parameterName);
+                    Deque<String> identifierPathDeque = new LinkedList<>(Arrays.asList(identifierPath.split("\\.")));
+                    final String firstPath = identifierPathDeque.removeFirst();
+                    if (!"$record".equals(firstPath)) {
+                        // TODO handle another root, if there are declared joins
+                        throw new IllegalStateException("An identifier must always begin with '$record'. Found " + identifierPath);
+                    } else {
+                        resolveParameterClassName(queryParameter, identifierPathDeque, baseEntityId, context, waiter);
+                    }
                 }
             }
 
-            return new ParsedQuery(nodeVisitor.queryDslCode.toString(), new ArrayList<>(nodeVisitor.queryParametersByParameterName.values()));
+            // Parse the default order by
+            final String defaultOrderByStr = element.getDefaultOrderBy();
+            final ArrayList<OrderBy> defaultOrderBy;
+            if (StringUtils.isNotBlank(defaultOrderByStr)) {
+                final JPQLParser parser = createJPQLParser("ORDER BY "+defaultOrderByStr);
+                final OrderByNode orderByNode = (OrderByNode) parser.orderByClause();
+                defaultOrderBy = new ArrayList<>(orderByNode.getOrderByItems().size());
+                for (Object orderByItemNode : orderByNode.getOrderByItems()) {
+                    defaultOrderBy.add(new OrderBy((OrderByItemNode) orderByItemNode));
+                }
+            } else {
+                defaultOrderBy = null;
+            }
+
+            return new ParsedQuery(nodeVisitor.queryDslCode.toString(), new ArrayList<>(nodeVisitor.queryParametersByParameterName.values()), defaultOrderBy);
         } else {
             return null;
         }
+    }
+
+    private static JPQLParser createJPQLParser(String queryText) {
+        final JPQLParser parser = JPQLParserBuilder.buildParser(queryText);
+        final String queryInfo = parser.getQueryInfo();
+        final NodeFactoryImpl factory = new NodeFactoryImpl(queryInfo);
+        parser.setNodeFactory(factory);
+        return parser;
     }
 
     private static void resolveParameterClassName(final QueryParameter parameter, final Deque<String> identifierPath, final EntityTargetFileId entityTargetFileId, final JAGeneratorContext context, final Object waiter) throws Exception {
@@ -379,7 +438,7 @@ public class QueryParser {
                     if (parameter.className != null) {
                         // Check compatibility if already exists
                         if (!entityAttributeType.equals(parameter.className)) {
-                            throw new IllegalStateException("Incompatible types encountered for parameter '" + parameter.getName() + "': "+parameter.className+" vs "+entityAttributeType);
+                            throw new IllegalStateException("Incompatible types encountered for parameter '" + parameter.getName() + "': " + parameter.className + " vs " + entityAttributeType);
                         }
                     } else {
                         parameter.className = entityAttributeType;
@@ -390,36 +449,5 @@ public class QueryParser {
                 }
             }
         });
-    }
-
-    public static void main(String[] args) throws RecognitionException {
-
-        /*
-        final JPAParser parser = new JPAParser(new CommonTokenStream(new JPALexer(new ANTLRInputStream("$record.test = :param AND $record.test2 IN (:param2)"))));
-        final JPAParser.Conditional_expressionContext tree = parser.conditional_expression();
-
-        tree.inspect(parser);
-        */
-
-
-
-        //final JPQLParser parser = JPQLParserBuilder.buildParser("select $record.test from Record $record where $record.test = :param AND $record.test2 IN (:param2)");
-        final JPQLParser parser = JPQLParserBuilder.buildParser("$record.test = :param AND $record.test2.field IN (:param2, TEST) OR $record.test3 = 'label' OR $record.test4 > 5 AND $record.test4 IS NULL AND $record.test5 IS NOT NULL");
-        final String queryInfo = parser.getQueryInfo();
-        final NodeFactoryImpl factory = new NodeFactoryImpl(queryInfo);
-        parser.setNodeFactory(factory);
-        //final JPQLParseTree tree = parser.parseExpression();
-        final Node tree = (Node) parser.conditionalExpression();
-
-        //final org.eclipse.persistence.internal.jpa.parsing.jpql.JPQLParser parser = new JPQLParserFactory().buildParserFor("SELECT * FROM Record $record WHERE $record.test = :param AND $record.test2 IN (:param2)");
-        //final JPQLParseTree tree = parser.parseExpression();
-
-        /*
-        new AnonymousExpressionVisitor() {
-
-        }.visit(tree);
-        */
-
-        //System.out.println(tree);
     }
 }

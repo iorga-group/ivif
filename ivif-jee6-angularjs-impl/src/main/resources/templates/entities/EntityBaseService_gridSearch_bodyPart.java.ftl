@@ -1,5 +1,6 @@
 <#include "../utils/rolesAllowedMacro.java.ftl"/>
 <#assign grid=model.grid>
+<#assign queryModel=grid.queryModel>
 <@rolesAllowed rolesAllowed=grid.element.rolesAllowed util=util nbTabs=1/>
     public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass(model.searchParamClassName)} searchParam) {
         ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery = createJPAQuery();
@@ -11,9 +12,9 @@
     }
 
     protected void applyQueryAndFiltersAndSorting(${util.useClass(baseModel.qEntityClassName)} $record, ${util.useClass(model.searchParamClassName)} searchParam, ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery) {
-<#if grid.queryModel.queryDslCode?exists>
+<#if queryModel.queryDslCode?has_content>
         // Applying static query
-        jpaQuery.where(<@grid.queryModel.queryDslCode?interpret/>);
+        jpaQuery.where(<@queryModel.queryDslCode?interpret/>);
 </#if>
         // Applying filter
         ${util.useClass(model.searchFilterClassName)} filter = searchParam.filter;
@@ -56,7 +57,10 @@
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(${util.useClass("com.iorga.ivif.ja.SortingType")}.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
-        }
+        }<#if (queryModel.defaultOrderBy)!?has_content> else {
+            // default sorting
+            jpaQuery.orderBy(<#list queryModel.defaultOrderBy as orderBy>$record.${orderBy.ref}.<#if orderBy.direction.toString() == 'ASCENDING'>asc<#else>desc</#if>()<#if orderBy_has_next>, </#if></#list>);<#-- TODO take into account default-order-by specified in openViewActions -->
+        }</#if>
     </#if>
 </#list>
     }
