@@ -4,11 +4,14 @@ import com.google.common.base.Throwables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ejb.EJBException;
 import javax.inject.Inject;
+import javax.persistence.OptimisticLockException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Provider
@@ -22,6 +25,70 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Inject
     private HeaderUtil headerUtil;
+
+    @Override
+    public Response toResponse(Throwable throwable) {
+        String uuid = UUID.randomUUID().toString();
+
+        swallowClientMessages(throwable, uuid);
+
+        final Response response = selectHandleMethod(throwable, uuid);
+        if (response == null) {
+            return handleThrowable(throwable, uuid);
+        } else {
+            return response;
+        }
+    }
+
+    private void swallowClientMessages(Throwable exception, String uuid) {
+
+        final List<Message> messages = clientMessages.getMessages();
+        if (!messages.isEmpty()) {
+            final String endMessage = " for exception #" + uuid + " (" + exception.getClass().getName() + ": " + exception.getMessage() + ").";
+            try {
+                LOG.warn("Swallowing client messages " + headerUtil.toJsonString(messages) + endMessage);
+            } catch (IOException e) {
+                LOG.warn("Swallowing client messages " + endMessage);
+                LOG.error("Problem while rendering client messages to json string", e);
+            }
+        }
+    }
+
+    private Response selectHandleMethod(Throwable throwable, String uuid) {
+        if (throwable instanceof EJBException) {
+            return selectHandleMethod(throwable.getCause(), uuid);
+        } else if (throwable instanceof FunctionalException) {
+            return handleFunctionalException((FunctionalException) throwable, uuid);
+        } else if (throwable instanceof OptimisticLockException) {
+            return handleOptimisticLockException((OptimisticLockException)throwable, uuid);
+        } else {
+            return null;
+        }
+    }
+
+    private Response handleFunctionalException(FunctionalException exception, String uuid) {
+        String base64ExceptionTemplate;
+        try {
+            base64ExceptionTemplate = headerUtil.toBase64JsonString(exception.getFunctionalMessage());
+        } catch (IOException e) {
+            LOG.error("Problem while rendering the exception to base64 (#" + uuid + ")", e);
+            base64ExceptionTemplate = "";
+        }
+        return Response.status(Response.Status.BAD_REQUEST)
+                .header(MessageUtils.MESSAGES_HEADER, base64ExceptionTemplate)
+                .build();
+    }
+
+    private Response handleOptimisticLockException(OptimisticLockException exception, String uuid) {
+        final Object entity = exception.getEntity();
+        final String message;
+        if (entity instanceof IEntity) {
+            message = ((IEntity) entity).displayName() + " has been saved by another user since you have clicked on 'Edit' button. Please click on 'Cancel' in order to refresh all the data (be careful, your current modifications will be lost).";
+        } else {
+            message = exception.getMessage();
+        }
+        return handleFunctionalException(new FunctionalException(message), uuid);
+    }
 
     private static class ExceptionTemplate {
         private final Throwable exception;
@@ -44,28 +111,19 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
             return uuid;
         }
     }
-    @Override
-    public Response toResponse(Throwable exception) {
-        String uuid = UUID.randomUUID().toString();
-
-        try {
-            LOG.error("Catching global exception #" + uuid + ", swallowing client messages " + headerUtil.toJsonString(clientMessages.getMessages()), exception);
-        } catch (IOException e) {
-            LOG.error("Catching global exception #" + uuid + ", swallowing client messages", exception);
-            LOG.error("Problem while rendering client messages to json string", e);
-        }
-
-        final ExceptionTemplate exceptionTemplate = new ExceptionTemplate(exception, uuid);
+    private Response handleThrowable(Throwable throwable, String uuid) {
+        LOG.error("Handling unexpected throwable #" + uuid, throwable);
+        final ExceptionTemplate exceptionTemplate = new ExceptionTemplate(throwable, uuid);
         String base64ExceptionTemplate;
         try {
             base64ExceptionTemplate = headerUtil.toBase64JsonString(exceptionTemplate);
         } catch (IOException e) {
-            LOG.error("Problem while rendering the exception to base64", e);
+            LOG.error("Problem while rendering the throwable to base64", e);
             base64ExceptionTemplate = "";
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .header(HEADER_PREFIX, base64ExceptionTemplate)
-                .entity(Throwables.getStackTraceAsString(exception))
+                .entity(Throwables.getStackTraceAsString(throwable))
                 .build();
     }
 }
