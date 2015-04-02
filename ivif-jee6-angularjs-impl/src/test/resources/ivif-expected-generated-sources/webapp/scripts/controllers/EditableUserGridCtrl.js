@@ -115,12 +115,13 @@ angular.module('test')
             $scope.editableUserGridTableParams.reload();
             locationService.removeDirtyCheck($scope.dirtyCheckKey);
         };
+        $scope.getCurrentScope = function() { return $scope; };
 
         // Init variables
         $scope.openProfileGridFromUserAction = openProfileGridFromUserAction;
 
         function getData($defer, params) {
-            var $scope = params.settings().$scope.$parent,
+            var $scope = params.settings().$scope.getCurrentScope(), // get the current controller scope
                 sorting = {
                     ref: null,
                     type: null

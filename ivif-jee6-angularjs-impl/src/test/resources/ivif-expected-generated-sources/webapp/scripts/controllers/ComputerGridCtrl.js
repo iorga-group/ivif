@@ -12,12 +12,13 @@ angular.module('test')
     .controller('ComputerGridCtrl', ['$scope', 'ngTableParams', '$timeout', '$http', 'locationService', 'openUserGridFromComputerAction', '$location', 'locationUtils', function($scope, ngTableParams, $timeout, $http, locationService, openUserGridFromComputerAction, $location, locationUtils) {
         // Utils
         // Declare actions
+        $scope.getCurrentScope = function() { return $scope; };
 
         // Init variables
         $scope.openUserGridFromComputerAction = openUserGridFromComputerAction;
 
         function getData($defer, params) {
-            var $scope = params.settings().$scope.$parent,
+            var $scope = params.settings().$scope.getCurrentScope(), // get the current controller scope
                 sorting = {
                     ref: null,
                     type: null

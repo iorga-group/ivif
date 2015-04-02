@@ -118,6 +118,7 @@ angular.module('test')
             $scope.selectEditableAndButtonUserGridTableParams.reload();
             locationService.removeDirtyCheck($scope.dirtyCheckKey);
         };
+        $scope.getCurrentScope = function() { return $scope; };
 
         // Init variables
         $scope.aService = aService;
@@ -126,7 +127,7 @@ angular.module('test')
         $scope.myOtherService = myOtherService;
 
         function getData($defer, params) {
-            var $scope = params.settings().$scope.$parent,
+            var $scope = params.settings().$scope.getCurrentScope(), // get the current controller scope
                 sorting = {
                     ref: null,
                     type: null

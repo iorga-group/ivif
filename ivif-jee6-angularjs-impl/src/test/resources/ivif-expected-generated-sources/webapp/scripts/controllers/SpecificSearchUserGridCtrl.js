@@ -24,10 +24,11 @@ angular.module('test')
             $scope.selectedLineId = $scope.getIdForLine(selectedLine);
             selectedLine.$selected = true;
         };
+        $scope.getCurrentScope = function() { return $scope; };
 
         // Init variables
         function getData($defer, params) {
-            var $scope = params.settings().$scope.$parent,
+            var $scope = params.settings().$scope.getCurrentScope(), // get the current controller scope
                 sorting = {
                     ref: null,
                     type: null

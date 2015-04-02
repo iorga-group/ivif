@@ -127,6 +127,7 @@ angular.module('${model.configuration.angularModuleName}')
             locationService.removeDirtyCheck($scope.dirtyCheckKey);
         };
 </#if>
+        $scope.getCurrentScope = function() { return $scope; };
 
         // Init variables
 <#list model.injections as injection>
@@ -136,7 +137,7 @@ angular.module('${model.configuration.angularModuleName}')
     </#if>
 </#list>
         function getData($defer, params) {
-            var $scope = params.settings().$scope.$parent,
+            var $scope = params.settings().$scope.getCurrentScope(), // get the current controller scope
                 sorting = {
                     ref: null,
                     type: null
