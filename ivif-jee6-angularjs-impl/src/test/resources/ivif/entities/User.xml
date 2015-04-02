@@ -9,7 +9,9 @@
         </integer>
         <string name="name" column="LAST_NAME" required="true" display-name="true"/>
         <string name="firstName" column="FIRST_NAME" required="true" display-name="true"/>
-        <many-to-one name="profile" column="PROFILE_ID" ref="Profile"/>
+        <many-to-one name="profile" column="PROFILE_ID" ref="Profile">
+            <join-column column="PROFILE_ID" ref-column="id"/>
+        </many-to-one>
         <long name="version" version="true"/>
         <string name="comment" column="&quot;COMMENT&quot;"/>
         <enum name="status" ref="UserStatusType"/>

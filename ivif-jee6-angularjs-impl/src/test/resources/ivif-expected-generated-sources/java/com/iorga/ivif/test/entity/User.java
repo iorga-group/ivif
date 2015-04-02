@@ -1,6 +1,5 @@
 package com.iorga.ivif.test.entity;
 
-import com.iorga.ivif.ja.BooleanUserType;
 import com.iorga.ivif.ja.IEntity;
 import com.iorga.ivif.test.Versionable;
 import com.iorga.ivif.test.entity.select.UserPassType;
@@ -21,17 +20,22 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "TEST_USER")
 public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
+
+    public static String ENABLED_TRUE_VALUE = "OK";
+    public static String ENABLED_FALSE_VALUE = "KO";
 
     @Id
     @NotNull
@@ -48,7 +52,9 @@ public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
     private String firstName;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "PROFILE_ID")
+    @JoinColumns({
+        @JoinColumn(name = "PROFILE_ID", referencedColumnName="id", insertable = false, updatable = false)
+    })
     private Profile profile;
 
     @Version
@@ -60,12 +66,11 @@ public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
     @Type(type = "com.iorga.ivif.test.entity.select.UserStatusType$UserType")
     private UserStatusType status;
 
-    public static class EnabledUserType extends BooleanUserType<String> {
-        public EnabledUserType() {
-            super("OK", "KO");
-        }
-    }
-    @Type(type = "com.iorga.ivif.test.entity.User$EnabledUserType")
+    @Column(name = "enabled")
+    private String enabled_value;
+
+    @Column(name = "enabled", insertable = false, updatable = false)
+    @Formula("(CASE WHEN enabled = 'OK' THEN 1 WHEN enabled = 'KO' THEN 0 ELSE NULL END)")
     private Boolean enabled;
 
     @Transient
@@ -155,12 +160,28 @@ public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
         this.status = status;
     }
 
+    public String getEnabled_value() {
+        return enabled_value;
+    }
+
+    public void setEnabled_value(String enabled_value) {
+        this.enabled_value = enabled_value;
+    }
+
     public Boolean getEnabled() {
         return enabled;
     }
 
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
+        // set the original value
+        if (Boolean.TRUE.equals(enabled)) {
+            setEnabled_value(ENABLED_TRUE_VALUE);
+        } else if (Boolean.FALSE.equals(enabled)) {
+            setEnabled_value(ENABLED_FALSE_VALUE);
+        } else {
+            setEnabled_value(null);
+        }
     }
 
     public String getCommentTemp() {

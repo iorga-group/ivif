@@ -17,7 +17,7 @@ public enum ${selection.name} implements ${util.useClass("com.iorga.ivif.ja.Valu
 </#list>
     }
 
-    public static class UserType extends ${util.useClass(selectionModel.userTypeSuperClassName)}<${selection.name}> {
+    public static class UserType extends ${util.useClass(selectionModel.userTypeSuperClassName)}<${selection.name}, ${util.useClass(selectionModel.fromTypeClassName)}> {
 
         @${util.useClass("java.lang.Override")}
         protected ${selection.name} getByValue(${util.useClass(selectionModel.fromTypeClassName)} value) {

@@ -59,7 +59,18 @@ public abstract class SwitchTypeUserType<T, J> implements UserType {
 
     @Override
     public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object owner) throws HibernateException, SQLException {
-        J value = rs.getObject(names[0], getJdbcClass());
+        final Class<J> jdbcClass = getJdbcClass();
+        J value;
+        final String name = names[0];
+        if (String.class.isAssignableFrom(jdbcClass)) {
+            value = (J) rs.getString(name);
+        } else if (Character.class.isAssignableFrom(jdbcClass)) {
+            value = (J) new Character(rs.getString(name).charAt(0));
+        } else if (Integer.class.isAssignableFrom(jdbcClass)) {
+            value = (J) new Integer(rs.getInt(name));
+        } else {
+            throw new UnsupportedOperationException("Can't handle " + jdbcClass.toString() + " yet.");
+        }
         if (rs.wasNull()) {
             return null;
         }

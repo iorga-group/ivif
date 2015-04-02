@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import java.lang.Boolean;
 import java.lang.String;
 import java.util.*;
@@ -99,6 +100,55 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
                 // This is a simple attribute, let's set its type and declare as resolved
                 String attributeType = attributeElement.getName().getLocalPart();
                 entityAttribute.setType(ATTRIBUTE_TYPES_TO_CLASS.get(attributeType).getName());
+                if (attribute instanceof com.iorga.ivif.tag.bean.Boolean) {
+                    com.iorga.ivif.tag.bean.Boolean booleanAttribute = (com.iorga.ivif.tag.bean.Boolean) attribute;
+                    String fromType = booleanAttribute.getFromType();
+                    if (StringUtils.isNotBlank(fromType)) {
+                        // this is a <boolean> attribute define with a "fromType", we must add a convert logic
+                        Class<?> fromTypeClass = ATTRIBUTE_TYPES_TO_CLASS.get(fromType);
+                        String fromTypeClassName = fromTypeClass.getName();
+                        entityAttribute.setFromType(fromTypeClassName);
+                        // create an attribute named "<attributeName>_value" which will be mapped to the real value
+                        Class<? extends AttributeType> valueAttributeClass = getAttributeTypeClassFromElementType(fromType);
+                        AttributeType valueAttribute = valueAttributeClass.newInstance();
+                        // copy fields
+                        String attributeColumn = attribute.getColumn();
+                        if (StringUtils.isBlank(attributeColumn)) {
+                            attributeColumn = attribute.getName();
+                        }
+                        valueAttribute.setColumn(attributeColumn);
+                        attribute.setColumn(null);
+                        valueAttribute.setRequired(attribute.isRequired());
+                        attribute.setRequired(false);
+                        valueAttribute.setName(attributeName + "_value");
+                        valueAttribute.setInsertable(attribute.isInsertable());
+                        valueAttribute.setUpdatable(attribute.isUpdatable());
+                        EntityAttribute valueEntityAttribute = new EntityAttribute(new JAXBElement(new QName(null, fromType), valueAttributeClass, valueAttribute), this);
+                        valueEntityAttribute.setType(fromTypeClassName);
+                        addEntityAttribute(valueEntityAttribute, context);
+
+                        // add a static field
+                        JavaStaticField trueValueStaticField = JavaStaticField.createFromVariableName(attributeName + "TrueValue", fromTypeClassName, booleanAttribute.getTrueValue());
+                        staticFields.add(trueValueStaticField);
+                        JavaStaticField falseValueStaticField = JavaStaticField.createFromVariableName(attributeName + "FalseValue", fromTypeClassName, booleanAttribute.getFalseValue());
+                        staticFields.add(falseValueStaticField);
+                        entityAttribute.setTrueValueStaticField(trueValueStaticField);
+                        entityAttribute.setFalseValueStaticField(falseValueStaticField);
+                        // define the formula
+                        boolean stringOrChar = String.class.isAssignableFrom(fromTypeClass) || Character.class.isAssignableFrom(fromTypeClass);
+                        String quote = (stringOrChar ? "'" : "");
+                        if (attributeColumn == null) {
+                            attributeColumn = attributeName;
+                        }
+                        attribute.setFormula("CASE " +
+                                "WHEN " + attributeColumn + " = " + quote + booleanAttribute.getTrueValue() + quote + " THEN 1 " +
+                                "WHEN " + attributeColumn + " = " + quote + booleanAttribute.getFalseValue() + quote + " THEN 0 " +
+                                "ELSE NULL END");
+                        // original attribute shouldn't be insertable nor updatable
+                        attribute.setUpdatable(false);
+                        attribute.setInsertable(false);
+                    }
+                }
             }
             addEntityAttribute(entityAttribute, context);
             // group id attributes

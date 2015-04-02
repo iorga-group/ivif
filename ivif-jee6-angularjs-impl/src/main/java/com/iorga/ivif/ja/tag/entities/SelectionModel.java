@@ -1,7 +1,6 @@
 package com.iorga.ivif.ja.tag.entities;
 
-import com.iorga.ivif.ja.AbstractIntegerEnumUserType;
-import com.iorga.ivif.ja.AbstractStringEnumUserType;
+import com.iorga.ivif.ja.EnumUserType;
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
 import com.iorga.ivif.tag.AbstractTarget;
 import com.iorga.ivif.tag.bean.Option;
@@ -28,11 +27,10 @@ public class SelectionModel extends AbstractTarget<String, JAGeneratorContext> {
         final String fromType = element.getFromType();
         if ("string".equals(fromType)) {
             fromTypeClassName = String.class.getName();
-            userTypeSuperClassName = AbstractStringEnumUserType.class.getName();
+            userTypeSuperClassName = EnumUserType.class.getName();
         } else if ("integer".equals(fromType)) {
             fromTypeClassName = Integer.class.getName();
-            userTypeSuperClassName = AbstractIntegerEnumUserType.class.getName();
-
+            userTypeSuperClassName = EnumUserType.class.getName();
         } else {
             throw new NotImplementedException("Not yet supported: from-type=" + fromType);
         }

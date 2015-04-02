@@ -21,29 +21,27 @@ public class ${entity.name} implements ${util.useClass("java.io.Serializable", f
 </#if>
 <#list model.attributes as attribute>
     <#assign element=attribute.element.value>
-    <#if element.fromType?has_content>
-    <#-- TODO support other "from-type" types than String or Character -->
-    public static class ${attribute.capitalizedName}UserType extends ${util.useClass("com.iorga.ivif.ja.BooleanUserType")}<${util.useClass("java.lang.String")}> {
-        public ${attribute.capitalizedName}UserType() {
-            super("${element.trueValue}", "${element.falseValue}");
-        }
-    }
-    @${util.useClass("org.hibernate.annotations.Type")}(type = "${model.id.className}$${attribute.capitalizedName}UserType")
-    </#if>
     <#if attribute.manyToOne>
     @${util.useClass("javax.persistence.ManyToOne")}(fetch = ${util.useClass("javax.persistence.FetchType")}.LAZY, cascade = {${util.useClass("javax.persistence.CascadeType")}.PERSIST, ${util.useClass("javax.persistence.CascadeType")}.MERGE})
     </#if>
     <#if element.id>
     @${util.useClass("javax.persistence.Id")}
     </#if>
-    <#if element.column?has_content>
+    <#assign hasColumn=element.column?has_content>
+    <#if hasColumn>
+        <#assign columnName=element.column>
+    <#else>
+        <#assign columnName=element.name>
+    </#if>
+    <#assign hasJoinColumns=element.joinColumn?size &gt; 0>
+    <#if !hasJoinColumns && (hasColumn || !element.insertable || !element.updatable)>
         <#if attribute.manyToOne>
-    @${util.useClass("javax.persistence.JoinColumn")}(name = "<@escapeJavaString str=element.column/>"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
+    @${util.useClass("javax.persistence.JoinColumn")}(name = "<@escapeJavaString str=columnName/>"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
         <#else>
-    @${util.useClass("javax.persistence.Column")}(name = "<@escapeJavaString str=element.column/>"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
+    @${util.useClass("javax.persistence.Column")}(name = "<@escapeJavaString str=columnName/>"<#if !element.insertable>, insertable = false</#if><#if !element.updatable>, updatable = false</#if>)
         </#if>
     </#if>
-    <#if element.joinColumn?size &gt; 0>
+    <#if hasJoinColumns>
     @${util.useClass("javax.persistence.JoinColumns")}({
         <#list element.joinColumn as joinColumn>
         @${util.useClass("javax.persistence.JoinColumn")}(name = "<@escapeJavaString str=joinColumn.column/>", referencedColumnName="<@escapeJavaString str=joinColumn.refColumn/>"<#if !joinColumn.insertable>, insertable = false</#if><#if !joinColumn.updatable>, updatable = false</#if>)<#if joinColumn_has_next>,</#if>
@@ -161,6 +159,17 @@ public class ${entity.name} implements ${util.useClass("java.io.Serializable", f
         this.${element.name} = ${element.name};
     <#if model.hasMultipleIds() && element.id>
         _entityId.${element.name} = ${element.name};
+    </#if>
+    <#if element.fromType?has_content>
+        <#-- this is a boolean attribute with a "from-type" defined, that is to say, we must set the original _value attribute -->
+        // set the original value
+        if (${util.useClass("java.lang.Boolean")}.TRUE.equals(${element.name})) {
+            ${attribute.setterName}_value(${attribute.trueValueStaticField.name});
+        } else if (${util.useClass("java.lang.Boolean")}.FALSE.equals(${element.name})) {
+            ${attribute.setterName}_value(${attribute.falseValueStaticField.name});
+        } else {
+            ${attribute.setterName}_value(null);
+        }
     </#if>
     }
 

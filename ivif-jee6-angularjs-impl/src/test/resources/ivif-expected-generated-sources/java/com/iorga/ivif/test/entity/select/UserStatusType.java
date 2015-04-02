@@ -1,6 +1,6 @@
 package com.iorga.ivif.test.entity.select;
 
-import com.iorga.ivif.ja.AbstractStringEnumUserType;
+import com.iorga.ivif.ja.EnumUserType;
 import com.iorga.ivif.ja.Valuable;
 import java.lang.Override;
 import java.lang.String;
@@ -29,7 +29,7 @@ public enum UserStatusType implements Valuable<String> {
         selectionByValue.put("?", UNKNOWN);
     }
 
-    public static class UserType extends AbstractStringEnumUserType<UserStatusType> {
+    public static class UserType extends EnumUserType<UserStatusType, String> {
 
         @Override
         protected UserStatusType getByValue(String value) {

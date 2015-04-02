@@ -1,6 +1,6 @@
 package com.iorga.ivif.test.entity.select;
 
-import com.iorga.ivif.ja.AbstractIntegerEnumUserType;
+import com.iorga.ivif.ja.EnumUserType;
 import com.iorga.ivif.ja.Valuable;
 import java.lang.Integer;
 import java.lang.Override;
@@ -29,7 +29,7 @@ public enum UserPassType implements Valuable<Integer> {
         selectionByValue.put(3, LIMITED);
     }
 
-    public static class UserType extends AbstractIntegerEnumUserType<UserPassType> {
+    public static class UserType extends EnumUserType<UserPassType, Integer> {
 
         @Override
         protected UserPassType getByValue(Integer value) {
