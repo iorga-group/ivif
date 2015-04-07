@@ -97,6 +97,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected boolean editable;
     protected String editableIf;
     protected boolean singleDisplayedOrderByColumn;
+    protected String tabTitleJsStringEscaped;
 
     public static class GridColumnFilterParam {
         private String name;
@@ -279,6 +280,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         title = StringUtils.isNotBlank(elementTitle) ? elementTitle : TargetFileUtils.getTitleFromCamelCasedName(element.getName());
         final String elementTabTitle = element.getTabTitle();
         tabTitle = StringUtils.isNotBlank(elementTabTitle) ? elementTabTitle : title;
+        tabTitleJsStringEscaped = tabTitle.replaceAll("'", "\\\\'");
 
         variableName = TargetFileUtils.getVariableNameFromCamelCasedName(element.getName());
 
@@ -894,5 +896,9 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     public boolean isSingleDisplayedOrderByColumn() {
         return singleDisplayedOrderByColumn;
+    }
+
+    public String getTabTitleJsStringEscaped() {
+        return tabTitleJsStringEscaped;
     }
 }

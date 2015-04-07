@@ -210,6 +210,6 @@ angular.module('${model.configuration.angularModuleName}')
         } else {
             $scope.reinitPage = $scope.${tableParamsVariableName}.page(); // fix a bug occurring when backing to the grid from another screen: page is reinitialized to 1 by ng-tables
         }
-        locationService.controllerInitialized('${grid.tabTitle}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById', '$edit', 'validDirtyLinesById', 'invalidDirtyLinesById', 'dirtyLinesById', '$dirtyGrid', '$validDirtyGrid', 'dirtyCheckKey'</#if><#if grid.singleSelection>, 'selectedLineId'</#if>]);
+        locationService.controllerInitialized('${grid.tabTitleJsStringEscaped}', $scope, ['${tableParamsVariableName}'<#if editable>, 'editedLinesById', '$edit', 'validDirtyLinesById', 'invalidDirtyLinesById', 'dirtyLinesById', '$dirtyGrid', '$validDirtyGrid', 'dirtyCheckKey'</#if><#if grid.singleSelection>, 'selectedLineId'</#if>]);
     }])
 ;

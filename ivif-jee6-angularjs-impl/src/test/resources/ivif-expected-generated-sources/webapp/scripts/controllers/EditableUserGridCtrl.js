@@ -174,6 +174,6 @@ angular.module('test')
         } else {
             $scope.reinitPage = $scope.editableUserGridTableParams.page(); // fix a bug occurring when backing to the grid from another screen: page is reinitialized to 1 by ng-tables
         }
-        locationService.controllerInitialized('Users', $scope, ['editableUserGridTableParams', 'editedLinesById', '$edit', 'validDirtyLinesById', 'invalidDirtyLinesById', 'dirtyLinesById', '$dirtyGrid', '$validDirtyGrid', 'dirtyCheckKey']);
+        locationService.controllerInitialized('That\'s the users', $scope, ['editableUserGridTableParams', 'editedLinesById', '$edit', 'validDirtyLinesById', 'invalidDirtyLinesById', 'dirtyLinesById', '$dirtyGrid', '$validDirtyGrid', 'dirtyCheckKey']);
     }])
 ;

@@ -9,7 +9,7 @@
         <query><default-order-by>$record.lastModification</default-order-by></query>
     </grid>
 
-    <grid name="EditableUserGrid" title="Users" entity="User" on-open="$action(openProfileGridFromUser)({profileId: $line.profile.id})" editable="true" roles-allowed="admin manager">
+    <grid name="EditableUserGrid" title="That's the users" entity="User" on-open="$action(openProfileGridFromUser)({profileId: $line.profile.id})" editable="true" roles-allowed="admin manager">
         <column ref="firstName"/>
         <column ref="name" editable-if="$record.profile.name === 'editableName'"/>
         <column ref="status" editable="true"/>
