@@ -45,4 +45,15 @@ public class QueryParserTest {
         assertThat(parsedQuery.getDefaultOrderBy()).hasSize(3);
         assertThat(parsedQuery.getDefaultOrderBy().get(2).direction).isEqualTo(SortingType.ASCENDING);
     }
+
+    @Test
+    public void notEqualTest() throws Exception {
+        // mock creation
+        final JAGeneratorContext context = mock(JAGeneratorContext.class);
+
+        final Query query = new Query();
+        query.setWhere("$record.test != 0");
+        final ParsedQuery parsedQuery = QueryParser.parse(query, null, this, context);
+        assertThat(parsedQuery.getQueryDslCode()).isEqualTo("$record.test.ne(0)");
+    }
 }

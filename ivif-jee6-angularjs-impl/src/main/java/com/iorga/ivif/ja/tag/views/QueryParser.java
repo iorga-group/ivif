@@ -214,7 +214,7 @@ public class QueryParser {
             } else if (node instanceof EqualsNode) {
                 visitGenericQueryDslMethod(node, "eq");
             } else if (node instanceof NotEqualsNode) {
-                visitGenericQueryDslMethod(node, "not().eq");
+                visitGenericQueryDslMethod(node, "ne");
             } else if (node instanceof PlusNode) {
                 visitGenericQueryDslMethod(node, "add");
             } else if (node instanceof MinusNode) {

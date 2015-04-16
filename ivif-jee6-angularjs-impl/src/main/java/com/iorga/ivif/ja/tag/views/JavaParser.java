@@ -5,14 +5,12 @@ import com.antlr.v4.grammars.JavaBaseVisitor;
 import com.antlr.v4.grammars.JavaLexer;
 import com.antlr.v4.grammars.JavaParser.ClassOrInterfaceTypeContext;
 import com.antlr.v4.grammars.JavaParser.ExpressionContext;
-import com.antlr.v4.grammars.JavaParser.TypeArgumentsContext;
 import com.antlr.v4.grammars.JavaParser.TypeListContext;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import sun.reflect.generics.tree.TypeArgument;
 
 import java.util.LinkedList;
 
