@@ -47,6 +47,10 @@ public enum UserStatusType implements Valuable<String> {
         return selectionByValue.get(value);
     }
 
+    public static UserStatusType fromString(String value) {
+        return byValue(value);
+    }
+
     @JsonValue
     public String value() {
         return value;

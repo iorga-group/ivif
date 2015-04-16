@@ -1,6 +1,7 @@
 package com.iorga.ivif.test.service;
 
 import com.iorga.ivif.ja.EntityBaseService;
+import com.iorga.ivif.ja.EntityBaseService.SearchState;
 import com.iorga.ivif.ja.Generated;
 import com.iorga.ivif.ja.Sorting;
 import com.iorga.ivif.ja.SortingType;
@@ -19,6 +20,7 @@ import com.mysema.query.types.ConstructorExpression;
 import com.mysema.query.types.expr.ComparableExpressionBase;
 import java.lang.Integer;
 import java.lang.Override;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -44,16 +46,25 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
         return entity.getUserId() == null && entity.getComputerId() == null;
     }
 
-    public SearchResults<DesktopSessionGridSearchResult> search(DesktopSessionGridSearchParam searchParam) {
-        JPAQuery jpaQuery = createJPAQuery();
-        QDesktopSession $record = new QDesktopSession("desktopSession");
-        jpaQuery.from($record);
-        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
-        applyLimitAndOffset(searchParam, jpaQuery);
-        return listSearchResults($record, searchParam, jpaQuery);
+
+    protected class DesktopSessionGridSearchState extends SearchState<QDesktopSession, DesktopSessionGridSearchParam> {
+        protected DesktopSessionGridSearchState(DesktopSessionGridSearchParam searchParam) {
+            super(new QDesktopSession("desktopSession"), searchParam);
+        }
     }
 
-    protected void applyQueryAndFiltersAndSorting(QDesktopSession $record, DesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
+    public SearchResults<DesktopSessionGridSearchResult> search(DesktopSessionGridSearchParam searchParam) {
+        DesktopSessionGridSearchState searchState = new DesktopSessionGridSearchState(searchParam);
+        searchState.jpaQuery.from(searchState.$record);
+        applyQueryAndFiltersAndSorting(searchState);
+        applyLimitAndOffset(searchState);
+        return listSearchResults(searchState);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(DesktopSessionGridSearchState searchState) {
+        QDesktopSession $record = searchState.$record;
+        DesktopSessionGridSearchParam searchParam = searchState.searchParam;
+        JPAQuery jpaQuery = searchState.jpaQuery;
         // Applying filter
         DesktopSessionGridSearchFilter filter = searchParam.filter;
         if (filter.computerId != null) {
@@ -84,13 +95,25 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
         }
     }
 
-    protected void applyLimitAndOffset(DesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
-        jpaQuery.limit(searchParam.limit);
-        jpaQuery.offset(searchParam.offset);
+    protected SearchResults<DesktopSessionGridSearchResult> listSearchResults(DesktopSessionGridSearchState searchState) {
+        return searchState.jpaQuery.listResults(listExpression(searchState));
     }
 
-    protected SearchResults<DesktopSessionGridSearchResult> listSearchResults(QDesktopSession $record, DesktopSessionGridSearchParam searchParam, JPAQuery jpaQuery) {
-        return jpaQuery.listResults(ConstructorExpression.create(DesktopSessionGridSearchResult.class, $record.computerId, $record.name));
+    protected ConstructorExpression<DesktopSessionGridSearchResult> listExpression(DesktopSessionGridSearchState searchState) {
+        QDesktopSession $record = searchState.$record;
+        return ConstructorExpression.create(DesktopSessionGridSearchResult.class, $record.computerId, $record.name);
+    }
+
+    public List<DesktopSessionGridSearchResult> find(DesktopSessionGridSearchParam searchParam) {
+        DesktopSessionGridSearchState searchState = new DesktopSessionGridSearchState(searchParam);
+        searchState.jpaQuery.from(searchState.$record);
+        applyQueryAndFiltersAndSorting(searchState);
+        applyLimitAndOffset(searchState);
+        return list(searchState);
+    }
+
+    protected List<DesktopSessionGridSearchResult> list(DesktopSessionGridSearchState searchState) {
+        return searchState.jpaQuery.list(listExpression(searchState));
     }
 
 

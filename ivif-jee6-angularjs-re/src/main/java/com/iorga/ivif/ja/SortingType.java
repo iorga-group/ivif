@@ -31,7 +31,7 @@ public enum SortingType {
     }
 
     @JsonCreator
-    public static SortingType create(String value) {
+    public static SortingType fromString(String value) {
         return sortingTypeByValue.get(value);
     }
 

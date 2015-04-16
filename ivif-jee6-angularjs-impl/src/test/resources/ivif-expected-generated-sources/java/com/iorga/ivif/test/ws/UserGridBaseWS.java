@@ -12,6 +12,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/userGrid")
@@ -46,8 +47,8 @@ public class UserGridBaseWS {
     public static class UserGridSearchParam extends GridSearchParam<UserGridSearchFilter> {}
     @POST
     @Path("/search")
-    @Consumes("application/json")
-    @Produces("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public SearchResults<UserGridSearchResult> search(UserGridSearchParam searchParam) {
         return userBaseService.search(searchParam);
     }

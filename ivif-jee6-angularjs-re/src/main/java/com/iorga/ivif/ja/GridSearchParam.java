@@ -4,8 +4,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class GridSearchParam<F> {
-    public int limit;
-    public int offset;
+    public Integer limit;
+    public Integer offset;
 
     public F filter;
     public Sorting sorting;

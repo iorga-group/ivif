@@ -1,17 +1,27 @@
 <#include "../utils/rolesAllowedMacro.java.ftl"/>
 <#assign grid=model.grid>
 <#assign queryModel=grid.queryModel>
-<@rolesAllowed rolesAllowed=grid.element.rolesAllowed util=util nbTabs=1/>
-    public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass(model.searchParamClassName)} searchParam) {
-        ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery = createJPAQuery();
-        ${util.useClass(baseModel.qEntityClassName)} $record = new ${util.useClass(baseModel.qEntityClassName)}("${baseModel.entityVariableName}");
-        jpaQuery.from($record);
-        applyQueryAndFiltersAndSorting($record, searchParam, jpaQuery);
-        applyLimitAndOffset(searchParam, jpaQuery);
-        return listSearchResults($record, searchParam, jpaQuery);
+<#assign searchStateClassName=grid.element.name+"SearchState">
+
+    protected class ${searchStateClassName} extends ${util.useClass("com.iorga.ivif.ja.EntityBaseService.SearchState")}<${util.useClass(baseModel.qEntityClassName)}, ${util.useClass(model.searchParamClassName)}> {
+        protected ${searchStateClassName}(${util.useClass(model.searchParamClassName)} searchParam) {
+            super(new ${util.useClass(baseModel.qEntityClassName)}("${baseModel.entityVariableName}"), searchParam);
+        }
     }
 
-    protected void applyQueryAndFiltersAndSorting(${util.useClass(baseModel.qEntityClassName)} $record, ${util.useClass(model.searchParamClassName)} searchParam, ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery) {
+<@rolesAllowed rolesAllowed=grid.element.rolesAllowed util=util nbTabs=1/>
+    public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass(model.searchParamClassName)} searchParam) {
+        ${searchStateClassName} searchState = new ${searchStateClassName}(searchParam);
+        searchState.jpaQuery.from(searchState.$record);
+        applyQueryAndFiltersAndSorting(searchState);
+        applyLimitAndOffset(searchState);
+        return listSearchResults(searchState);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(${searchStateClassName} searchState) {
+        ${util.useClass(baseModel.qEntityClassName)} $record = searchState.$record;
+        ${util.useClass(model.searchParamClassName)} searchParam = searchState.searchParam;
+        ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery = searchState.jpaQuery;
 <#if queryModel.queryDslCode?has_content>
         // Applying static query
         jpaQuery.where(<@queryModel.queryDslCode?interpret/>);
@@ -65,12 +75,25 @@
 </#list>
     }
 
-    protected void applyLimitAndOffset(${util.useClass(model.searchParamClassName)} searchParam, ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery) {
-        jpaQuery.limit(searchParam.limit);
-        jpaQuery.offset(searchParam.offset);
+    protected ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> listSearchResults(${searchStateClassName} searchState) {
+        return searchState.jpaQuery.listResults(listExpression(searchState));
     }
 
-    protected ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> listSearchResults(${util.useClass(baseModel.qEntityClassName)} $record, ${util.useClass(model.searchParamClassName)} searchParam, ${util.useClass("com.mysema.query.jpa.impl.JPAQuery")} jpaQuery) {
-        return jpaQuery.listResults(${util.useClass("com.mysema.query.types.ConstructorExpression")}.create(${util.useClass(model.searchResultClassName)}.class, <#list grid.resultGridColumns as column>$record.${column.ref}<#if column_has_next>, </#if></#list>));
+    protected ${util.useClass("com.mysema.query.types.ConstructorExpression")}<${util.useClass(model.searchResultClassName)}> listExpression(${searchStateClassName} searchState) {
+        ${util.useClass(baseModel.qEntityClassName)} $record = searchState.$record;
+        return ${util.useClass("com.mysema.query.types.ConstructorExpression")}.create(${util.useClass(model.searchResultClassName)}.class, <#list grid.resultGridColumns as column>$record.${column.ref}<#if column_has_next>, </#if></#list>);
+    }
+
+<@rolesAllowed rolesAllowed=grid.element.rolesAllowed util=util nbTabs=1/>
+    public ${util.useClass("java.util.List")}<${util.useClass(model.searchResultClassName)}> find(${util.useClass(model.searchParamClassName)} searchParam) {
+        ${searchStateClassName} searchState = new ${searchStateClassName}(searchParam);
+        searchState.jpaQuery.from(searchState.$record);
+        applyQueryAndFiltersAndSorting(searchState);
+        applyLimitAndOffset(searchState);
+        return list(searchState);
+    }
+
+    protected ${util.useClass("java.util.List")}<${util.useClass(model.searchResultClassName)}> list(${searchStateClassName} searchState) {
+        return searchState.jpaQuery.list(listExpression(searchState));
     }
 

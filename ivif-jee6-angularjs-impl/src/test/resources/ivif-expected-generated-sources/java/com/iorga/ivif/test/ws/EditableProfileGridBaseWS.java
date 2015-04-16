@@ -16,6 +16,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Path("/editableProfileGrid")
@@ -72,8 +73,8 @@ public class EditableProfileGridBaseWS {
     public static class EditableProfileGridSearchParam extends GridSearchParam<EditableProfileGridSearchFilter> {}
     @POST
     @Path("/search")
-    @Consumes("application/json")
-    @Produces("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public SearchResults<EditableProfileGridSearchResult> search(EditableProfileGridSearchParam searchParam) {
         return profileBaseService.search(searchParam);
     }

@@ -35,6 +35,14 @@ public enum ${selection.name} implements ${util.useClass("com.iorga.ivif.ja.Valu
         return selectionByValue.get(value);
     }
 
+    public static ${selection.name} fromString(String value) {
+<#if selectionModel.fromTypeClassName == "java.lang.String">
+        return byValue(value);
+<#else>
+        return byValue(new ${util.useClass(selectionModel.fromTypeClassName)}(value));
+</#if>
+    }
+
     @${util.useClass("org.codehaus.jackson.annotate.JsonValue")}
     public ${util.useClass(selectionModel.fromTypeClassName)} value() {
         return value;

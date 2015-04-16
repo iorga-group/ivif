@@ -123,8 +123,8 @@ public class ${gridName}BaseWS {
     public static class ${model.searchParamSimpleClassName} extends ${util.useClass("com.iorga.ivif.ja.GridSearchParam")}<${util.useClass(model.searchFilterClassName)}> {}
     @${util.useClass("javax.ws.rs.POST")}
     @${util.useClass("javax.ws.rs.Path")}("/search")
-    @${util.useClass("javax.ws.rs.Consumes")}("application/json")
-    @${util.useClass("javax.ws.rs.Produces")}("application/json")
+    @${util.useClass("javax.ws.rs.Consumes")}(${util.useClass("javax.ws.rs.core.MediaType")}.APPLICATION_JSON)
+    @${util.useClass("javax.ws.rs.Produces")}(${util.useClass("javax.ws.rs.core.MediaType")}.APPLICATION_JSON)
     public ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> search(${util.useClass(model.searchParamClassName)} searchParam) {
 <#if grid.serviceSearchMethod?has_content>
         return searchService.${grid.serviceSearchMethod}(searchParam);

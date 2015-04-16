@@ -47,6 +47,10 @@ public enum UserPassType implements Valuable<Integer> {
         return selectionByValue.get(value);
     }
 
+    public static UserPassType fromString(String value) {
+        return byValue(new Integer(value));
+    }
+
     @JsonValue
     public Integer value() {
         return value;

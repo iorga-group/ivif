@@ -22,6 +22,18 @@ public abstract class EntityBaseService<E extends IEntity<I>, I> extends Persist
         entityClass = (Class<E>) entityTypeToken.getRawType();
     }
 
+    public class SearchState<Q, GSP extends GridSearchParam<?>> {
+        public JPAQuery jpaQuery;
+        public Q $record;
+        public GSP searchParam;
+
+        protected SearchState(Q $record, GSP searchParam) {
+            this.jpaQuery = createJPAQuery();
+            this.$record = $record;
+            this.searchParam = searchParam;
+        }
+    }
+
 
     public E find(I id) {
         return entityManager.find(entityClass, id);
@@ -86,5 +98,18 @@ public abstract class EntityBaseService<E extends IEntity<I>, I> extends Persist
 
     protected JPAQuery createJPAQuery() {
         return new JPAQuery(entityManager);
+    }
+
+    protected void applyLimitAndOffset(GridSearchParam<?> searchParam, JPAQuery jpaQuery) {
+        if (searchParam.limit != null) {
+            jpaQuery.limit(searchParam.limit);
+        }
+        if (searchParam.offset != null) {
+            jpaQuery.offset(searchParam.offset);
+        }
+    }
+
+    protected void applyLimitAndOffset(SearchState<?, ?> searchState) {
+        applyLimitAndOffset(searchState.searchParam, searchState.jpaQuery);
     }
 }
