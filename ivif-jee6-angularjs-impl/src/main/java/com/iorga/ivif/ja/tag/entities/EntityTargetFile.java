@@ -11,11 +11,14 @@ import com.iorga.ivif.ja.tag.views.JavaParser;
 import com.iorga.ivif.tag.TargetPartPreparedEvent;
 import com.iorga.ivif.tag.bean.*;
 import com.iorga.ivif.tag.bean.Enum;
+
 import org.apache.commons.lang3.StringUtils;
+
 import com.iorga.ivif.ja.tag.JavaTargetFile.JavaTargetFileId;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+
 import java.lang.Boolean;
 import java.lang.String;
 import java.util.*;
@@ -171,9 +174,13 @@ public class EntityTargetFile extends JavaTargetFile<EntityTargetFileId> {
             idClassName = getClassName() + "." + entity.getName() + "Id";
             idSimpleClassName = entity.getName() + "Id";
         } else {
-            final EntityAttribute idAttribute = idAttributes.get(0);
-            idClassName = idAttribute.getType();
-            idSimpleClassName = StringUtils.substringAfterLast(idClassName, ".");
+        	if (idAttributes.isEmpty()) {
+        		throw new IllegalStateException("Must define an id=\"true\" attribute in this entity "+this.toString());
+        	} else {
+                final EntityAttribute idAttribute = idAttributes.get(0);
+                idClassName = idAttribute.getType();
+                idSimpleClassName = StringUtils.substringAfterLast(idClassName, ".");
+        	}
         }
 
         // Handle implements
