@@ -77,10 +77,12 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
-        if ("name".equals(sorting.ref)) {
-            sortingExpression = $record.name;
-        } else if ("profile_id".equals(sorting.ref)) {
-            sortingExpression = $record.profile.id;
+        if (sorting != null) {
+            if ("name".equals(sorting.ref)) {
+                sortingExpression = $record.name;
+            } else if ("profile_id".equals(sorting.ref)) {
+                sortingExpression = $record.profile.id;
+            }
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
@@ -158,20 +160,22 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
-        if ("firstName".equals(sorting.ref)) {
-            sortingExpression = $record.firstName;
-        } else if ("name".equals(sorting.ref)) {
-            sortingExpression = $record.name;
-        } else if ("status".equals(sorting.ref)) {
-            sortingExpression = $record.status;
-        } else if ("enabled".equals(sorting.ref)) {
-            sortingExpression = $record.enabled;
-        } else if ("bigComment".equals(sorting.ref)) {
-            sortingExpression = $record.bigComment;
-        } else if ("pass".equals(sorting.ref)) {
-            sortingExpression = $record.pass;
-        } else if ("lastModification".equals(sorting.ref)) {
-            sortingExpression = $record.lastModification;
+        if (sorting != null) {
+            if ("firstName".equals(sorting.ref)) {
+                sortingExpression = $record.firstName;
+            } else if ("name".equals(sorting.ref)) {
+                sortingExpression = $record.name;
+            } else if ("status".equals(sorting.ref)) {
+                sortingExpression = $record.status;
+            } else if ("enabled".equals(sorting.ref)) {
+                sortingExpression = $record.enabled;
+            } else if ("bigComment".equals(sorting.ref)) {
+                sortingExpression = $record.bigComment;
+            } else if ("pass".equals(sorting.ref)) {
+                sortingExpression = $record.pass;
+            } else if ("lastModification".equals(sorting.ref)) {
+                sortingExpression = $record.lastModification;
+            }
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
@@ -231,8 +235,10 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
-        if ("name".equals(sorting.ref)) {
-            sortingExpression = $record.name;
+        if (sorting != null) {
+            if ("name".equals(sorting.ref)) {
+                sortingExpression = $record.name;
+            }
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
@@ -291,8 +297,10 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
-        if ("name".equals(sorting.ref)) {
-            sortingExpression = $record.name;
+        if (sorting != null) {
+            if ("name".equals(sorting.ref)) {
+                sortingExpression = $record.name;
+            }
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
@@ -351,10 +359,12 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
-        if ("name".equals(sorting.ref)) {
-            sortingExpression = $record.name;
-        } else if ("id".equals(sorting.ref)) {
-            sortingExpression = $record.id;
+        if (sorting != null) {
+            if ("name".equals(sorting.ref)) {
+                sortingExpression = $record.name;
+            } else if ("id".equals(sorting.ref)) {
+                sortingExpression = $record.id;
+            }
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());

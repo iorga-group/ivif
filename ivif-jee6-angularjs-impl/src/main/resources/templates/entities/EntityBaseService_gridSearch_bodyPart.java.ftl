@@ -59,11 +59,13 @@
         // Applying sorting
         ${util.useClass("com.iorga.ivif.ja.Sorting")} sorting = searchParam.sorting;
         ${util.useClass("com.mysema.query.types.expr.ComparableExpressionBase")} sortingExpression = null;
+        if (sorting != null) {
 <#list grid.sortableGridColumns as column>
     <#-- can sort only on non transient fields -->
-        <#if column_index != 0>} else </#if>if ("${column.refVariableName}".equals(sorting.ref)) {
-            sortingExpression = $record.${column.ref};
+            <#if column_index != 0>} else </#if>if ("${column.refVariableName}".equals(sorting.ref)) {
+                sortingExpression = $record.${column.ref};
     <#if !column_has_next>
+            }
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(${util.useClass("com.iorga.ivif.ja.SortingType")}.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());

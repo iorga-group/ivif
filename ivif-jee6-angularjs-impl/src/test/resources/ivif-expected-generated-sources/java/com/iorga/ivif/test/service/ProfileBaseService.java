@@ -73,8 +73,10 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
-        if ("name".equals(sorting.ref)) {
-            sortingExpression = $record.name;
+        if (sorting != null) {
+            if ("name".equals(sorting.ref)) {
+                sortingExpression = $record.name;
+            }
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
@@ -131,8 +133,10 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
-        if ("name".equals(sorting.ref)) {
-            sortingExpression = $record.name;
+        if (sorting != null) {
+            if ("name".equals(sorting.ref)) {
+                sortingExpression = $record.name;
+            }
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());

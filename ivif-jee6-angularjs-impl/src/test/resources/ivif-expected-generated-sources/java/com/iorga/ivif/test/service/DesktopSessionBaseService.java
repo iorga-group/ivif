@@ -85,10 +85,12 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
         // Applying sorting
         Sorting sorting = searchParam.sorting;
         ComparableExpressionBase sortingExpression = null;
-        if ("computerId".equals(sorting.ref)) {
-            sortingExpression = $record.computerId;
-        } else if ("name".equals(sorting.ref)) {
-            sortingExpression = $record.name;
+        if (sorting != null) {
+            if ("computerId".equals(sorting.ref)) {
+                sortingExpression = $record.computerId;
+            } else if ("name".equals(sorting.ref)) {
+                sortingExpression = $record.name;
+            }
         }
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
