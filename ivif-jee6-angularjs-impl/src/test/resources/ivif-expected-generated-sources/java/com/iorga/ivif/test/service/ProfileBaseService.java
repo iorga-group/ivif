@@ -26,6 +26,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.apache.commons.lang3.StringUtils;
 
 @Generated
 @Stateless
@@ -60,7 +61,7 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
         JPAQuery jpaQuery = searchState.jpaQuery;
         // Applying filter
         ProfileGridSearchFilter filter = searchParam.filter;
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         // Applying action filters
@@ -126,7 +127,7 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
         JPAQuery jpaQuery = searchState.jpaQuery;
         // Applying filter
         EditableProfileGridSearchFilter filter = searchParam.filter;
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         // Applying action filters

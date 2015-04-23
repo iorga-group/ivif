@@ -33,6 +33,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.apache.commons.lang3.StringUtils;
 
 @Generated
 @Stateless
@@ -63,7 +64,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         JPAQuery jpaQuery = searchState.jpaQuery;
         // Applying filter
         UserGridSearchFilter filter = searchParam.filter;
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         if (filter.profile_id != null) {
@@ -135,10 +136,10 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         JPAQuery jpaQuery = searchState.jpaQuery;
         // Applying filter
         EditableUserGridSearchFilter filter = searchParam.filter;
-        if (filter.firstName != null) {
+        if (StringUtils.isNotEmpty(filter.firstName)) {
             jpaQuery.where($record.firstName.containsIgnoreCase(filter.firstName));
         }
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         if (filter.status != null) {
@@ -147,7 +148,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (filter.enabled != null) {
             jpaQuery.where($record.enabled.eq(filter.enabled));
         }
-        if (filter.bigComment != null) {
+        if (StringUtils.isNotEmpty(filter.bigComment)) {
             jpaQuery.where($record.bigComment.containsIgnoreCase(filter.bigComment));
         }
         if (filter.pass != null) {
@@ -225,10 +226,10 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         JPAQuery jpaQuery = searchState.jpaQuery;
         // Applying filter
         ToolbarUserGridSearchFilter filter = searchParam.filter;
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
-        if (filter.firstName != null) {
+        if (StringUtils.isNotEmpty(filter.firstName)) {
             jpaQuery.where($record.firstName.containsIgnoreCase(filter.firstName));
         }
         // Applying action filters
@@ -287,10 +288,10 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         JPAQuery jpaQuery = searchState.jpaQuery;
         // Applying filter
         SpecificSearchUserGridSearchFilter filter = searchParam.filter;
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
-        if (filter.firstName != null) {
+        if (StringUtils.isNotEmpty(filter.firstName)) {
             jpaQuery.where($record.firstName.containsIgnoreCase(filter.firstName));
         }
         // Applying action filters
@@ -349,7 +350,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         JPAQuery jpaQuery = searchState.jpaQuery;
         // Applying filter
         SelectEditableAndButtonUserGridSearchFilter filter = searchParam.filter;
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         if (filter.id != null) {

@@ -31,6 +31,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.apache.commons.lang3.StringUtils;
 
 @Generated
 @Stateless
@@ -66,10 +67,10 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         jpaQuery.where($record.defaultProfile.isNull());
         // Applying filter
         ComputerGridSearchFilter filter = searchParam.filter;
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
-        if (filter.user_name != null) {
+        if (StringUtils.isNotEmpty(filter.user_name)) {
             jpaQuery.where($record.user.name.containsIgnoreCase(filter.user_name));
         }
         // Applying action filters
@@ -140,7 +141,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         if (filter.id != null) {
             jpaQuery.where($record.id.like("%" + filter.id + "%"));
         }
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         if (filter.user_id != null) {
@@ -208,7 +209,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         jpaQuery.where($record.user.id.eq(connectedUser.getUserId()));
         // Applying filter
         ComputerForConnectedUserGridSearchFilter filter = searchParam.filter;
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         // Applying action filters
@@ -270,7 +271,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         JPAQuery jpaQuery = searchState.jpaQuery;
         // Applying filter
         ComputerToCurrentUserDesktopSessionGridSearchFilter filter = searchParam.filter;
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         // Applying action filters

@@ -29,10 +29,11 @@
         // Applying filter
         ${util.useClass(model.searchFilterClassName)} filter = searchParam.filter;
 <#list grid.filterGridColumns as column>
+    <#assign columnType=column.entityAttribute.element.name.localPart/>
     <#-- can filter only on non transient fields -->
-        if (filter.${column.refVariableName} != null) {
+        if (<#if columnType == "string">${util.useClass("org.apache.commons.lang3.StringUtils")}.isNotEmpty(filter.${column.refVariableName})<#else>filter.${column.refVariableName} != null</#if>) {
             jpaQuery.where($record.${column.ref}.<#rt>
-    <#switch column.entityAttribute.element.name.localPart>
+    <#switch columnType>
         <#case "string">
             containsIgnoreCase(filter.${column.refVariableName})<#t>
             <#break>

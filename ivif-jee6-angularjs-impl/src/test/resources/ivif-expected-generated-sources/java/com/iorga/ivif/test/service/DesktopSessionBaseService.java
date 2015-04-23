@@ -25,6 +25,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.apache.commons.lang3.StringUtils;
 
 @Generated
 @Stateless
@@ -70,7 +71,7 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
         if (filter.computerId != null) {
             jpaQuery.where($record.computerId.like("%" + filter.computerId + "%"));
         }
-        if (filter.name != null) {
+        if (StringUtils.isNotEmpty(filter.name)) {
             jpaQuery.where($record.name.containsIgnoreCase(filter.name));
         }
         // Applying action filters
