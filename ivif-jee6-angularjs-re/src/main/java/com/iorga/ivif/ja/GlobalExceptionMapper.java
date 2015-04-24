@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.EJBException;
 import javax.inject.Inject;
 import javax.persistence.OptimisticLockException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
@@ -34,7 +36,7 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
 
         final Response response = selectHandleMethod(throwable, uuid);
         if (response == null) {
-            return handleThrowable(throwable, uuid);
+            return handleThrowable(throwable, uuid, null);
         } else {
             return response;
         }
@@ -61,6 +63,8 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
             return handleFunctionalException((FunctionalException) throwable, uuid);
         } else if (throwable instanceof OptimisticLockException) {
             return handleOptimisticLockException((OptimisticLockException)throwable, uuid);
+        } else if (throwable instanceof WebApplicationException) {
+            return handleThrowable(throwable, uuid, ((WebApplicationException) throwable).getResponse());
         } else {
             return null;
         }
@@ -111,7 +115,7 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
             return uuid;
         }
     }
-    private Response handleThrowable(Throwable throwable, String uuid) {
+    private Response handleThrowable(Throwable throwable, String uuid, Response responseTemplate) {
         LOG.error("Handling unexpected throwable #" + uuid, throwable);
         final ExceptionTemplate exceptionTemplate = new ExceptionTemplate(throwable, uuid);
         String base64ExceptionTemplate;
@@ -121,9 +125,15 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
             LOG.error("Problem while rendering the throwable to base64", e);
             base64ExceptionTemplate = "";
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+        ResponseBuilder responseBuilder;
+        if (responseTemplate != null) {
+            responseBuilder = Response.fromResponse(responseTemplate);
+        } else {
+            responseBuilder = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Throwables.getStackTraceAsString(throwable));
+        }
+        return responseBuilder
                 .header(HEADER_PREFIX, base64ExceptionTemplate)
-                .entity(Throwables.getStackTraceAsString(throwable))
                 .build();
     }
 }
