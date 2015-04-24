@@ -251,20 +251,9 @@ angular.module('${model.configuration.angularModuleName}', [
         return messageService;
     }])
     .config(['$httpProvider', function ($httpProvider) {
-        $httpProvider.interceptors.push(['$q', 'headerUtil', 'messageService', function($q, headerUtil, messageService) {
-            function interceptExceptionOrMessages(config) {
-                var exception = config.headers('X-IVIF-JA-Exception'),
-                    messages = config.headers('X-IVIF-JA-Messages');
-                if (exception) {
-                    exception = headerUtil.fromServerToObject(exception);
-                    messageService.addModalMessage({
-                        title: 'Problem on the server side',
-                        level: 'ERROR',
-                        message: '<p>A problem appeared on the server side: '+exception.message+'</p>' +
-                        '<p><button class="btn" type="button" data-toggle="collapse" data-target="#ivifExceptionModal" aria-expended="false" aria-controls="ivifExceptionModal">Details...</button>' +
-                        '<div class="collapse" id="ivifExceptionModal"><div class="well"><p>'+exception.className+'#'+exception.uuid+'<pre>'+config.data+'</pre></p></div></div></p>'
-                    });
-                }
+        $httpProvider.interceptors.push(['$q', 'headerUtil', 'messageService', '$rootScope', function($q, headerUtil, messageService, $rootScope) {
+            function handleMessages(response) {
+                var messages = response.headers('X-IVIF-JA-Messages');
                 if (messages) {
                     messages = headerUtil.fromServerToObject(messages);
                     if (angular.isArray(messages)) {
@@ -280,16 +269,30 @@ angular.module('${model.configuration.angularModuleName}', [
                         messageService.addMessage(messages);
                     }
                 }
-                return exception || messages;
+                return messages;
             }
-            return {
-                'response': function(response) {
-                    interceptExceptionOrMessages(response);
-                    return response;
-                },
-                'responseError': function(rejection) {
-                    if (!interceptExceptionOrMessages(rejection)) {
-                        // No message was shown, must show a problem
+            function handleException(response, rejection, messages) {
+                var exception = response.headers('X-IVIF-JA-Exception');
+                if (exception) {
+                    exception = headerUtil.fromServerToObject(exception);
+                    var exceptionEvent = $rootScope.$emit('ivif.exception', exception, response, rejection, messages);
+                    if (!exceptionEvent.defaultPrevented) { // if nobody intercepted & prevented the default exception handling, display a modal message
+                        messageService.addModalMessage({
+                            title: 'Problem on the server side',
+                            level: 'ERROR',
+                            message: '<p>A problem appeared on the server side: '+exception.message+'</p>' +
+                            '<p><button class="btn" type="button" data-toggle="collapse" data-target="#ivifExceptionModal" aria-expended="false" aria-controls="ivifExceptionModal">Details...</button>' +
+                            '<div class="collapse" id="ivifExceptionModal"><div class="well"><p>'+exception.className+'#'+exception.uuid+'<pre>'+response.data+'</pre></p></div></div></p>'
+                        });
+                    } else {
+                        if (exceptionEvent.exceptionInterceptionResponse) {
+                            return exceptionEvent.exceptionInterceptionResponse;
+                        }
+                    }
+                }
+                if (rejection) {
+                    if (!messages && !exception) {
+                        // rejection without message or exception, must display something to the user
                         messageService.addModalMessage({
                             title: 'Error '+rejection.status,
                             level: 'ERROR',
@@ -299,6 +302,21 @@ angular.module('${model.configuration.angularModuleName}', [
                         });
                     }
                     return $q.reject(rejection);
+                } else {
+                    return response;
+                }
+            }
+            function handleMessagesAndException(response, rejection) {
+                var response = response || rejection,
+                    messages = handleMessages(response);
+                return handleException(response, rejection, messages);
+            }
+            return {
+                'response': function(response) {
+                    return handleMessagesAndException(response);
+                },
+                'responseError': function(rejection) {
+                    return handleMessagesAndException(null, rejection);
                 }
             }
         }]);
