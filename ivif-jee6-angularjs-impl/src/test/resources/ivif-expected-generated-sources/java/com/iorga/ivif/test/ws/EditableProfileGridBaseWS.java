@@ -8,6 +8,7 @@ import com.iorga.ivif.test.service.ProfileBaseService;
 import com.mysema.query.SearchResults;
 import java.lang.Integer;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -43,6 +44,7 @@ public class EditableProfileGridBaseWS {
     @Consumes("application/json")
     @TransactionAttribute
     public void save(List<EditableProfileGridSaveParam> saveParams) {
+        List<Profile> entitiesToSave = new ArrayList<>(saveParams.size());
         for (EditableProfileGridSaveParam saveParam : saveParams) {
             // Search for this entityToSave
             Profile entityToSave = profileBaseService.find(saveParam.id);
@@ -53,9 +55,11 @@ public class EditableProfileGridBaseWS {
             // Apply modifications
             entityToSave.setName(saveParam.name);
 
-            // Ask for save
-            saveService.save(entityToSave);
+            entitiesToSave.add(entityToSave);
         }
+
+        // Ask for save
+        saveService.save(entitiesToSave);
     }
 
     public static class EditableProfileGridSearchResult extends EditableProfileGridEditableFilterResult {

@@ -12,6 +12,7 @@ import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -53,6 +54,7 @@ public class EditableUserGridBaseWS {
     @Consumes("application/json")
     @TransactionAttribute
     public void save(List<EditableUserGridSaveParam> saveParams) {
+        List<User> entitiesToSave = new ArrayList<>(saveParams.size());
         for (EditableUserGridSaveParam saveParam : saveParams) {
             // Search for this entityToSave
             User entityToSave = userBaseService.find(saveParam.id);
@@ -72,9 +74,11 @@ public class EditableUserGridBaseWS {
             userBaseService.detach(entityToSave);
             entityToSave.setVersion(saveParam.version);
 
-            // Ask for save
-            userBaseService.save(entityToSave);
+            entitiesToSave.add(entityToSave);
         }
+
+        // Ask for save
+        userBaseService.save(entitiesToSave);
     }
 
     public static class EditableUserGridFilterResult extends EditableUserGridEditableFilterResult {

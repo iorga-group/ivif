@@ -8,6 +8,7 @@ import com.mysema.query.SearchResults;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -41,6 +42,7 @@ public class SelectEditableAndButtonUserGridBaseWS {
     @Consumes("application/json")
     @TransactionAttribute
     public void save(List<SelectEditableAndButtonUserGridSaveParam> saveParams) {
+        List<User> entitiesToSave = new ArrayList<>(saveParams.size());
         for (SelectEditableAndButtonUserGridSaveParam saveParam : saveParams) {
             // Search for this entityToSave
             User entityToSave = userBaseService.find(saveParam.id);
@@ -54,9 +56,11 @@ public class SelectEditableAndButtonUserGridBaseWS {
             userBaseService.detach(entityToSave);
             entityToSave.setVersion(saveParam.version);
 
-            // Ask for save
-            userBaseService.save(entityToSave);
+            entitiesToSave.add(entityToSave);
         }
+
+        // Ask for save
+        userBaseService.save(entitiesToSave);
     }
 
     public static class SelectEditableAndButtonUserGridFilterResult extends SelectEditableAndButtonUserGridEditableFilterResult {

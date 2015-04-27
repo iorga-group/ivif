@@ -45,6 +45,7 @@ public class ${gridName}BaseWS {
     @${util.useClass("javax.ws.rs.Consumes")}("application/json")
     @${util.useClass("javax.ejb.TransactionAttribute")}
     public void save(${util.useClass("java.util.List")}<${model.saveParamSimpleClassName}> saveParams) {
+        ${util.useClass("java.util.List")}<${util.useClass(entityClassName)}> entitiesToSave = new ${util.useClass("java.util.ArrayList")}<>(saveParams.size());
         for (${model.saveParamSimpleClassName} saveParam : saveParams) {
             // Search for this entityToSave
             ${util.useClass(entityClassName)} entityToSave = ${serviceVariableName}.find(<#list grid.idColumns as column>saveParam.${column.ref}<#if column_has_next>, </#if></#list>);
@@ -64,13 +65,15 @@ public class ${gridName}BaseWS {
             entityToSave.${grid.versionColumn.entityAttribute.setterName}(saveParam.${grid.versionColumn.refVariableName});
     </#if>
 
-            // Ask for save
-    <#if grid.serviceSaveMethod?has_content>
-            saveService.${grid.serviceSaveMethod}(entityToSave);
-    <#else>
-            ${serviceVariableName}.save(entityToSave);
-    </#if>
+            entitiesToSave.add(entityToSave);
         }
+
+        // Ask for save
+    <#if grid.serviceSaveMethod?has_content>
+        saveService.${grid.serviceSaveMethod}(entitiesToSave);
+    <#else>
+        ${serviceVariableName}.save(entitiesToSave);
+    </#if>
     }
 
 </#if>
