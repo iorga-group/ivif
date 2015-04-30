@@ -9,6 +9,14 @@
         <query><default-order-by>$record.lastModification</default-order-by></query>
     </grid>
 
+    <grid name="LeftJoinUserGrid" entity="User">
+        <column ref="name"/>
+        <column ref="name" from="profile" title="Profile name"/>
+        <query>
+            <from>$record left join $record.profile profile</from>
+        </query>
+    </grid>
+
     <grid name="EditableUserGrid" title="That's the users" entity="User" on-open="$action(openProfileGridFromUser)({profileId: $line.profile.id})" editable="true" roles-allowed="admin manager">
         <column ref="firstName"/>
         <column ref="name" editable-if="$record.profile.name === 'editableName'"/>

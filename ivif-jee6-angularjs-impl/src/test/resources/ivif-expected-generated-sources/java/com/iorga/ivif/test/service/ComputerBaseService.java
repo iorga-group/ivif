@@ -53,10 +53,14 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
 
     public SearchResults<ComputerGridSearchResult> search(ComputerGridSearchParam searchParam) {
         ComputerGridSearchState searchState = new ComputerGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(ComputerGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(ComputerGridSearchState searchState) {
@@ -107,7 +111,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
 
     public List<ComputerGridSearchResult> find(ComputerGridSearchParam searchParam) {
         ComputerGridSearchState searchState = new ComputerGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);
@@ -126,10 +130,14 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
 
     public SearchResults<ComputerToDesktopSessionGridSearchResult> search(ComputerToDesktopSessionGridSearchParam searchParam) {
         ComputerToDesktopSessionGridSearchState searchState = new ComputerToDesktopSessionGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(ComputerToDesktopSessionGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(ComputerToDesktopSessionGridSearchState searchState) {
@@ -176,7 +184,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
 
     public List<ComputerToDesktopSessionGridSearchResult> find(ComputerToDesktopSessionGridSearchParam searchParam) {
         ComputerToDesktopSessionGridSearchState searchState = new ComputerToDesktopSessionGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);
@@ -195,10 +203,14 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
 
     public SearchResults<ComputerForConnectedUserGridSearchResult> search(ComputerForConnectedUserGridSearchParam searchParam) {
         ComputerForConnectedUserGridSearchState searchState = new ComputerForConnectedUserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(ComputerForConnectedUserGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(ComputerForConnectedUserGridSearchState searchState) {
@@ -240,7 +252,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
 
     public List<ComputerForConnectedUserGridSearchResult> find(ComputerForConnectedUserGridSearchParam searchParam) {
         ComputerForConnectedUserGridSearchState searchState = new ComputerForConnectedUserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);
@@ -259,10 +271,14 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
 
     public SearchResults<ComputerToCurrentUserDesktopSessionGridSearchResult> search(ComputerToCurrentUserDesktopSessionGridSearchParam searchParam) {
         ComputerToCurrentUserDesktopSessionGridSearchState searchState = new ComputerToCurrentUserDesktopSessionGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(ComputerToCurrentUserDesktopSessionGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(ComputerToCurrentUserDesktopSessionGridSearchState searchState) {
@@ -299,7 +315,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
 
     public List<ComputerToCurrentUserDesktopSessionGridSearchResult> find(ComputerToCurrentUserDesktopSessionGridSearchParam searchParam) {
         ComputerToCurrentUserDesktopSessionGridSearchState searchState = new ComputerToCurrentUserDesktopSessionGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);

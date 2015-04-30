@@ -32,6 +32,11 @@ public abstract class EntityBaseService<E extends IEntity<I>, I> extends Persist
             this.$record = $record;
             this.searchParam = searchParam;
         }
+
+        protected SearchState(GSP searchParam) {
+            this.jpaQuery = createJPAQuery();
+            this.searchParam = searchParam;
+        }
     }
 
 

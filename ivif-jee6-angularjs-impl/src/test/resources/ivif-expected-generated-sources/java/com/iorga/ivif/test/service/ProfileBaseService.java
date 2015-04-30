@@ -49,10 +49,14 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
     @RolesAllowed("manager")
     public SearchResults<ProfileGridSearchResult> search(ProfileGridSearchParam searchParam) {
         ProfileGridSearchState searchState = new ProfileGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(ProfileGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(ProfileGridSearchState searchState) {
@@ -96,7 +100,7 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
     @RolesAllowed("manager")
     public List<ProfileGridSearchResult> find(ProfileGridSearchParam searchParam) {
         ProfileGridSearchState searchState = new ProfileGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);
@@ -115,10 +119,14 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
 
     public SearchResults<EditableProfileGridSearchResult> search(EditableProfileGridSearchParam searchParam) {
         EditableProfileGridSearchState searchState = new EditableProfileGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(EditableProfileGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(EditableProfileGridSearchState searchState) {
@@ -155,7 +163,7 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
 
     public List<EditableProfileGridSearchResult> find(EditableProfileGridSearchParam searchParam) {
         EditableProfileGridSearchState searchState = new EditableProfileGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);

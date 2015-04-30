@@ -28,6 +28,10 @@ public class JsExpressionParser {
             return ref;
         }
 
+        public String getFrom() {
+            return RECORD_NAME; // TODO handle $from(name_of_from).ref in parsing
+        }
+
         public String getRefVariableName() {
             return refVariableName;
         }

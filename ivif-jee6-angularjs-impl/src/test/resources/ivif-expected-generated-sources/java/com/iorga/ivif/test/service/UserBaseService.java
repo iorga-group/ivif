@@ -6,11 +6,15 @@ import com.iorga.ivif.ja.Generated;
 import com.iorga.ivif.ja.RolesAllowed;
 import com.iorga.ivif.ja.Sorting;
 import com.iorga.ivif.ja.SortingType;
+import com.iorga.ivif.test.entity.QProfile;
 import com.iorga.ivif.test.entity.QUser;
 import com.iorga.ivif.test.entity.User;
 import com.iorga.ivif.test.ws.EditableUserGridBaseWS.EditableUserGridSearchFilter;
 import com.iorga.ivif.test.ws.EditableUserGridBaseWS.EditableUserGridSearchParam;
 import com.iorga.ivif.test.ws.EditableUserGridBaseWS.EditableUserGridSearchResult;
+import com.iorga.ivif.test.ws.LeftJoinUserGridBaseWS.LeftJoinUserGridSearchFilter;
+import com.iorga.ivif.test.ws.LeftJoinUserGridBaseWS.LeftJoinUserGridSearchParam;
+import com.iorga.ivif.test.ws.LeftJoinUserGridBaseWS.LeftJoinUserGridSearchResult;
 import com.iorga.ivif.test.ws.SelectEditableAndButtonUserGridBaseWS.SelectEditableAndButtonUserGridSearchFilter;
 import com.iorga.ivif.test.ws.SelectEditableAndButtonUserGridBaseWS.SelectEditableAndButtonUserGridSearchParam;
 import com.iorga.ivif.test.ws.SelectEditableAndButtonUserGridBaseWS.SelectEditableAndButtonUserGridSearchResult;
@@ -52,10 +56,14 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     public SearchResults<UserGridSearchResult> search(UserGridSearchParam searchParam) {
         UserGridSearchState searchState = new UserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(UserGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(UserGridSearchState searchState) {
@@ -104,13 +112,86 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     public List<UserGridSearchResult> find(UserGridSearchParam searchParam) {
         UserGridSearchState searchState = new UserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);
     }
 
     protected List<UserGridSearchResult> list(UserGridSearchState searchState) {
+        return searchState.jpaQuery.list(listExpression(searchState));
+    }
+
+
+    protected class LeftJoinUserGridSearchState extends SearchState<QUser, LeftJoinUserGridSearchParam> {
+        protected QProfile profile = new QProfile("profile");
+
+        protected LeftJoinUserGridSearchState(LeftJoinUserGridSearchParam searchParam) {
+            super(new QUser("user"), searchParam);
+        }
+    }
+
+    public SearchResults<LeftJoinUserGridSearchResult> search(LeftJoinUserGridSearchParam searchParam) {
+        LeftJoinUserGridSearchState searchState = new LeftJoinUserGridSearchState(searchParam);
+        applyFrom(searchState);
+        applyQueryAndFiltersAndSorting(searchState);
+        applyLimitAndOffset(searchState);
+        return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(LeftJoinUserGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
+        searchState.jpaQuery.leftJoin(searchState.$record.profile, searchState.profile);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(LeftJoinUserGridSearchState searchState) {
+        QUser $record = searchState.$record;
+        QProfile profile = searchState.profile;
+        LeftJoinUserGridSearchParam searchParam = searchState.searchParam;
+        JPAQuery jpaQuery = searchState.jpaQuery;
+        // Applying filter
+        LeftJoinUserGridSearchFilter filter = searchParam.filter;
+        if (StringUtils.isNotEmpty(filter.name)) {
+            jpaQuery.where($record.name.containsIgnoreCase(filter.name));
+        }
+        if (StringUtils.isNotEmpty(filter.__profile_name)) {
+            jpaQuery.where(profile.name.containsIgnoreCase(filter.__profile_name));
+        }
+        // Applying action filters
+        // Applying sorting
+        Sorting sorting = searchParam.sorting;
+        ComparableExpressionBase sortingExpression = null;
+        if (sorting != null) {
+            if ("name".equals(sorting.ref)) {
+                sortingExpression = $record.name;
+            } else if ("__profile_name".equals(sorting.ref)) {
+                sortingExpression = profile.name;
+            }
+        }
+        if (sortingExpression != null) {
+            jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
+        }
+    }
+
+    protected SearchResults<LeftJoinUserGridSearchResult> listSearchResults(LeftJoinUserGridSearchState searchState) {
+        return searchState.jpaQuery.listResults(listExpression(searchState));
+    }
+
+    protected ConstructorExpression<LeftJoinUserGridSearchResult> listExpression(LeftJoinUserGridSearchState searchState) {
+        QUser $record = searchState.$record;
+        QProfile profile = searchState.profile;
+        return ConstructorExpression.create(LeftJoinUserGridSearchResult.class, $record.name, profile.name);
+    }
+
+    public List<LeftJoinUserGridSearchResult> find(LeftJoinUserGridSearchParam searchParam) {
+        LeftJoinUserGridSearchState searchState = new LeftJoinUserGridSearchState(searchParam);
+        applyFrom(searchState);
+        applyQueryAndFiltersAndSorting(searchState);
+        applyLimitAndOffset(searchState);
+        return list(searchState);
+    }
+
+    protected List<LeftJoinUserGridSearchResult> list(LeftJoinUserGridSearchState searchState) {
         return searchState.jpaQuery.list(listExpression(searchState));
     }
 
@@ -124,10 +205,14 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
     @RolesAllowed({"admin", "manager"})
     public SearchResults<EditableUserGridSearchResult> search(EditableUserGridSearchParam searchParam) {
         EditableUserGridSearchState searchState = new EditableUserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(EditableUserGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(EditableUserGridSearchState searchState) {
@@ -195,7 +280,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
     @RolesAllowed({"admin", "manager"})
     public List<EditableUserGridSearchResult> find(EditableUserGridSearchParam searchParam) {
         EditableUserGridSearchState searchState = new EditableUserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);
@@ -214,10 +299,14 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     public SearchResults<ToolbarUserGridSearchResult> search(ToolbarUserGridSearchParam searchParam) {
         ToolbarUserGridSearchState searchState = new ToolbarUserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(ToolbarUserGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(ToolbarUserGridSearchState searchState) {
@@ -257,7 +346,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     public List<ToolbarUserGridSearchResult> find(ToolbarUserGridSearchParam searchParam) {
         ToolbarUserGridSearchState searchState = new ToolbarUserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);
@@ -276,10 +365,14 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     public SearchResults<SpecificSearchUserGridSearchResult> search(SpecificSearchUserGridSearchParam searchParam) {
         SpecificSearchUserGridSearchState searchState = new SpecificSearchUserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(SpecificSearchUserGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(SpecificSearchUserGridSearchState searchState) {
@@ -319,7 +412,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     public List<SpecificSearchUserGridSearchResult> find(SpecificSearchUserGridSearchParam searchParam) {
         SpecificSearchUserGridSearchState searchState = new SpecificSearchUserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);
@@ -338,10 +431,14 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     public SearchResults<SelectEditableAndButtonUserGridSearchResult> search(SelectEditableAndButtonUserGridSearchParam searchParam) {
         SelectEditableAndButtonUserGridSearchState searchState = new SelectEditableAndButtonUserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(SelectEditableAndButtonUserGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(SelectEditableAndButtonUserGridSearchState searchState) {
@@ -383,7 +480,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     public List<SelectEditableAndButtonUserGridSearchResult> find(SelectEditableAndButtonUserGridSearchParam searchParam) {
         SelectEditableAndButtonUserGridSearchState searchState = new SelectEditableAndButtonUserGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);

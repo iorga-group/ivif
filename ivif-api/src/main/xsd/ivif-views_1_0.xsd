@@ -99,6 +99,7 @@
     <xs:element name="column">
         <xs:complexType>
             <xs:attribute name="ref" type="xs:string" use="required"/>
+            <xs:attribute name="from" type="xs:string" default="$record"/>
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="editable" type="xs:boolean" default="false"/>
             <xs:attribute name="editable-if" type="xs:string"/>
@@ -118,12 +119,14 @@
     <xs:element name="column-hidden-edit">
         <xs:complexType>
             <xs:attribute name="ref" type="xs:string" use="required"/>
+            <xs:attribute name="from" type="xs:string" default="$record"/>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="column-filter">
         <xs:complexType>
             <xs:attribute name="ref" type="xs:string" use="required"/>
+            <xs:attribute name="from" type="xs:string" default="$record"/>
         </xs:complexType>
     </xs:element>
 
@@ -137,6 +140,7 @@
     <xs:element name="query">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="from" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="where" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="default-order-by" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="parameter" minOccurs="0" maxOccurs="unbounded"/>
@@ -144,6 +148,7 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="from" type="xs:string"/>
     <xs:element name="where" type="xs:string"/>
     <xs:element name="default-order-by" type="xs:string"/>
 

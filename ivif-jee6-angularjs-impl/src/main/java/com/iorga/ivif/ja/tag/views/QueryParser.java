@@ -2,11 +2,14 @@ package com.iorga.ivif.ja.tag.views;
 
 
 import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.iorga.ivif.ja.SortingType;
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
+import com.iorga.ivif.ja.tag.configurations.JAConfiguration;
 import com.iorga.ivif.ja.tag.entities.EntityAttribute;
 import com.iorga.ivif.ja.tag.entities.EntityAttributePreparedWaiter;
+import com.iorga.ivif.ja.tag.entities.EntityTargetFile;
 import com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 import com.iorga.ivif.tag.bean.Parameter;
 import com.iorga.ivif.tag.bean.Query;
@@ -77,15 +80,73 @@ public class QueryParser {
         }
     }
 
+    public static class From {
+        protected String name;
+        protected String path;
+        protected EntityTargetFileId entityTargetFileId;
+        protected EntityTargetFile entityTargetFile;
+        protected String qEntityClassName;
+
+
+        protected void setEntityTargetFile(EntityTargetFile entityTargetFile) {
+            this.entityTargetFile = entityTargetFile;
+            setEntityTargetFileId(entityTargetFile.getId());
+        }
+
+        protected void setEntityTargetFileId(EntityTargetFileId entityTargetFileId) {
+            this.entityTargetFileId = entityTargetFileId;
+            this.qEntityClassName = entityTargetFileId.getPackageName() + ".Q" + entityTargetFileId.getSimpleClassName();
+        }
+
+        public String getPath() {
+            return path;
+        }
+        public String getName() {
+            return name;
+        }
+        public String getqEntityClassName() {
+            return qEntityClassName;
+        }
+        public EntityTargetFileId getEntityTargetFileId() {
+            return entityTargetFileId;
+        }
+    }
+
+    public static class Join extends From {
+        protected boolean left;
+        protected EntityAttribute entityAttribute;
+
+        public Join(JoinDeclNode node) {
+            this.name = node.getVariableName();
+            this.path = node.getPath().getAsString();
+            this.left = node.isOuterJoin();
+        }
+
+        protected void setEntityAttribute(EntityAttribute entityAttribute, JAConfiguration configuration) {
+            this.entityAttribute = entityAttribute;
+            setEntityTargetFileId(new EntityTargetFileId(entityAttribute.getType(), configuration));
+        }
+
+        public boolean isLeft() {
+            return left;
+        }
+    }
+
     public static class ParsedQuery {
-        private final List<OrderBy> defaultOrderBy;
+        private final Map<String, From> froms;
         protected String queryDslCode;
+        private final List<OrderBy> defaultOrderBy;
         protected List<QueryParameter> queryParameters;
 
-        public ParsedQuery(String queryDslCode, List<QueryParameter> queryParameters, List<OrderBy> defaultOrderBy) {
+        public ParsedQuery(Map<String, From> froms, String queryDslCode, List<QueryParameter> queryParameters, List<OrderBy> defaultOrderBy) {
+            this.froms = froms;
             this.queryDslCode = queryDslCode;
             this.queryParameters = queryParameters;
             this.defaultOrderBy = defaultOrderBy;
+        }
+
+        public Map<String, From> getFroms() {
+            return froms;
         }
 
         public String getQueryDslCode() {
@@ -365,10 +426,47 @@ public class QueryParser {
         return "${util.useClass(\"" + klass.getName() + "\")}";
     }
 
+    public static Map<String, From> createDefaultFroms(EntityTargetFileId baseEntityId) {
+        Map<String, From> froms = new LinkedHashMap<>();
+        // Add $record from
+        final From recordFrom = new From();
+        recordFrom.name = RECORD_NAME;
+        recordFrom.path = RECORD_NAME;
+        recordFrom.setEntityTargetFileId(baseEntityId);
+        froms.put(RECORD_NAME, recordFrom);
+
+        return froms;
+    }
+
     public static ParsedQuery parse(Query element, EntityTargetFileId baseEntityId, Object waiter, JAGeneratorContext context) throws Exception {
 
         Map<String, String> parametersValueByName = new HashMap<>();
         if (element != null) {
+
+            // Parse the from
+            final String from = element.getFrom();
+            Map<String, From> froms = createDefaultFroms(baseEntityId);
+
+            if (StringUtils.isNotBlank(from)) {
+                final JPQLParser parser = createJPQLParser("FROM $record " + from);
+                final FromNode fromNode = (FromNode) parser.fromClause();
+                final LinkedList<IdentificationVariableDeclNode> declarations = new LinkedList<>(fromNode.getDeclarations());
+                final IdentificationVariableDeclNode first = declarations.removeFirst();
+                // first must be $record
+                if (!(first instanceof RangeDeclNode) || !RECORD_NAME.equals(first.getVariableName())) {
+                    throw new IllegalStateException("From reference must start with '$record', encountered: '" + first.getAsString() + "' (in from: '" + from + "'");
+                }
+                for (IdentificationVariableDeclNode node : declarations) {
+                    if (!(node instanceof JoinDeclNode)) {
+                        throw new IllegalStateException("A reference in from was not a join: '" + node.getAsString() + "' (in from: '" + from + "'");
+                    } else {
+                        final Join join = new Join((JoinDeclNode) node);
+                        froms.put(join.name, join);
+                        resolveEntityTargetFileIdAndQEntityClassName(join, froms, waiter, context, null);
+                    }
+                }
+            }
+
             // Parsing parameter values
             for (Parameter parameter : element.getParameter()) {
                 final String parameterName = parameter.getName();
@@ -389,13 +487,7 @@ public class QueryParser {
                     final String identifierPath = identifierPathForParameterName.getValue();
                     final QueryParameter queryParameter = nodeVisitor.queryParametersByParameterName.get(parameterName);
                     Deque<String> identifierPathDeque = new LinkedList<>(Arrays.asList(identifierPath.split("\\.")));
-                    final String firstPath = identifierPathDeque.removeFirst();
-                    if (!"$record".equals(firstPath)) {
-                        // TODO handle another root, if there are declared joins
-                        throw new IllegalStateException("An identifier must always begin with '$record'. Found " + identifierPath);
-                    } else {
-                        resolveParameterClassName(queryParameter, identifierPathDeque, baseEntityId, context, waiter);
-                    }
+                    resolveParameterClassName(queryParameter, identifierPathDeque, froms, waiter, context);
                 }
             }
 
@@ -403,7 +495,7 @@ public class QueryParser {
             final String defaultOrderByStr = element.getDefaultOrderBy();
             final ArrayList<OrderBy> defaultOrderBy;
             if (StringUtils.isNotBlank(defaultOrderByStr)) {
-                final JPQLParser parser = createJPQLParser("ORDER BY "+defaultOrderByStr);
+                final JPQLParser parser = createJPQLParser("ORDER BY " + defaultOrderByStr);
                 final OrderByNode orderByNode = (OrderByNode) parser.orderByClause();
                 defaultOrderBy = new ArrayList<>(orderByNode.getOrderByItems().size());
                 for (Object orderByItemNode : orderByNode.getOrderByItems()) {
@@ -413,7 +505,7 @@ public class QueryParser {
                 defaultOrderBy = null;
             }
 
-            return new ParsedQuery(nodeVisitor.queryDslCode.toString(), new ArrayList<>(nodeVisitor.queryParametersByParameterName.values()), defaultOrderBy);
+            return new ParsedQuery(froms, nodeVisitor.queryDslCode.toString(), new ArrayList<>(nodeVisitor.queryParametersByParameterName.values()), defaultOrderBy);
         } else {
             return null;
         }
@@ -427,7 +519,76 @@ public class QueryParser {
         return parser;
     }
 
-    private static void resolveParameterClassName(final QueryParameter parameter, final Deque<String> identifierPath, final EntityTargetFileId entityTargetFileId, final JAGeneratorContext context, final Object waiter) throws Exception {
+    private static interface EntityTargetFileIdWaiter {
+        void onEntityTargetFileIdResolved(EntityTargetFileId entityTargetFileId) throws Exception;
+    }
+    private static interface EntityTargetFileWaiter {
+        void onEntityTargetFileResolved(EntityTargetFile entityTargetFile);
+    }
+
+    private static void resolveEntityTargetFileIdAndQEntityClassName(final Join join, Map<String, From> froms, final Object waiter, final JAGeneratorContext context, final EntityTargetFileIdWaiter entityTargetFileIdWaiter) throws Exception {
+        if (join.qEntityClassName == null) {
+            final Deque<String> identifierPath = new LinkedList<>(Lists.newArrayList(join.getPath().split("\\.")));
+            final String fromName = identifierPath.removeFirst();
+            final From from = froms.get(fromName);
+            resolveFromEntityTargetFileId(from, froms, waiter, context, new EntityTargetFileIdWaiter() {
+                @Override
+                public void onEntityTargetFileIdResolved(EntityTargetFileId entityTargetFileId) throws Exception {
+                    resolveEntityTargetFileIdAndQEntityClassName(join, entityTargetFileId, identifierPath, waiter, context);
+                    if (entityTargetFileIdWaiter != null) {
+                        entityTargetFileIdWaiter.onEntityTargetFileIdResolved(entityTargetFileId);
+                    }
+                }
+            });
+        }
+    }
+
+    private static void resolveEntityTargetFileIdAndQEntityClassName(final Join join, final EntityTargetFileId entityTargetFileId, final Deque<String> identifierPath, final Object waiter, final JAGeneratorContext context) throws Exception {
+        String currentPathPart = identifierPath.removeFirst();
+        context.waitForEvent(new EntityAttributePreparedWaiter(currentPathPart, entityTargetFileId, waiter) {
+            @Override
+            protected void onEntityAttributePrepared(EntityAttribute entityAttribute) throws Exception {
+                final JAConfiguration configuration = entityTargetFileId.getConfiguration();
+                if (identifierPath.isEmpty()) {
+                    // last part, can resolve type
+                    join.setEntityAttribute(entityAttribute, configuration);
+                } else {
+                    // Continue recursive iteration
+                    resolveEntityTargetFileIdAndQEntityClassName(join, new EntityTargetFileId(entityAttribute.getType(), configuration), identifierPath, waiter, context);
+                }
+            }
+        });
+    }
+
+    private static void resolveFromEntityTargetFileId(From from, Map<String, From> froms, Object waiter, JAGeneratorContext context, EntityTargetFileIdWaiter entityTargetFileIdWaiter) throws Exception {
+        if (from.entityTargetFileId != null) {
+            entityTargetFileIdWaiter.onEntityTargetFileIdResolved(from.entityTargetFileId);
+        } else {
+            // TODO resolve other "root" froms => must add the type in the from, else here
+            if (!(from instanceof Join)) {
+                throw new IllegalStateException("Root froms other than $record are not yet supported");
+            } else {
+                resolveEntityTargetFileIdAndQEntityClassName((Join) from, froms, waiter, context, entityTargetFileIdWaiter);
+            }
+        }
+    }
+
+    private static void resolveParameterClassName(final QueryParameter parameter, final Deque<String> identifierPath, Map<String, From> froms, final Object waiter, final JAGeneratorContext context) throws Exception {
+        final String firstIdentifier = identifierPath.removeFirst();
+        final From from = froms.get(firstIdentifier);
+        if (from.entityTargetFileId != null) {
+            resolveParameterClassName(parameter, identifierPath, from.entityTargetFileId, waiter, context);
+        } else {
+            resolveFromEntityTargetFileId(from, froms, waiter, context, new EntityTargetFileIdWaiter() {
+                @Override
+                public void onEntityTargetFileIdResolved(EntityTargetFileId entityTargetFileId) throws Exception {
+                    resolveParameterClassName(parameter, identifierPath, entityTargetFileId, waiter, context);
+                }
+            });
+        }
+    }
+
+    private static void resolveParameterClassName(final QueryParameter parameter, final Deque<String> identifierPath, final EntityTargetFileId entityTargetFileId, final Object waiter, final JAGeneratorContext context) throws Exception {
         String currentPathPart = identifierPath.removeFirst();
         context.waitForEvent(new EntityAttributePreparedWaiter(currentPathPart, entityTargetFileId, waiter) {
             @Override
@@ -445,7 +606,7 @@ public class QueryParser {
                     }
                 } else {
                     // Continue recursive iteration
-                    resolveParameterClassName(parameter, identifierPath, new EntityTargetFileId(entityAttributeType, entityTargetFileId.getConfiguration()), context, waiter);
+                    resolveParameterClassName(parameter, identifierPath, new EntityTargetFileId(entityAttributeType, entityTargetFileId.getConfiguration()), waiter, context);
                 }
             }
         });

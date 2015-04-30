@@ -120,6 +120,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     public static class GridColumn {
         protected String refVariableName;
         protected String ref;
+        protected String from;
         private EntityAttribute entityAttribute;
         private List<EntityAttribute> refEntityAttributes = new ArrayList<>();
         public boolean resultToResolve = false;
@@ -127,18 +128,24 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         public boolean sortableToResolve = false;
 
         public GridColumn(EntityAttribute entityAttribute) {
-            this(entityAttribute.getElement().getValue().getName());
+            this(entityAttribute.getElement().getValue().getName(), "$record");
             this.entityAttribute = entityAttribute;
         }
 
-        public GridColumn(String ref) {
+        public GridColumn(String ref, String from) {
             this.ref = ref;
-            this.refVariableName = ref.replaceAll("\\.", "_");
+            this.from = from;
+            final String flatRef = ref.replaceAll("\\.", "_");
+            this.refVariableName = "$record".equals(from) ? flatRef : "__" + from + "_" + flatRef;
         }
 
 
         public void setEntityAttribute(EntityAttribute entityAttribute) {
             this.entityAttribute = entityAttribute;
+        }
+
+        public String getFrom() {
+            return from;
         }
 
         public String getRefVariableName() {
@@ -167,7 +174,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         private JsExpression requiredIfExpression;
 
         public DisplayedGridColumn(Column column) {
-            super(column.getRef());
+            super(column.getRef(), column.getFrom());
             this.column = column;
             editable = column.isEditable() || (StringUtils.isNotBlank(column.getEditableIf()) && BooleanUtils.toBooleanObject(column.getEditableIf()) != Boolean.FALSE);
         }
@@ -335,6 +342,15 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
                 entityTargetFileId = new EntityTargetFileId(element.getEntity(), configuration);
 
+                // Create QueryModel
+                final String queryModelId = "grid:" + element.getName();
+                queryModel = context.getOrCreateTarget(QueryModel.class, queryModelId, new TargetFactory<QueryModel, String, JAGeneratorContext>() {
+                    @Override
+                    public QueryModel createTarget() throws Exception {
+                        return new QueryModel(queryModelId, element.getQuery(), entityTargetFileId, GridModel.this);
+                    }
+                });
+
                 if (isEditableIf) {
                     final JsExpression editableIfExpr = addResultColumnForExpressionIfNecessary(editableIfStr, "selectedLine", "selectedLine.$original", configuration, context);
                     codeInjections.addAll(editableIfExpr.getInjections());
@@ -365,13 +381,13 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                         updateLists(gridColumn, true, false, true, false);
                     } else {
                         // new grid column
-                        prepareNewGridColumn(new GridColumn(ref), true, false, true, false, context, configuration);
+                        prepareNewGridColumn(new GridColumn(ref, columnHiddenEdit.getFrom()), true, false, true, false, context, configuration);
                     }
                 }
 
                 // Add columns for simple column-filters
                 for (ColumnFilter columnFilter : element.getColumnFilter()) {
-                    addColumnForRefIfNecessary(columnFilter.getRef(), false, true, false, configuration, context);
+                    addColumnForRefIfNecessary(columnFilter.getRef(), columnFilter.getFrom(), false, true, false, configuration, context);
                 }
 
                 columnFilterParams = new ArrayList<>();
@@ -491,14 +507,6 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 // Create Java Entity Base Service
                 serviceTargetFileId = new ServiceTargetFileId(element.getEntity() + "BaseService", null, configuration);
 
-                // Create QueryModel
-                final String queryModelId = "grid:" + element.getName();
-                queryModel = context.getOrCreateTarget(QueryModel.class, queryModelId, new TargetFactory<QueryModel, String, JAGeneratorContext>() {
-                    @Override
-                    public QueryModel createTarget() throws Exception {
-                        return new QueryModel(queryModelId, element.getQuery(), entityTargetFileId, GridModel.this);
-                    }
-                });
                 context.waitForEvent(new TargetPreparedWaiter<QueryModel, String, JAGeneratorContext>(QueryModel.class, queryModelId, GridModel.this) {
                     @Override
                     protected void onTargetPrepared(QueryModel queryModel) throws Exception {
@@ -530,7 +538,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
             if (dotIndex > -1) {
                 // we have field references, let's replace them
                 final String fieldsRef = ref.substring(dotIndex + 1);
-                addResultColumnForRefIfNecessary(fieldsRef, configuration, context); // add them as a select if necessary
+                addResultColumnForRefIfNecessary(fieldsRef, "$record", configuration, context); // add them as a select if necessary // TODO handle $from(name_of_from).ref in parsing
                 refBuilder.append("." + fieldsRef.replaceAll("\\.", "_"));
             }
             if (ref.startsWith("$line")) {
@@ -558,7 +566,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         return codeBuffer.toString();
     }
 
-    private void prepareNewGridColumn(GridColumn gridColumn, boolean editable, boolean filter, boolean result, boolean sortable, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
+    private void prepareNewGridColumn(final GridColumn gridColumn, boolean editable, boolean filter, boolean result, boolean sortable, final JAGeneratorContext context, final JAConfiguration configuration) throws Exception {
         gridColumnsByRef.put(gridColumn.ref, gridColumn);
 
         if (gridColumn.entityAttribute == null) {
@@ -578,8 +586,15 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
         if (gridColumn.entityAttribute == null) {
             // Ask to resolve later
-            Deque<String> refPath = new LinkedList<>(Arrays.asList(gridColumn.ref.split("\\.")));
-            waitToPrepareGridColumnRecursive(refPath, entityTargetFileId, gridColumn, context, configuration);
+            final Deque<String> refPath = new LinkedList<>(Arrays.asList(gridColumn.ref.split("\\.")));
+            context.waitForEvent(new TargetPreparedWaiter<QueryModel, String, JAGeneratorContext>(QueryModel.class, queryModel.getId(), this) {
+
+                @Override
+                protected void onTargetPrepared(QueryModel queryModel) throws Exception {
+
+                    waitToPrepareGridColumnRecursive(refPath, queryModel.getFroms().get(gridColumn.from).getEntityTargetFileId(), gridColumn, context, configuration);
+                }
+            });
         }
     }
 
@@ -640,20 +655,19 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     private void addResultColumnsForExpressionIfNecessary(JsExpression jsExpression, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
         for (LineRef lineRef : jsExpression.getLineRefs()) {
-            final String ref = lineRef.getRef();
-            addResultColumnForRefIfNecessary(ref, configuration, context);
+            addResultColumnForRefIfNecessary(lineRef.getRef(), lineRef.getFrom(), configuration, context);
         }
     }
 
-    private void addResultColumnForRefIfNecessary(String ref, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
-        addColumnForRefIfNecessary(ref, false, false, true, configuration, context);
+    private void addResultColumnForRefIfNecessary(String ref, String from, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+        addColumnForRefIfNecessary(ref, from, false, false, true, configuration, context);
     }
 
-    private void addColumnForRefIfNecessary(String ref, boolean editable, boolean filter, boolean result, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+    private void addColumnForRefIfNecessary(String ref, String from, boolean editable, boolean filter, boolean result, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
         GridColumn gridColumn = gridColumnsByRef.get(ref);
         if (gridColumn == null) {
             // Add this non already added id column
-            gridColumn = new GridColumn(ref);
+            gridColumn = new GridColumn(ref, from);
             prepareNewGridColumn(gridColumn, editable, filter, result, false, context, configuration);
         } else {
             updateLists(gridColumn, editable, filter, result, false);

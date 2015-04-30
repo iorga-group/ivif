@@ -56,10 +56,14 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
 
     public SearchResults<DesktopSessionGridSearchResult> search(DesktopSessionGridSearchParam searchParam) {
         DesktopSessionGridSearchState searchState = new DesktopSessionGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(DesktopSessionGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
     }
 
     protected void applyQueryAndFiltersAndSorting(DesktopSessionGridSearchState searchState) {
@@ -109,7 +113,7 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
 
     public List<DesktopSessionGridSearchResult> find(DesktopSessionGridSearchParam searchParam) {
         DesktopSessionGridSearchState searchState = new DesktopSessionGridSearchState(searchParam);
-        searchState.jpaQuery.from(searchState.$record);
+        applyFrom(searchState);
         applyQueryAndFiltersAndSorting(searchState);
         applyLimitAndOffset(searchState);
         return list(searchState);

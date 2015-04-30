@@ -1,6 +1,7 @@
 package com.iorga.ivif.ja.tag.views;
 
 import com.iorga.ivif.ja.tag.JAGeneratorContext;
+import com.iorga.ivif.ja.tag.views.QueryParser.From;
 import com.iorga.ivif.ja.tag.views.QueryParser.OrderBy;
 import com.iorga.ivif.ja.tag.views.QueryParser.ParsedQuery;
 import com.iorga.ivif.ja.tag.views.QueryParser.QueryParameter;
@@ -9,6 +10,7 @@ import com.iorga.ivif.tag.bean.Query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.iorga.ivif.ja.tag.entities.EntityTargetFile.EntityTargetFileId;
 
@@ -19,6 +21,7 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
     private String queryDslCode;
     private List<QueryParameter> parameters;
     private List<OrderBy> defaultOrderBy;
+    private Map<String, From> froms;
 
 
     public QueryModel(String id, Query element, EntityTargetFileId baseEntityId, Object waiter) {
@@ -41,11 +44,16 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
             final ParsedQuery parsedQuery = QueryParser.parse(element, baseEntityId, waiter, context);
 
             if (parsedQuery != null) {
+                froms = parsedQuery.getFroms();
                 queryDslCode = parsedQuery.getQueryDslCode();
                 parameters = parsedQuery.getQueryParameters();
                 defaultOrderBy = parsedQuery.getDefaultOrderBy();
             }
+        }
 
+        if (froms == null) {
+            // this can happened if there were no query declared
+            froms = QueryParser.createDefaultFroms(baseEntityId);
         }
     }
 
@@ -56,6 +64,10 @@ public class QueryModel extends AbstractTarget<String, JAGeneratorContext> {
 
         // TODO declare this handler
 
+
+    public Map<String, From> getFroms() {
+        return froms;
+    }
 
     public String getQueryDslCode() {
         return queryDslCode;
