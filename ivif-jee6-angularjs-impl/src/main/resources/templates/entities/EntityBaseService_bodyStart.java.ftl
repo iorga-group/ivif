@@ -26,3 +26,9 @@ public class ${model.simpleClassName} extends ${util.useClass("com.iorga.ivif.ja
     }
 
 </#if>
+    /**
+     * Apply pagination sort : sort on Id columns in order to paginate later<#-- see http://java.dzone.com/articles/jpql-pagination-oracle#comment-87017 -->
+     **/
+    protected void applyPaginationSort(${util.useClass("com.iorga.ivif.ja.EntityBaseService.SearchState")}<${util.useClass(model.qEntityClassName)}, ?> searchParam) {
+        searchParam.jpaQuery.orderBy(<#list entity.idAttributes as attribute>searchParam.$record.${attribute.element.value.name}.asc()<#if attribute_has_next>, </#if></#list>);
+    }

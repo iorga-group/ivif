@@ -44,6 +44,12 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
     protected ConnectedUser connectedUser;
 
 
+    /**
+     * Apply pagination sort : sort on Id columns in order to paginate later
+     **/
+    protected void applyPaginationSort(SearchState<QComputer, ?> searchParam) {
+        searchParam.jpaQuery.orderBy(searchParam.$record.id.asc());
+    }
 
     protected class ComputerGridSearchState extends SearchState<QComputer, ComputerGridSearchParam> {
         protected ComputerGridSearchState(ComputerGridSearchParam searchParam) {
@@ -98,6 +104,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
             // default sorting
             jpaQuery.orderBy($record.name.asc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<ComputerGridSearchResult> listSearchResults(ComputerGridSearchState searchState) {
@@ -171,6 +178,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<ComputerToDesktopSessionGridSearchResult> listSearchResults(ComputerToDesktopSessionGridSearchState searchState) {
@@ -239,6 +247,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
             // default sorting
             jpaQuery.orderBy($record.name.desc(), $record.user.name.asc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<ComputerForConnectedUserGridSearchResult> listSearchResults(ComputerForConnectedUserGridSearchState searchState) {
@@ -302,6 +311,7 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<ComputerToCurrentUserDesktopSessionGridSearchResult> listSearchResults(ComputerToCurrentUserDesktopSessionGridSearchState searchState) {

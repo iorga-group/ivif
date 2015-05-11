@@ -39,6 +39,12 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
     protected SecurityService securityService;
 
 
+    /**
+     * Apply pagination sort : sort on Id columns in order to paginate later
+     **/
+    protected void applyPaginationSort(SearchState<QProfile, ?> searchParam) {
+        searchParam.jpaQuery.orderBy(searchParam.$record.id.asc());
+    }
 
     protected class ProfileGridSearchState extends SearchState<QProfile, ProfileGridSearchParam> {
         protected ProfileGridSearchState(ProfileGridSearchParam searchParam) {
@@ -86,6 +92,7 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<ProfileGridSearchResult> listSearchResults(ProfileGridSearchState searchState) {
@@ -150,6 +157,7 @@ public class ProfileBaseService extends EntityBaseService<Profile, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<EditableProfileGridSearchResult> listSearchResults(EditableProfileGridSearchState searchState) {

@@ -47,6 +47,12 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
         return entity.getUserId() == null && entity.getComputerId() == null;
     }
 
+    /**
+     * Apply pagination sort : sort on Id columns in order to paginate later
+     **/
+    protected void applyPaginationSort(SearchState<QDesktopSession, ?> searchParam) {
+        searchParam.jpaQuery.orderBy(searchParam.$record.userId.asc(), searchParam.$record.computerId.asc());
+    }
 
     protected class DesktopSessionGridSearchState extends SearchState<QDesktopSession, DesktopSessionGridSearchParam> {
         protected DesktopSessionGridSearchState(DesktopSessionGridSearchParam searchParam) {
@@ -100,6 +106,7 @@ public class DesktopSessionBaseService extends EntityBaseService<DesktopSession,
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<DesktopSessionGridSearchResult> listSearchResults(DesktopSessionGridSearchState searchState) {

@@ -47,6 +47,12 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
     protected EntityManager entityManager;
 
 
+    /**
+     * Apply pagination sort : sort on Id columns in order to paginate later
+     **/
+    protected void applyPaginationSort(SearchState<QUser, ?> searchParam) {
+        searchParam.jpaQuery.orderBy(searchParam.$record.id.asc());
+    }
 
     protected class UserGridSearchState extends SearchState<QUser, UserGridSearchParam> {
         protected UserGridSearchState(UserGridSearchParam searchParam) {
@@ -99,6 +105,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
             // default sorting
             jpaQuery.orderBy($record.lastModification.asc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<UserGridSearchResult> listSearchResults(UserGridSearchState searchState) {
@@ -171,6 +178,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<LeftJoinUserGridSearchResult> listSearchResults(LeftJoinUserGridSearchState searchState) {
@@ -266,6 +274,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<EditableUserGridSearchResult> listSearchResults(EditableUserGridSearchState searchState) {
@@ -333,6 +342,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<ToolbarUserGridSearchResult> listSearchResults(ToolbarUserGridSearchState searchState) {
@@ -399,6 +409,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<SpecificSearchUserGridSearchResult> listSearchResults(SpecificSearchUserGridSearchState searchState) {
@@ -467,6 +478,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (sortingExpression != null) {
             jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
         }
+        applyPaginationSort(searchState);
     }
 
     protected SearchResults<SelectEditableAndButtonUserGridSearchResult> listSearchResults(SelectEditableAndButtonUserGridSearchState searchState) {

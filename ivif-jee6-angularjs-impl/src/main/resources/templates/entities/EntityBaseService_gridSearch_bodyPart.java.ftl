@@ -96,6 +96,7 @@
         }</#if>
     </#if>
 </#list>
+        applyPaginationSort(searchState);
     }
 
     protected ${util.useClass("com.mysema.query.SearchResults")}<${util.useClass(model.searchResultClassName)}> listSearchResults(${searchStateClassName} searchState) {
