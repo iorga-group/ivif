@@ -53,18 +53,21 @@ public class QueryParser {
     }
 
     public static class OrderBy {
+        protected String from;
         protected String ref;
         protected String refVariableName;
         protected SortingType direction;
 
         public OrderBy(OrderByItemNode orderByItemNode) {
             final String originalRef = ((DotNode) orderByItemNode.getOrderByItem()).getAsString();
-            if (!originalRef.startsWith(RECORD_NAME)) {
-                throw new IllegalArgumentException("Default order by must start with '"+RECORD_NAME+"'. Got '"+originalRef+"'");
-            }
+            from = StringUtils.substringBefore(originalRef, ".");
             ref = StringUtils.substringAfter(originalRef, ".");
             refVariableName = ref.replaceAll("\\.", "_");
             direction = orderByItemNode.getDirection().getSortDirection() == ExpressionOperator.Ascending ? SortingType.ASCENDING : SortingType.DESCENDING;
+        }
+
+        public String getFrom() {
+            return from;
         }
 
         public SortingType getDirection() {

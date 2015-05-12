@@ -30,7 +30,7 @@ import static com.iorga.ivif.ja.tag.views.JsExpressionParser.*;
 public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected final Grid element;
 
-    public static final Pattern LINE_OR_RECORD_REF = Pattern.compile("(?<![\\w\\$])\\$(line|record)(\\.[\\p{Alpha}\\$_][\\w\\$]*)*");
+    public static final Pattern LINE_OR_RECORD_REF = Pattern.compile("(?<![\\w\\$])\\$(line|record)(?:\\(([\\w\\$]*)\\))?(\\.[\\p{Alpha}\\$_][\\w\\$]*)*");
     public static final Pattern INJECT_OR_ACTION_PATTERN = Pattern.compile("(?<![\\w\\$])\\$(inject|action)\\(([\\p{Alpha}\\$_][\\w\\$]*)\\)");
     public static final Pattern ENUM_TYPE = Pattern.compile("enum\\[(.*)\\]");
 
@@ -38,7 +38,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     protected EntityTargetFileId entityTargetFileId;
     protected ServiceTargetFileId serviceTargetFileId;
 
-    protected Map<String, GridColumn> gridColumnsByRef;
+    protected Map<String, GridColumn> gridColumnsByFromAndRef;
 
     protected LinkedHashSet<GridColumn> editableGridColumns;
     protected LinkedHashSet<GridColumn> resultGridColumns;
@@ -127,8 +127,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         public boolean filterToResolve = false;
         public boolean sortableToResolve = false;
 
-        public GridColumn(EntityAttribute entityAttribute) {
-            this(entityAttribute.getElement().getValue().getName(), "$record");
+        public GridColumn(String from, EntityAttribute entityAttribute) {
+            this(entityAttribute.getElement().getValue().getName(), from);
             this.entityAttribute = entityAttribute;
         }
 
@@ -296,7 +296,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         editable = element.isEditable() || isEditableIf;
 
         // Prepare displayed columns
-        gridColumnsByRef = new HashMap<>();
+        gridColumnsByFromAndRef = new HashMap<>();
 
         editableGridColumns = new LinkedHashSet<>();
         resultGridColumns = new LinkedHashSet<>();
@@ -375,7 +375,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                 // handle hidden editable columns
                 for (ColumnHiddenEdit columnHiddenEdit : element.getColumnHiddenEdit()) {
                     final String ref = columnHiddenEdit.getRef();
-                    final GridColumn gridColumn = gridColumnsByRef.get(ref);
+                    final GridColumn gridColumn = getGridColumn(columnHiddenEdit.getFrom(), ref);
                     if (gridColumn != null) {
                         // it already exists, let's just update
                         updateLists(gridColumn, true, false, true, false);
@@ -514,7 +514,8 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                         final List<OrderBy> defaultOrderBy = queryModel.getDefaultOrderBy();
                         singleDisplayedOrderByColumn = false;
                         if (defaultOrderBy != null && defaultOrderBy.size() == 1) {
-                            final GridColumn gridColumn = gridColumnsByRef.get(defaultOrderBy.get(0).getRef());
+                            OrderBy orderBy = defaultOrderBy.get(0);
+                            final GridColumn gridColumn = getGridColumn(orderBy.getFrom(), orderBy.getRef());
                             if (gridColumn != null && gridColumn instanceof DisplayedGridColumn) {
                                 singleDisplayedOrderByColumn = true;
                             }
@@ -534,12 +535,14 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         while (matcher.find()) {
             String ref = matcher.group();
             final int dotIndex = ref.indexOf('.');
+            final String from = matcher.group(2);
+            final boolean fromDefined = StringUtils.isNotBlank(from);
             final StringBuilder refBuilder = new StringBuilder();
             if (dotIndex > -1) {
                 // we have field references, let's replace them
                 final String fieldsRef = ref.substring(dotIndex + 1);
-                addResultColumnForRefIfNecessary(fieldsRef, "$record", configuration, context); // add them as a select if necessary // TODO handle $from(name_of_from).ref in parsing
-                refBuilder.append("." + fieldsRef.replaceAll("\\.", "_"));
+                addResultColumnForRefIfNecessary(fieldsRef, fromDefined ? from : "$record", configuration, context); // add them as a select if necessary
+                refBuilder.append("." + (fromDefined ? "__" + from + "_" : "") + fieldsRef.replaceAll("\\.", "_"));
             }
             if (ref.startsWith("$line")) {
                 refBuilder.insert(0, dollarLineReplacement);
@@ -567,7 +570,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     }
 
     private void prepareNewGridColumn(final GridColumn gridColumn, boolean editable, boolean filter, boolean result, boolean sortable, final JAGeneratorContext context, final JAConfiguration configuration) throws Exception {
-        gridColumnsByRef.put(gridColumn.ref, gridColumn);
+        gridColumnsByFromAndRef.put(gridColumn.from + ":" + gridColumn.ref, gridColumn);
 
         if (gridColumn.entityAttribute == null) {
             // entity attribute is not yet resolved, result (depending on transient), filter (depending on the field type + transient) and sortable (depending on transient) should be resolved later, but added new anyways
@@ -631,10 +634,10 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
     private GridColumn addNewResultColumnIfNecessary(EntityAttribute entityAttribute, boolean editable, JAGeneratorContext context, JAConfiguration configuration) throws Exception {
         final String attributeName = entityAttribute.getElement().getValue().getName();
-        GridColumn gridColumn = gridColumnsByRef.get(attributeName);
+        GridColumn gridColumn = getGridColumn("$record", attributeName);
         if (gridColumn == null) {
             // Add this non already added id column
-            gridColumn = new GridColumn(entityAttribute);
+            gridColumn = new GridColumn("$record", entityAttribute);
             prepareNewGridColumn(gridColumn, editable, false, true, false, context, configuration);
         } else {
             updateLists(gridColumn, editable, false, true, false);
@@ -664,7 +667,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     }
 
     private void addColumnForRefIfNecessary(String ref, String from, boolean editable, boolean filter, boolean result, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
-        GridColumn gridColumn = gridColumnsByRef.get(ref);
+        GridColumn gridColumn = getGridColumn(from, ref);
         if (gridColumn == null) {
             // Add this non already added id column
             gridColumn = new GridColumn(ref, from);
@@ -672,6 +675,10 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
         } else {
             updateLists(gridColumn, editable, filter, result, false);
         }
+    }
+
+    private GridColumn getGridColumn(String from, String ref) {
+        return gridColumnsByFromAndRef.get(from + ":" + ref);
     }
 
     private JsExpression addResultColumnForActionIfNecessary(String expression, String dollarLineReplacement, String dollarRecordReplacement, JAConfiguration configuration, JAGeneratorContext context) throws Exception {

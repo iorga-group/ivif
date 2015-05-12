@@ -10,8 +10,16 @@
     </grid>
 
     <grid name="LeftJoinUserGrid" entity="User">
+        <toolbar>
+            <button title="Test" action="$inject(testMethod)($line(profile).id)"/>
+        </toolbar>
         <column ref="name"/>
         <column ref="name" from="profile" title="Profile name"/>
+        <code><![CDATA[
+            <td data-title="'Profile description'">
+                Desc : {{$line(profile).description}}
+            </td>
+        ]]></code>
         <query>
             <from>$record left join $record.profile profile</from>
         </query>

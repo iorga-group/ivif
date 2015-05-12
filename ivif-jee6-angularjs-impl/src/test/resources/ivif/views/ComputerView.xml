@@ -31,6 +31,19 @@
         <column ref="name"/>
     </grid>
 
+    <grid name="LeftJoinComputerGrid" title="Computers" entity="Computer">
+        <column ref="id"/>
+        <column ref="name"/>
+        <code><![CDATA[
+            <td data-title="'Profile description'">
+                Desc : {{$line(defaultProfile).description}} / {{$line(user).name}}
+            </td>
+        ]]></code>
+        <query>
+            <from>$record left join $record.user user left join $record.defaultProfile defaultProfile</from>
+        </query>
+    </grid>
+
     <action-open-view name="openUserGridFromComputer" grid-name="UserGrid">
         <query>
             <where>$record.id = :userId</where>

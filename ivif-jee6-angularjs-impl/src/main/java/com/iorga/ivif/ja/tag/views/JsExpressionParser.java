@@ -18,10 +18,12 @@ public class JsExpressionParser {
     public static class LineRef {
         private final String ref;
         private final String refVariableName;
+        private final String from;
 
-        public LineRef(String fullLineRef, String refPrefix) {
-            ref = StringUtils.substringAfter(fullLineRef, refPrefix);
+        public LineRef(String ref, String from) {
+            this.ref = ref;
             refVariableName = ref.replaceAll("\\.", "_");
+            this.from = from;
         }
 
         public String getRef() {
@@ -29,7 +31,7 @@ public class JsExpressionParser {
         }
 
         public String getFrom() {
-            return RECORD_NAME; // TODO handle $from(name_of_from).ref in parsing
+            return from;
         }
 
         public String getRefVariableName() {
@@ -141,20 +143,34 @@ public class JsExpressionParser {
             @Override
             public Void visitMemberDotExpression(MemberDotExpressionContext ctx) {
                 String ref = parser.getTokenStream().getText(ctx);
-                if (ref.startsWith(LINE_NAME + ".")) {
-                    final LineRef lineRef = new LineRef(ref, LINE_NAME + ".");
-                    expression.lineRefs.add(lineRef);
-                    // must change $line.field.subfield to lineReplacement.field_subfield
-                    expressionBuilder.append(lineReplacement + "." + lineRef.refVariableName);
-                } else if (ref.startsWith(RECORD_NAME + ".")) {
-                    final LineRef lineRef = new LineRef(ref, RECORD_NAME + ".");
-                    expression.lineRefs.add(lineRef);
-                    // must change $record.field.subfield to lineReplacement.field_subfield
-                    expressionBuilder.append(recordReplacement + "." + lineRef.refVariableName);
-                } else {
+                if (!visitLineOrRecord(ref, LINE_NAME, lineReplacement) && !visitLineOrRecord(ref, RECORD_NAME, recordReplacement)) {
                     super.visitMemberDotExpression(ctx);
                 }
                 return null;
+            }
+
+            private boolean visitLineOrRecord(String ref, String prefix, String replacement) {
+                String fromRefPrefix = prefix + "(";
+                boolean hasFromRef = ref.startsWith(fromRefPrefix);
+                String dotPrefix = prefix + ".";
+                if (ref.startsWith(dotPrefix) || hasFromRef) {
+                    String from = "$record";
+                    if (hasFromRef) {
+                        // change from
+                        int endFromIndex = ref.indexOf(')');
+                        from = ref.substring(fromRefPrefix.length(), endFromIndex);
+                        ref = ref.substring(endFromIndex + 2);
+                    } else {
+                        ref = ref.substring(dotPrefix.length());
+                    }
+                    final LineRef lineRef = new LineRef(ref, from);
+                    expression.lineRefs.add(lineRef);
+                    // must change $record.field.subfield to lineReplacement.field_subfield
+                    expressionBuilder.append(replacement + "." + (hasFromRef ? "__" + from + "_" : "") + lineRef.refVariableName);
+                    return true;
+                } else {
+                    return false;
+                }
             }
 
             @Override

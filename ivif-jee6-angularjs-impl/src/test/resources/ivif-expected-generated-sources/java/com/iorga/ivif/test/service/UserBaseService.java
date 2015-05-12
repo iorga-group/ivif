@@ -188,7 +188,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
     protected ConstructorExpression<LeftJoinUserGridSearchResult> listExpression(LeftJoinUserGridSearchState searchState) {
         QUser $record = searchState.$record;
         QProfile profile = searchState.profile;
-        return ConstructorExpression.create(LeftJoinUserGridSearchResult.class, $record.name, profile.name);
+        return ConstructorExpression.create(LeftJoinUserGridSearchResult.class, $record.name, profile.name, profile.description, profile.id);
     }
 
     public List<LeftJoinUserGridSearchResult> find(LeftJoinUserGridSearchParam searchParam) {

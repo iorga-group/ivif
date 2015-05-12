@@ -8,6 +8,8 @@ import com.iorga.ivif.ja.SortingType;
 import com.iorga.ivif.ja.test.ConnectedUser;
 import com.iorga.ivif.test.entity.Computer;
 import com.iorga.ivif.test.entity.QComputer;
+import com.iorga.ivif.test.entity.QProfile;
+import com.iorga.ivif.test.entity.QUser;
 import com.iorga.ivif.test.ws.ComputerForConnectedUserGridBaseWS.ComputerForConnectedUserGridSearchFilter;
 import com.iorga.ivif.test.ws.ComputerForConnectedUserGridBaseWS.ComputerForConnectedUserGridSearchParam;
 import com.iorga.ivif.test.ws.ComputerForConnectedUserGridBaseWS.ComputerForConnectedUserGridSearchResult;
@@ -21,6 +23,9 @@ import com.iorga.ivif.test.ws.ComputerToCurrentUserDesktopSessionGridBaseWS.Comp
 import com.iorga.ivif.test.ws.ComputerToDesktopSessionGridBaseWS.ComputerToDesktopSessionGridSearchFilter;
 import com.iorga.ivif.test.ws.ComputerToDesktopSessionGridBaseWS.ComputerToDesktopSessionGridSearchParam;
 import com.iorga.ivif.test.ws.ComputerToDesktopSessionGridBaseWS.ComputerToDesktopSessionGridSearchResult;
+import com.iorga.ivif.test.ws.LeftJoinComputerGridBaseWS.LeftJoinComputerGridSearchFilter;
+import com.iorga.ivif.test.ws.LeftJoinComputerGridBaseWS.LeftJoinComputerGridSearchParam;
+import com.iorga.ivif.test.ws.LeftJoinComputerGridBaseWS.LeftJoinComputerGridSearchResult;
 import com.mysema.query.SearchResults;
 import com.mysema.query.jpa.impl.JPAQuery;
 import com.mysema.query.types.ConstructorExpression;
@@ -332,6 +337,84 @@ public class ComputerBaseService extends EntityBaseService<Computer, Integer> {
     }
 
     protected List<ComputerToCurrentUserDesktopSessionGridSearchResult> list(ComputerToCurrentUserDesktopSessionGridSearchState searchState) {
+        return searchState.jpaQuery.list(listExpression(searchState));
+    }
+
+
+    protected class LeftJoinComputerGridSearchState extends SearchState<QComputer, LeftJoinComputerGridSearchParam> {
+        protected QUser user = new QUser("user");
+        protected QProfile defaultProfile = new QProfile("defaultProfile");
+
+        protected LeftJoinComputerGridSearchState(LeftJoinComputerGridSearchParam searchParam) {
+            super(new QComputer("computer"), searchParam);
+        }
+    }
+
+    public SearchResults<LeftJoinComputerGridSearchResult> search(LeftJoinComputerGridSearchParam searchParam) {
+        LeftJoinComputerGridSearchState searchState = new LeftJoinComputerGridSearchState(searchParam);
+        applyFrom(searchState);
+        applyQueryAndFiltersAndSorting(searchState);
+        applyLimitAndOffset(searchState);
+        return listSearchResults(searchState);
+    }
+
+    protected void applyFrom(LeftJoinComputerGridSearchState searchState) {
+        searchState.jpaQuery.from(searchState.$record);
+        searchState.jpaQuery.leftJoin(searchState.$record.user, searchState.user);
+        searchState.jpaQuery.leftJoin(searchState.$record.defaultProfile, searchState.defaultProfile);
+    }
+
+    protected void applyQueryAndFiltersAndSorting(LeftJoinComputerGridSearchState searchState) {
+        QComputer $record = searchState.$record;
+        QUser user = searchState.user;
+        QProfile defaultProfile = searchState.defaultProfile;
+        LeftJoinComputerGridSearchParam searchParam = searchState.searchParam;
+        JPAQuery jpaQuery = searchState.jpaQuery;
+        // Applying filter
+        LeftJoinComputerGridSearchFilter filter = searchParam.filter;
+        if (filter.id != null) {
+            jpaQuery.where($record.id.like("%" + filter.id + "%"));
+        }
+        if (StringUtils.isNotEmpty(filter.name)) {
+            jpaQuery.where($record.name.containsIgnoreCase(filter.name));
+        }
+        // Applying action filters
+        // Applying sorting
+        Sorting sorting = searchParam.sorting;
+        ComparableExpressionBase sortingExpression = null;
+        if (sorting != null) {
+            if ("id".equals(sorting.ref)) {
+                sortingExpression = $record.id;
+            } else if ("name".equals(sorting.ref)) {
+                sortingExpression = $record.name;
+            }
+        }
+        if (sortingExpression != null) {
+            jpaQuery.orderBy(SortingType.ASCENDING.equals(sorting.type) ? sortingExpression.asc() : sortingExpression.desc());
+        }
+        applyPaginationSort(searchState);
+    }
+
+    protected SearchResults<LeftJoinComputerGridSearchResult> listSearchResults(LeftJoinComputerGridSearchState searchState) {
+        return searchState.jpaQuery.listResults(listExpression(searchState));
+    }
+
+    protected ConstructorExpression<LeftJoinComputerGridSearchResult> listExpression(LeftJoinComputerGridSearchState searchState) {
+        QComputer $record = searchState.$record;
+        QUser user = searchState.user;
+        QProfile defaultProfile = searchState.defaultProfile;
+        return ConstructorExpression.create(LeftJoinComputerGridSearchResult.class, $record.id, $record.name, defaultProfile.description, user.name);
+    }
+
+    public List<LeftJoinComputerGridSearchResult> find(LeftJoinComputerGridSearchParam searchParam) {
+        LeftJoinComputerGridSearchState searchState = new LeftJoinComputerGridSearchState(searchParam);
+        applyFrom(searchState);
+        applyQueryAndFiltersAndSorting(searchState);
+        applyLimitAndOffset(searchState);
+        return list(searchState);
+    }
+
+    protected List<LeftJoinComputerGridSearchResult> list(LeftJoinComputerGridSearchState searchState) {
         return searchState.jpaQuery.list(listExpression(searchState));
     }
 

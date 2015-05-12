@@ -4,6 +4,8 @@ import com.iorga.ivif.ja.tag.views.JsExpressionParser.JsExpression;
 import com.iorga.ivif.ja.tag.views.JsExpressionParser.LineRef;
 import org.junit.Test;
 
+import java.util.Iterator;
+
 import static org.assertj.core.api.Assertions.*;
 
 public class JsExpressionParserTest {
@@ -77,5 +79,28 @@ public class JsExpressionParserTest {
         final LineRef recordLineRef = expression.getLineRefs().iterator().next();
         assertThat(recordLineRef.getRef()).isEqualTo("test.toto");
         assertThat(recordLineRef.getRefVariableName()).isEqualTo("test_toto");
+    }
+
+    @Test
+    public void dollarLineFromAnotherTableTest() {
+        JsExpression expression = JsExpressionParser.parseExpression("$line.field + $line(anotherTable).test + $line(table1).field.two", "line", "rec");
+        assertThat(expression.getLineRefs()).hasSize(3);
+        final Iterator<LineRef> iterator = expression.getLineRefs().iterator();
+        LineRef recordLineRef;
+
+        recordLineRef = iterator.next();
+        assertThat(recordLineRef.getFrom()).isEqualTo("$record");
+
+        recordLineRef = iterator.next();
+        assertThat(recordLineRef.getRef()).isEqualTo("test");
+        assertThat(recordLineRef.getRefVariableName()).isEqualTo("test");
+        assertThat(recordLineRef.getFrom()).isEqualTo("anotherTable");
+
+        recordLineRef = iterator.next();
+        assertThat(recordLineRef.getRef()).isEqualTo("field.two");
+        assertThat(recordLineRef.getRefVariableName()).isEqualTo("field_two");
+        assertThat(recordLineRef.getFrom()).isEqualTo("table1");
+
+        assertThat(expression.getExpression()).isEqualTo("line.field+line.__anotherTable_test+line.__table1_field_two");
     }
 }
