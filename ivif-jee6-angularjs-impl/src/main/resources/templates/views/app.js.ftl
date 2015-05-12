@@ -201,7 +201,7 @@ angular.module('${model.configuration.angularModuleName}', [
                 }
             },
             addModalMessage: function(message) {
-                var messageElement = '<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content panel-'+messageService.getLevelClassSuffix(message)+'"><div class="modal-header panel-heading">';
+                var messageElement = '<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"><div class="modal-dialog modal-lg"><div class="modal-content panel-'+messageService.getLevelClassSuffix(message)+'"><div class="modal-header panel-heading">';
                 if (message.title) {
                     messageElement += '<h4 class="modal-title">'+message.title+'</h4>';
                 }
