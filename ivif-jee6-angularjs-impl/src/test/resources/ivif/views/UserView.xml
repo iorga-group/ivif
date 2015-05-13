@@ -48,6 +48,7 @@
         </toolbar>
         <column ref="name"/>
         <column-filter ref="firstName"/>
+        <column-sort ref="comment"/>
     </grid>
 
     <grid name="SpecificSearchUserGrid" entity="User" service-search-method="com.iorga.ivif.test.UserService.search" selection="single">

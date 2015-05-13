@@ -387,7 +387,7 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
 
                 // Add columns for simple column-filters
                 for (ColumnFilter columnFilter : element.getColumnFilter()) {
-                    addColumnForRefIfNecessary(columnFilter.getRef(), columnFilter.getFrom(), false, true, false, configuration, context);
+                    addColumnForRefIfNecessary(columnFilter.getRef(), columnFilter.getFrom(), false, true, false, false, configuration, context);
                 }
 
                 columnFilterParams = new ArrayList<>();
@@ -405,6 +405,11 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
                         }
                         columnFilterParams.add(new GridColumnFilterParam(columnFilterParam.getName(), typeClass.getName()));
                     }
+                }
+
+                // Add columns for simple column-filters
+                for (ColumnSort columnSort : element.getColumnSort()) {
+                    addColumnForRefIfNecessary(columnSort.getRef(), columnSort.getFrom(), false, false, false, true, configuration, context);
                 }
 
                 // Add columns selected by actions
@@ -663,17 +668,17 @@ public class GridModel extends AbstractTarget<String, JAGeneratorContext> {
     }
 
     private void addResultColumnForRefIfNecessary(String ref, String from, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
-        addColumnForRefIfNecessary(ref, from, false, false, true, configuration, context);
+        addColumnForRefIfNecessary(ref, from, false, false, true, false, configuration, context);
     }
 
-    private void addColumnForRefIfNecessary(String ref, String from, boolean editable, boolean filter, boolean result, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
+    private void addColumnForRefIfNecessary(String ref, String from, boolean editable, boolean filter, boolean result, boolean sort, JAConfiguration configuration, JAGeneratorContext context) throws Exception {
         GridColumn gridColumn = getGridColumn(from, ref);
         if (gridColumn == null) {
             // Add this non already added id column
             gridColumn = new GridColumn(ref, from);
-            prepareNewGridColumn(gridColumn, editable, filter, result, false, context, configuration);
+            prepareNewGridColumn(gridColumn, editable, filter, result, sort, context, configuration);
         } else {
-            updateLists(gridColumn, editable, filter, result, false);
+            updateLists(gridColumn, editable, filter, result, sort);
         }
     }
 

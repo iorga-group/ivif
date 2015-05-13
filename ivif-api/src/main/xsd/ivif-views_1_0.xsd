@@ -32,6 +32,7 @@
                 <xs:element ref="column-hidden-edit" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="column-filter" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="column-filter-param" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="column-sort" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="query" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
             <xs:attribute name="on-open" type="xs:string"/>
@@ -134,6 +135,13 @@
         <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="type" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="column-sort">
+        <xs:complexType>
+            <xs:attribute name="ref" type="xs:string" use="required"/>
+            <xs:attribute name="from" type="xs:string" default="$record"/>
         </xs:complexType>
     </xs:element>
 

@@ -337,6 +337,8 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (sorting != null) {
             if ("name".equals(sorting.ref)) {
                 sortingExpression = $record.name;
+            } else if ("comment".equals(sorting.ref)) {
+                sortingExpression = $record.comment;
             }
         }
         if (sortingExpression != null) {
