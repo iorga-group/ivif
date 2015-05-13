@@ -1,0 +1,29 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <fieldset>
+                <legend>Left Join User Grid</legend>
+                <nav class="navbar navbar-default">
+                    <div class="collapse navbar-collapse">
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="testMethod(selectedLine.__profile_id)" ng-disabled="!selectedLine">Test</button>
+                    </div>
+                </nav>
+                <table ng-table="leftJoinUserGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
+                    <tr ng-repeat="line in $data">
+                        <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">
+                            {{line.name}}
+                        </td>
+                        <td data-title="'Profile name'" sortable="'__profile_name'" filter="{'__profile_name':'text'}">
+                            {{line.__profile_name}}
+                        </td>
+
+            <td data-title="'Profile description'">
+                Desc : {{line.__profile_description}}
+            </td>
+        
+                    </tr>
+                </table>
+            </fieldset>
+        </div>
+    </div>
+</div>
