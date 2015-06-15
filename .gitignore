@@ -1,0 +1,9 @@
+.idea
+*.iml
+*~
+target
+.project
+.settings
+bin
+.classpath
+ivif-generated-sources

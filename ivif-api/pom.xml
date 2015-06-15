@@ -2,9 +2,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.iorga</groupId>
     <artifactId>ivif-api</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <parent>
+        <groupId>com.iorga</groupId>
+        <artifactId>ivif-parent</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../ivif-parent/pom.xml</relativePath>
+    </parent>
+
+    <name>IVIF API</name>
+    <url>https://github.com/iorga-group/ivif.git</url>
+    <description>IVIF XML language definition and common objects</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

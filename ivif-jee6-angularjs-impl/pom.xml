@@ -6,9 +6,12 @@
     <parent>
         <groupId>com.iorga</groupId>
         <artifactId>ivif-jee6-angularjs-impl-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath>../ivif-jee6-angularjs-impl-parent/pom.xml</relativePath>
     </parent>
+
+    <name>IVIF - JEE6 + AngularJS implementation</name>
+    <description>JEE6 + AngularJS generator for IVIF</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

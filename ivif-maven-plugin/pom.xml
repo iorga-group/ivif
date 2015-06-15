@@ -7,9 +7,13 @@
     <parent>
         <groupId>com.iorga</groupId>
         <artifactId>ivif-maven-plugin-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath>../ivif-maven-plugin-parent/pom.xml</relativePath>
     </parent>
+    <name>IVIF Maven plugin</name>
+    <description>
+        Maven plugin which enables an IVIF project to generate its target application in the Maven build process.
+    </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
