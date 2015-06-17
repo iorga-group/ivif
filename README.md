@@ -4,7 +4,7 @@ IVIF is an XML framework used to generate applications.
 Currently it only supports generating JEE6 + AngularJS web applications.
 
 # How can I develop with IVIF? #
-With IVIF, you design your **entities** (one by data table) and the application **grids**.
+With IVIF, you design your **entities** (one by data table) and the application **grids** (that is to say sortable, filterable and editable datatables).
 
 ## Entities ##
 An entity represents a table of your data.
@@ -99,6 +99,146 @@ Inside this tag, put some `<option>` tags which accept those attributes:
  * `name` (required): name of this option. It is a best practice to use only capital letters for that name.
  * `value`: value of this option. By default, takes the value of `name` attribute.
  * `title`: value to display to the user when using this in lists. By default takes the `value` or `name` attribute.
+
+## Views ##
+In a `<views>` tag, you can define `grid`s or `action-open-view`.
+
+A grid represents a datatable presentation of your data.
+
+An "action open view" represents a transition between two grids.
+
+Here is a sample grid:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<views xmlns="http://www.iorga.com/xml/ns/ivif-views"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-views">
+
+    <grid name="EditableUserGrid" title="That's the users" entity="User" on-open="$action(openProfileGridFromUser)({profileId: $line.profile.id})" editable="true" roles-allowed="admin manager">
+        <column ref="firstName"/>
+        <column ref="name" editable-if="$record.profile.name === 'editableName'"/>
+        <column ref="status" editable="true"/>
+        <code><![CDATA[
+            <td data-title="'Profile description'">
+                Desc : {{$line.profile.description}}
+            </td>
+        ]]></code>
+        <column ref="commentTemp" editable="true" required-if="$isDirty($line)"/>
+        <column ref="enabled" editable="true"/>
+        <column ref="bigComment" editable="true"/>
+        <column ref="pass" editable="true"/>
+        <column ref="lastModification" editable="true"/>
+    </grid>
+
+    <action-open-view name="openProfileGridFromUser" grid-name="ProfileGrid" roles-allowed="admin">
+        <query>
+            <where>$record.id = :profileId</where>
+        </query>
+    </action-open-view>
+</views>
+```
+
+### Grid ###
+First, here are the attributes you can set on a `<grid>` tag:
+
+ * `name` (required): name of this grid. Must start with a capital letter
+ * `entity` (required): name of the entity (`name` attribute of an `<entity>`) this grid will list
+ * `title`: title of this grid. Will be displayed in the header of the grid
+ * `tab-title`: title of the tab in which this grid is contained
+ * `selection` (value: [`single`|`none`] ; default: `none`): enables the selection capacity on this grid
+ * `editable` (value: [`true`|`false`] ; default: `false`): whether this grid is editable or not
+ * `editable-if`: javascript expression which returns a boolean representing whether this grid is editable or not
+ * `on-open`: javascript expression which is executed when you click on a line of the grid
+ * `on-select`: javascript expression which is executed when you select a line of the grid (with `selection` set to `single`)
+ * `service-save-method`: reference of the java method to call when clicking on "Save" button (with `editable` set to `true` and modified data). This method should have this signature: `save(List<E> entitiesToSave)` with `E` the class of the entity referenced by `entity` attribute.
+ * `service-search-method`: reference of the java method to call to retrieve data. This method should have this signature: `com.mysema.query.SearchResults<R> search(S searchParam)` with `R` the class of this generated grid search result (`UserGridSearchResult` for example) and `S` the class of the generated grid search param (`UserGridSearchParam` for example).
+ * `roles-allowed`: list of roles (separated by space) which are allowed to access this grid
+
+Inside a `<grid>` you can then add those tags (in this order):
+
+ * `<toolbar>`: defines what is in the toolbar
+   * `<button>`: a button
+     * `title` (required): the title of the button
+     * `action`: javascript expression launched when clicking on the button
+     * `disabled-if`: javascript expression returning a boolean which defines whether this button is disabled or not
+   * `<code>`: free angular HTML code
+ * `<highlight>`: defines how to highlight specific lines
+   * `if` (required): javascript expression returning a boolean which defines whether a line is targeted or not
+   * `color-class` (required): css class to apply to targeted lines
+ * `<column>`: defines a column of the grid
+   * `ref` (required): see bellow
+   * `from` (default: `$record`): see bellow
+   * `title`: title of this column. Defaults to the `title` of this field entity
+   * `editable` (value: [`true`|`false`] ; default: `false`): whether this column is editable or not
+   * `editable-if`: javascript expression which returns a boolean representing whether this column is editable or not
+   * `required-if`: javascript expression which returns a boolean representing whether this column is editable or not
+ * `<code>`: free angular HTML code
+ * `<column-hidden-edit>`: hidden column (not displayed) but editable (the web service will take into account this field modifications)
+   * `ref` (required): see bellow
+   * `from` (default: `$record`): see bellow
+ * `<column-filter>`: hidden column (not displayed) but filterable (the web service will take into account this field value for filtering)
+   * `ref` (required): see bellow
+   * `from` (default: `$record`): see bellow
+ * `<column-filter-param>`: hidden parameter which takes a part into the filter (should be used with `service-search-method` to redefine a specific search method which takes this parameter into account). This will be used to generate an additional parameter in the grid search param
+   * `name` (required): name of the filter
+   * `type` (required): type of this parameter (use one of the `<entity>` type)
+ * `<column-sort>`: hidden column (not displayed) but sortable (the web service will take into account this field value for sorting)
+   * `ref` (required): see bellow
+   * `from` (default: `$record`): see bellow
+ * `<query>`: the base JPA query of the grid (the following tags must be written in this order)
+   * `<from>`: a string which represents the "from" part of the query. Used to left join parts. Must always start with `$record`. For example: `<from>$record left join $record.profile profile</from>`
+   * `<where>`: a string which represents the "where" part of the query. Use the special variable `$record` as the "current entity". For example `<where>$record.field1 = 'test'</where>`
+   * `<default-order-by>`: default order by for the query. Use the special variable `$record` as the "current entity". For example `<default-order-by>$record.name DESC, $record.user.name</default-order-by>`
+   * `<parameter>`: a parameter used in the query. The value is either static or a piece of java code.
+     * `name` (required): the name of this parameter. This will be used in the query like this `$record.field = :param1` if this parameter name is `param1`.
+     * `value` (required): the value for this parameter. Either a static value or a piece of java code. For example: `<parameter name="currentUserId" value="$inject(com.iorga.ivif.ja.test.ConnectedUser).getUserId()"/>`
+
+For tags which accept `ref` and `from` attributes, here is the documentation:
+ * `ref` (required): reference of a field of the entity. You can use "pointed annotation" like `field.subField` if `field` is a `<many-to-one>`
+ * `from` (default: `$record`): name of a jointed entity declared in the `<query>`'s `<from>`
+
+The reference to java method should be like `="com.iorga.ivif.test.UserService.save"`.
+Javascript expressions accept those special references:
+
+ * `$action(actionName)({param1: value1, param2: value2, ...})`: will point to an action defined with `<action-open-view name="actionName">` and which have in this example `:param1` and `:param2` as query parameters in its `<where>` part.
+ * `$inject(angularServiceName)(param1, param2, ...)`: will inject `angularServiceName` in the angular controller of the grid so it can be used in the grid view
+ * `$line.field1`: references the field `field1` of current selected line
+ * `$line(joinedEntityReference).field2`: references the field `field2` of the jointed entity reference `joinedEntityReference` declared in the `<query>`'s `<from>`
+ * `$record.field1`: references the field `field1` of the original record value of the current selected line
+ * `$record(joinedEntityReference).field2`: references the field `field2` of the original record value of the jointed entity reference `joinedEntityReference` declared in the `<query>`'s `<from>`
+
+### Action open view ###
+An "action open view" will generate the code needed to define a transition between 2 grids.
+It contains a query part which will be added to the target grid in order to "filter out" the target grid data.
+
+Here are the attributes of `<action-open-view>`:
+
+ * `name`: the name of this action. Should start with a lower case letter.
+ * `grid-name`: the name of the grid this action will open.
+ * `roles-allowed`: the roles allowed to use this action
+ * `<query>`: a query element, like in a `<grid>` except that all the parameters (`:param`) defined in the `<where>` part will be used as an input parameter
+
+Here is an example:
+
+```xml
+    <action-open-view name="openComputerGridFromUser" grid-name="ComputerGrid">
+        <query>
+            <where>$record.user.id = :userid</where>
+        </query>
+    </action-open-view>
+```
+
+which will be used by this grid:
+
+```xml
+    <grid name="UserGrid" title="Users" entity="User" on-open="$action(openComputerGridFromUser)({userId: $line.id})">
+        <column ref="name"/>
+        <column ref="profile.id"/>
+    </grid>
+```
+
+So the target `ComputerGrid` will be opened and will filter the computers of this user.
 
 # JEE6 + AngularJS IVIF Project #
 ## What is generated? ##
