@@ -199,6 +199,7 @@ For tags which accept `ref` and `from` attributes, here is the documentation:
  * `from` (default: `$record`): name of a jointed entity declared in the `<query>`'s `<from>`
 
 The reference to java method should be like `="com.iorga.ivif.test.UserService.save"`.
+
 Javascript expressions accept those special references:
 
  * `$action(actionName)({param1: value1, param2: value2, ...})`: will point to an action defined with `<action-open-view name="actionName">` and which have in this example `:param1` and `:param2` as query parameters in its `<where>` part.
@@ -210,6 +211,7 @@ Javascript expressions accept those special references:
 
 ### Action open view ###
 An "action open view" will generate the code needed to define a transition between 2 grids.
+
 It contains a query part which will be added to the target grid in order to "filter out" the target grid data.
 
 Here are the attributes of `<action-open-view>`:
@@ -250,6 +252,50 @@ More precisely, here is what will be generated:
  * A basic CRUD service per entity which uses `EntityManager` as a DAO, which uses JTA `@TransactionAttribute` for database modification methods, and which uses [QueryDSL](http://querydsl.com/) QEntity in search methods (one search method per declared IVIF grid)
  * A JAX-RS REST webservices for every IVIF grid
 
+All those files use the `com.iorga:ivif-jee6-angulajs-re` library. This library contains a framework used to develop those kind of web applications.
+
+## Framework APIs ##
+Here are the classes & utils you will find in `com.iorga:ivif-jee6-angulajs-re` library and the generated angular `app.js`.
+
+### Client Messages ###
+You can send messages that will be displayed in the user browser directly from the webservices classes.
+
+Here is an example:
+
+```java
+@Path("/test")
+@ApplicationScoped
+public class TestWS {
+
+	@Inject
+	private ClientMessages clientMessages;
+
+	@POST
+	@Path("/message")
+	public void message() {
+        clientMessages.addError("Here is an error message");
+	}
+}
+```
+
+You can find in [`com.iorga.ivif.ja.ClientMessages`](ivif-jee6-angularjs-re/src/main/java/com/iorga/ivif/ja/ClientMessages.java) multiple APIs which enables you to send `Success` (green by default), `Info` (blue by default), `Warning` (orange by default) or `Error` (red by default) client messages. You also can choose between standard message (displayed as [bootstrap alert](http://getbootstrap.com/components/#alerts) message) or `Modal` ones (displayed as [bootstrap modal dialog](http://getbootstrap.com/javascript/#modals)).
+
+All the "magic" is handled by [`AddClientMessagesInterceptor`](ivif-jee6-angularjs-re/src/main/java/com/iorga/ivif/ja/AddClientMessagesInterceptor.java).
+
+You can also indicate that there has been a functional problem in your webservice by simply throwing a `new `[`FunctionalException`](ivif-jee6-angularjs-re/src/main/java/com/iorga/ivif/ja/FunctionalException.java)`(String |`[`Message`](ivif-jee6-angularjs-re/src/main/java/com/iorga/ivif/ja/Message.java)`)`
+
+On the client angularjs part, you can use (by injecting) the [`messageService`](ivif-jee6-angularjs-impl/src/main/resources/templates/views/app.js.ftl#L194). Those two methods are available:
+
+ * `addAlertMessage(message)`: displays an alert message
+ * `addModalMessage(message)`: displays a modal message
+ * `addMessage(message)`: displays either an alert or a modal message depending on its `type` property. If it is equals to `'MODAL'`, a modal message will be displayed.
+
+A message is javascript object which has those properties:
+
+ * `title`: the title of the message
+ * `message` (required): the content of the message
+ * `level`: the level of the message. Can be (case unsensitive): `'error'`, `'danger'` (same as `'error'`), `'warning'`, `'info'` (default) or `'success'`.
+
 ## Recommended project structure ##
 Here is the recommended project structure:
 
@@ -261,6 +307,27 @@ Here is the recommended project structure:
            * `ivif-ja-config.xml`: your IVIF JA configuration file containing the `<configurations>` root
          * `entities`: folder which contains all your IVIF `<entities>`, one file for each entity
          * `views`: folder which contains all your IVIF `<views><grid/></views>`
+
+## Configuration ##
+In the recommended `src/main/ivif/conf/ivif-ja-config.xml` here is what you can set:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configurations xmlns="http://www.iorga.com/xml/ns/ivif-ja-configurations"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.iorga.com/xml/ns/ivif-ja-configurations">
+    <base-package value="com.iorga.ivif.test"/>
+    <angular-module-name value="sara"/>
+    <angular-module-import value="ngSanitize"/>
+    <angular-module-import value="ngAnimate"/>
+    <angular-module-import value="angular-loading-bar"/>
+    <angular-module-import value="mgcrea.ngStrap.helpers.parseOptions"/>
+</configurations>
+```
+
+ * `<base-package>`: base package of every Java generated classes
+ * `<angular-module-name>`: name of the generated angular application (generated in `app.js` file)
+ * `<angular-module-import>`: add a new angular module dependency to the generated angular application (generated in `app.js` file)
 
 ## Maven configuration ##
 To create a new IVIF project, create 2 maven projects:
