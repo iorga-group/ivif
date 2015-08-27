@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.iorga</groupId>
         <artifactId>ivif-jee6-angularjs-impl-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
         <relativePath>../ivif-jee6-angularjs-impl-parent/pom.xml</relativePath>
     </parent>
 

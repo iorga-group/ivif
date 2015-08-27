@@ -4,6 +4,7 @@
 
     <artifactId>ivif-jee6-angularjs-impl-parent</artifactId>
     <packaging>pom</packaging>
+    <version>1.0.1</version>
     <parent>
         <groupId>com.iorga</groupId>
         <artifactId>ivif-parent</artifactId>
