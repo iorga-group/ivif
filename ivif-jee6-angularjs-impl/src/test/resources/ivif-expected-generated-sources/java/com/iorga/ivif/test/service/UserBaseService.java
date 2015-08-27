@@ -250,6 +250,9 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
         if (filter.lastModification != null) {
             jpaQuery.where($record.lastModification.eq(filter.lastModification));
         }
+        if (filter.age != null) {
+            jpaQuery.where($record.age.eq(filter.age));
+        }
         // Applying action filters
         // Applying sorting
         Sorting sorting = searchParam.sorting;
@@ -269,6 +272,8 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
                 sortingExpression = $record.pass;
             } else if ("lastModification".equals(sorting.ref)) {
                 sortingExpression = $record.lastModification;
+            } else if ("age".equals(sorting.ref)) {
+                sortingExpression = $record.age;
             }
         }
         if (sortingExpression != null) {
@@ -283,7 +288,7 @@ public class UserBaseService extends EntityBaseService<User, Integer> {
 
     protected ConstructorExpression<EditableUserGridSearchResult> listExpression(EditableUserGridSearchState searchState) {
         QUser $record = searchState.$record;
-        return ConstructorExpression.create(EditableUserGridSearchResult.class, $record.firstName, $record.name, $record.status, $record.profile.description, $record.enabled, $record.bigComment, $record.pass, $record.lastModification, $record.profile.id, $record.profile.name, $record.id, $record.version);
+        return ConstructorExpression.create(EditableUserGridSearchResult.class, $record.firstName, $record.name, $record.status, $record.profile.description, $record.enabled, $record.bigComment, $record.pass, $record.lastModification, $record.age, $record.profile.id, $record.profile.name, $record.id, $record.version);
     }
 
     @RolesAllowed({"admin", "manager"})

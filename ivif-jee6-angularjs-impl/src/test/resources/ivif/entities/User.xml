@@ -20,6 +20,7 @@
         <string name="bigComment" default-editor="textArea"/>
         <enum name="pass" ref="UserPassType"/>
         <datetime name="lastModification"/>
+        <long name="age"/>
     </entity>
 
     <selection name="UserStatusType" from-type="string">

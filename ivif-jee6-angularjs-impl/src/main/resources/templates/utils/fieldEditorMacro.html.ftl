@@ -29,7 +29,7 @@
                 <#if entityAttribute.element.value.defaultEditor?has_content && entityAttribute.element.value.defaultEditor.toString() == "TEXT_AREA">
 <@tabulate nbTabs=nbTabs/><textarea ng-if="${editSwitch}" class="form-control" ng-model="${model}"<#if requiredIf?has_content> ng-required="${requiredIf}"</#if> grid-line-field/>
                 <#else>
-<@tabulate nbTabs=nbTabs/><input ng-if="${editSwitch}" type="text" class="form-control" ng-model="${model}"<#if requiredIf?has_content> ng-required="${requiredIf}"</#if> grid-line-field/>
+<@tabulate nbTabs=nbTabs/><input ng-if="${editSwitch}" type="<#if ivifType == "long" || ivifType == "integer">number<#else>text</#if>" class="form-control" ng-model="${model}"<#if requiredIf?has_content> ng-required="${requiredIf}"</#if> grid-line-field/>
                 </#if>
             <#else>
 <@tabulate nbTabs=nbTabs/>{{${model}}}

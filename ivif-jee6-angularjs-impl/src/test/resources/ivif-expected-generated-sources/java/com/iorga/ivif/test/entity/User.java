@@ -83,6 +83,8 @@ public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
 
     private Date lastModification;
 
+    private Long age;
+
 
     @Override
     public Integer entityId() {
@@ -214,6 +216,14 @@ public class User implements Serializable, IEntity<Integer>, Versionable<Long> {
 
     public void setLastModification(Date lastModification) {
         this.lastModification = lastModification;
+    }
+
+    public Long getAge() {
+        return age;
+    }
+
+    public void setAge(Long age) {
+        this.age = age;
     }
 
 }

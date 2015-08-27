@@ -357,7 +357,10 @@ angular.module('${model.configuration.angularModuleName}', [
             }
         };
     })
-    .run(['$templateCache', function($templateCache) {<#-- customize pagination in order to add information of the current displayed data : from "x to y of z" -->
+    .run(['$templateCache', function($templateCache) {
+        <#-- customize pagination in order to add information of the current displayed data : from "x to y of z" -->
         $templateCache.put('ng-table/pager.html', '<div class="ng-cloak ng-table-pager"> <div ng-if="params.settings().counts.length" class="ng-table-counts btn-group pull-right"> <button ng-repeat="count in params.settings().counts" type="button" ng-class="{\'active\':params.count()==count}" ng-click="params.count(count)" class="btn btn-default"> <span ng-bind="count"></span> </button> </div> <ul class="pagination"> <li class="disabled"> <span> <span ng-bind="(params.page() - 1) * params.count() + 1"></span> to <span ng-bind="params.page() * params.count() > params.total() ? params.total() : params.page() * params.count()"></span> of <span ng-bind="params.total()"></span></span></li></ul> <ul class="pagination ng-table-pagination"> <li ng-class="{\'disabled\': !page.active}" ng-repeat="page in pages" ng-switch="page.type"> <a ng-switch-when="prev" ng-click="params.page(page.number)" href="">&laquo;</a> <a ng-switch-when="first" ng-click="params.page(page.number)" href=""><span ng-bind="page.number"></span></a> <a ng-switch-when="page" ng-click="params.page(page.number)" href=""><span ng-bind="page.number"></span></a> <a ng-switch-when="more" ng-click="params.page(page.number)" href="">&#8230;</a> <a ng-switch-when="last" ng-click="params.page(page.number)" href=""><span ng-bind="page.number"></span></a> <a ng-switch-when="next" ng-click="params.page(page.number)" href="">&raquo;</a> </li> </ul> </div> ');
+        <#-- add a "number" filter to force the user to enter only numbers -->
+        $templateCache.put('ng-table/filters/number.html', '<input type="number" ng-model="params.filter()[name]" name="filter-number"/>');
     }])
 ;

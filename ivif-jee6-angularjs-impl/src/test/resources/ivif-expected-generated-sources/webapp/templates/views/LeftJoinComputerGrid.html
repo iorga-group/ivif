@@ -5,7 +5,7 @@
                 <legend>Computers</legend>
                 <table ng-table="leftJoinComputerGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
                     <tr ng-repeat="line in $data">
-                        <td data-title="'Id'" sortable="'id'" filter="{'id':'text'}">
+                        <td data-title="'Id'" sortable="'id'" filter="{'id':'number'}">
                             {{line.id}}
                         </td>
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">

@@ -61,6 +61,12 @@
                                 {{line.lastModification | amDateFormat:'lll'}}
                             </div>
                         </td>
+                        <td data-title="'Age'" sortable="'age'" filter="{'age':'number'}">
+                            <div class="form-group" ng-class="{'has-error': line.$modelCtrls.age.$invalid}">
+                                <span ng-if="!($edit)">{{line.age}}</span>
+                                <input ng-if="$edit" type="number" class="form-control" ng-model="line.age" grid-line-field/>
+                            </div>
+                        </td>
                     </tr>
                 </table>
             </fieldset>

@@ -5,7 +5,7 @@
                 <legend>Desktop Session Grid</legend>
                 <table ng-table="desktopSessionGridTableParams" show-filter="true" class="table table-bordered table-condensed table-hover">
                     <tr ng-repeat="line in $data">
-                        <td data-title="'Computer Id'" sortable="'computerId'" filter="{'computerId':'text'}">
+                        <td data-title="'Computer Id'" sortable="'computerId'" filter="{'computerId':'number'}">
                             {{line.computerId}}
                         </td>
                         <td data-title="'Name'" sortable="'name'" filter="{'name':'text'}">

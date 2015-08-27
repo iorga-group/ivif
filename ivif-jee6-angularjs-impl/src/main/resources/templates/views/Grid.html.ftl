@@ -57,8 +57,11 @@
         <#if !column.entityAttribute.element.value.transient>
  sortable="'${column.refVariableName}'" <#rt>
             <#switch ivifType>
-                <#case "string">
                 <#case "integer">
+                <#case "long">
+            filter="{'${column.refVariableName}':'number'}"<#t>
+                    <#break>
+                <#case "string">
             filter="{'${column.refVariableName}':'text'}"<#t>
                     <#break>
                 <#case "enum">

@@ -92,6 +92,7 @@ angular.module('test')
                     bigComment: editedLine.bigComment,
                     pass: editedLine.pass,
                     lastModification: editedLine.lastModification,
+                    age: editedLine.age,
                     id: editedLine.id,
                     version: editedLine.version
                 });
